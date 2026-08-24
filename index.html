@@ -61,7 +61,7 @@
         .controls-row {
             display: flex;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 6px;
             flex-wrap: wrap;
         }
@@ -100,32 +100,31 @@
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Panneau d'ajustement -->
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour placer. Utilisez les contrôles ci-dessous.</p>
+            <p id="step-instruction" class="sub-info">Maintenez les boutons appuyés pour ajuster en continu.</p>
             
-            <!-- Contrôles Zoom, Rotation et Calibrage de taille (masqués à l'étape des perçages) -->
+            <!-- Contrôles Zoom, Rotation et Taille avec appui continu -->
             <div class="controls-row" id="panel-tools">
                 <button onclick="adjustZoom(0.2)">🔍+</button>
                 <button onclick="adjustZoom(-0.2)">🔍-</button>
-                <button onclick="adjustAngle(-1)">↺ -1°</button>
-                <button onclick="adjustAngle(1)">↻ +1°</button>
-                <button onclick="adjustSize(2)" id="btn-size-up" style="background:#007bff;">➕ Taille</button>
-                <button onclick="adjustSize(-2)" id="btn-size-down" style="background:#007bff;">➖ Taille</button>
+                <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" id="btn-size-up" style="background:#007bff;">➕ Taille</button>
+                <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" id="btn-size-down" style="background:#007bff;">➖ Taille</button>
             </div>
 
-            <!-- Grille de déplacement -->
+            <!-- Grille de déplacement continu -->
             <div class="adjust-grid">
                 <div></div>
-                <button onmousedown="startMove(0, -10)" onmouseup="stopMove()" ontouchstart="startMove(0, -10)" ontouchend="stopMove()">⬆️</button>
+                <button onmousedown="startAction(() => moveStep(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
                 <div></div>
                 
-                <button onmousedown="startMove(-10, 0)" onmouseup="stopMove()" ontouchstart="startMove(-10, 0)" ontouchend="stopMove()">⬅️</button>
+                <button onmousedown="startAction(() => moveStep(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
                 <button onclick="resetCurrentPos()" style="background:#444;" title="Centrer">🎯</button>
-                <button onmousedown="startMove(10, 0)" onmouseup="stopMove()" ontouchstart="startMove(10, 0)" ontouchend="stopMove()">➡️</button>
+                <button onmousedown="startAction(() => moveStep(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(6, 0), 40)" ontouchend="stopAction()">➡️</button>
                 
                 <div></div>
-                <button onmousedown="startMove(0, 10)" onmouseup="stopMove()" ontouchstart="startMove(0, 10)" ontouchend="stopMove()">⬇️</button>
+                <button onmousedown="startAction(() => moveStep(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
                 <div></div>
             </div>
 
@@ -149,16 +148,16 @@
         const panelTools = document.getElementById('panel-tools');
 
         let currentImg = null;
-        let step = 0; // 1: Carré GAUCHE, 2: Carré DROIT, 3: Gabarit 170x100 (Bleu), 4: Perçages (Verts), 5: Terminé
+        let step = 0; 
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        let template = { x: 0, y: 0, width: 0, height: 0, angle: 0 }; // Gabarit 170x100
-        let holes = []; // Perçages multiples
+        let template = { x: 0, y: 0, width: 0, height: 0, angle: 0 }; // Gabarit 170x100 avec diagonales
+        let holes = []; 
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0, tempW = 0, tempH = 0;
         let zoomLevel = 1.0;
-        let moveInterval = null;
+        let actionInterval = null;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -181,7 +180,6 @@
                     box1.size = defaultSize;
                     box2.size = defaultSize;
 
-                    // Initialisation du gabarit 170x100 proportionnel
                     template.width = w * 0.7;
                     template.height = template.width * (100 / 170);
 
@@ -214,7 +212,6 @@
                 tempX = clickX;
                 tempY = clickY;
             } else if (step === 4) {
-                // Perçages en VERT (rayon fixe, pas de calibration de taille nécessaire)
                 holes.push({ x: clickX, y: clickY, radius: box1.size * 0.25 });
             }
             redrawCanvas();
@@ -228,31 +225,30 @@
             }
         }, { passive: false });
 
-        window.startMove = function(dx, dy) {
-            stopMove();
-            moveStep(dx, dy);
-            moveInterval = setInterval(() => moveStep(dx, dy), 60);
+        // Maintien continu universel
+        window.startAction = function(actionFn, speedMs) {
+            stopAction();
+            actionFn();
+            actionInterval = setInterval(actionFn, speedMs);
         }
-        window.stopMove = function() { if (moveInterval) { clearInterval(moveInterval); moveInterval = null; } }
-        function moveStep(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.stopAction = function() { 
+            if (actionInterval) { 
+                clearInterval(actionInterval); 
+                actionInterval = null; 
+            } 
+        }
 
-        window.adjustZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta));
-            redrawCanvas();
-        }
-        window.adjustAngle = function(deltaDeg) {
-            if (step <= 3) {
-                tempAngle += deltaDeg;
-                redrawCanvas();
-            }
-        }
+        window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.adjustZoom = function(delta) { zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta)); redrawCanvas(); }
+        window.adjustAngle = function(deltaDeg) { if (step <= 3) { tempAngle += deltaDeg; redrawCanvas(); } }
+        
         window.adjustSize = function(deltaSize) {
             if (step === 1 || step === 2) {
                 tempSize = Math.max(10, tempSize + deltaSize);
                 redrawCanvas();
             } else if (step === 3) {
-                tempW = Math.max(50, tempW + (deltaSize * 5));
-                tempH = Math.max(30, tempH + (deltaSize * 3));
+                tempW = Math.max(50, tempW + (deltaSize * 4));
+                tempH = Math.max(30, tempH + (deltaSize * 2.5));
                 redrawCanvas();
             }
         }
@@ -271,7 +267,7 @@
             ctx.drawImage(currentImg, 0, 0);
 
             let w = currentImg.naturalWidth;
-            ctx.lineWidth = Math.max(5, w / 250);
+            ctx.lineWidth = Math.max(4, w / 300);
 
             // 1. Carré GAUCHE (Vert)
             if (step >= 2 || step === 1) {
@@ -281,7 +277,7 @@
             if (step >= 3 || step === 2) {
                 drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, step === 2, "#00FF00");
             }
-            // 3. Gabarit 170x100 (BLEU pour éviter toute confusion avec le vert dans Python)
+            // 3. Gabarit 170x100 (BLEU avec 4 coins et 2 diagonales croisées)
             if (step >= 4 || step === 3) {
                 let rx = step === 3 ? tempX : template.x;
                 let ry = step === 3 ? tempY : template.y;
@@ -298,11 +294,22 @@
                 } else {
                     ctx.setLineDash([]);
                 }
+                
+                // Tracé du rectangle 170x100
                 ctx.strokeRect(-rw / 2, -rh / 2, rw, rh);
+
+                // Tracé des deux diagonales pour le contrôle croisé
+                ctx.beginPath();
+                ctx.moveTo(-rw / 2, -rh / 2);
+                ctx.lineTo(rw / 2, rh / 2);
+                ctx.moveTo(rw / 2, -rh / 2);
+                ctx.lineTo(-rw / 2, rh / 2);
+                ctx.stroke();
+
                 ctx.restore();
             }
 
-            // 4. Perçages multiples (VERTS avec contour blanc pour la netteté)
+            // 4. Perçages multiples (Verts)
             ctx.fillStyle = "#00FF00";
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = Math.max(3, w / 400);
@@ -346,7 +353,7 @@
         }
 
         window.validateStep = function() {
-            stopMove();
+            stopAction();
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
@@ -359,7 +366,7 @@
                 redrawCanvas();
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
-                step = 3; // Étape Gabarit 170x100 (Bleu)
+                step = 3; // Gabarit 170x100 + Diagonales (Bleu)
                 tempX = currentImg.naturalWidth * 0.5;
                 tempY = currentImg.naturalHeight * 0.5;
                 tempW = template.width;
@@ -370,7 +377,7 @@
                 redrawCanvas();
             } else if (step === 3) {
                 template.x = tempX; template.y = tempY; template.width = tempW; template.height = tempH; template.angle = tempAngle;
-                step = 4; // Étape Perçages (Verts)
+                step = 4; // Perçages (Verts)
                 zoomLevel = 1.0;
                 updateUIState();
                 redrawCanvas();
@@ -387,25 +394,25 @@
         function updateUIState() {
             if (step === 1) {
                 statusText.innerText = "Étape 1 / 4 : Carré GAUCHE (Vert)";
-                stepInstruction.innerText = "Ajustez position, angle et taille du carré gauche.";
+                stepInstruction.innerText = "Maintenez les flèches ou la taille pour ajuster rapidement.";
             } else if (step === 2) {
                 statusText.innerText = "Étape 2 / 4 : Carré DROIT (Vert)";
-                stepInstruction.innerText = "Ajustez position, angle et taille du carré droit.";
+                stepInstruction.innerText = "Maintenez les flèches ou la taille pour ajuster rapidement.";
             } else if (step === 3) {
-                statusText.innerText = "Étape 3 / 4 : Gabarit Global 170x100 (Bleu)";
-                stepInstruction.innerText = "Ajustez le grand rectangle bleu autour de la plaque.";
+                statusText.innerText = "Étape 3 / 4 : Gabarit 170x100 + Diagonales (Bleu)";
+                stepInstruction.innerText = "Ajustez les 4 coins et l'angle pour aligner les diagonales.";
                 document.getElementById('btn-size-up').innerText = "➕ Grand.";
                 document.getElementById('btn-size-down').innerText = "➖ Grand.";
             } else if (step === 4) {
                 statusText.innerText = "Étape 4 / 4 : Perçages Multiples (Verts)";
                 stepInstruction.innerText = "Touchez l'écran pour poser les cercles de perçage.";
-                panelTools.style.display = 'none'; // Pas de zoom/taille pour les points de perçage
+                panelTools.style.display = 'none';
                 document.getElementById('btn-validate-step').innerText = "Terminer et Générer l'image";
             }
         }
 
         btnRetry.addEventListener('click', function() {
-            stopMove();
+            stopAction();
             canvas.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
