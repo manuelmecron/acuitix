@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.10 - Studio de Calage Expert</title>
+    <title>Acuitix.11 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,7 +101,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.10 - Studio de Calage Expert</h1>
+    <h1>Acuitix.11 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
@@ -156,7 +156,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.10)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.11)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -192,7 +192,7 @@
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let zoomLevel = 1.0;
-        let manualPanX = 0; // Décalage manuel si l'utilisateur glisse l'image
+        let manualPanX = 0; 
         let manualPanY = 0;
         let actionInterval = null;
 
@@ -301,7 +301,6 @@
             let clientClickX = (clientX - rect.left) * scaleX;
             let clientClickY = (clientY - rect.top) * scaleY;
 
-            // Inversion propre de la matrice de centrage sur tempX/tempY
             let imgX = (clientClickX - canvas.width / 2) / zoomLevel + tempX - manualPanX;
             let imgY = (clientClickY - canvas.height / 2) / zoomLevel + tempY - manualPanY;
             return { x: imgX, y: imgY };
@@ -375,6 +374,12 @@
         window.addCurrentHole = function() {
             if (step === 7) {
                 holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                // Réinitialiser le curseur du prochain perçage au centre de l'image (au lieu de rester sur le dernier perçage)
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                manualPanX = 0;
+                manualPanY = 0;
+                zoomLevel = 1.0;
                 redrawCanvas();
             }
         }
@@ -386,17 +391,16 @@
             }
         }
 
-        function redrawCanvas() {
+        function redrawCanvas(isForExport = false) {
             if (!currentImg) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
 
-            // Focalisation rigoureuse et propre du zoom sur l'élément actif (tempX, tempY)
-            if (zoomLevel > 1.0) {
+            // Si on génère l'export final, on ignore le zoom et le pan pour capturer TOUTE l'image
+            if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
-                // On centre directement sur la position active de l'élément en cours de réglage
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
 
@@ -416,22 +420,22 @@
 
             // 1. Carré GAUCHE (Vert)
             if (step >= 2 || step === 1) {
-                drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, step === 1 ? tempSize : box1.size, step === 1 ? tempAngle : box1.angle, step === 1, "#00FF00");
+                drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, step === 1 ? tempSize : box1.size, step === 1 ? tempAngle : box1.angle, (step === 1 && !isForExport), "#00FF00");
             }
             // 2. Carré DROIT (Vert)
             if (step >= 3 || step === 2) {
-                drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, step === 2, "#00FF00");
+                drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, (step === 2 && !isForExport), "#00FF00");
             }
 
             // 3 à 6. Les 4 coins indépendants
             for (let i = 0; i < 4; i++) {
-                let isActive = (step === i + 3);
-                let isPassed = (step > i + 3);
+                let isActive = (step === i + 3 && !isForExport);
+                let isPassed = (step > i + 3 || isForExport);
                 if (isPassed || isActive) {
-                    let cx = isActive ? tempX : corners[i].x;
-                    let cy = isActive ? tempY : corners[i].y;
-                    let csize = isActive ? tempSize : corners[i].size;
-                    let cangle = isActive ? tempAngle : corners[i].angle;
+                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
+                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
+                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
+                    let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
 
                     drawCornerMarker(cx, cy, csize, cangle, isActive, "#007BFF", i);
                 }
@@ -452,16 +456,18 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Curseur actif du perçage en cours (Cyan transparent)
-                ctx.save();
-                ctx.strokeStyle = "#00FFFF";
-                ctx.fillStyle = "rgba(0, 255, 255, 0.35)";
-                ctx.lineWidth = Math.max(3, refW / 400);
-                ctx.beginPath();
-                ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.restore();
+                // Curseur actif du perçage en cours (uniquement si pas en mode export)
+                if (!isForExport && step === 7) {
+                    ctx.save();
+                    ctx.strokeStyle = "#00FFFF";
+                    ctx.fillStyle = "rgba(0, 255, 255, 0.35)";
+                    ctx.lineWidth = Math.max(3, refW / 400);
+                    ctx.beginPath();
+                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                }
             }
 
             // 8. Perçages validés (Cyan transparent haute visibilité)
@@ -477,11 +483,11 @@
 
             ctx.restore();
 
-            if (step === 8) {
+            if (step === 8 && isForExport) {
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v10.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v11.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -591,10 +597,11 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.10) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.11) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
-                redrawCanvas();
+                zoomLevel = 1.0;
+                redrawCanvas(true); // Génère l'export complet sans zoom
                 return;
             }
             zoomLevel = 1.0;
@@ -632,7 +639,7 @@
                 panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez pour placer, glissez l'image pour naviguer, ou utilisez le joystick.";
+                stepInstruction.innerText = "Touchez pour placer un perçage, glissez pour naviguer.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
