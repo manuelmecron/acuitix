@@ -1,1 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Studio de Calage Avancé</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+            user-select: none;
+        }
+        h1 { font-size: 1.05rem; margin-bottom: 8px; }
+        .box {
+            background: #2a2a2a;
+            border: 2px solid #555;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 8px auto;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            max-height: 38vh;
+            object-fit: contain;
+            display: none;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 8px; font-weight: bold; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 11px;
+            background: #28a745;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            margin-top: 6px;
+        }
+        #file-input { display: none; }
+        
+        /* Panneau de contrôle unifié */
+        .adjust-panel {
+            display: none;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .adjust-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 160px;
+            margin: 0 auto;
+        }
+        .adjust-grid button, .controls-row button {
+            padding: 10px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .adjust-grid button:active, .controls-row button:active { background: #007bff; }
+        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 6px; }
+    </style>
+</head>
+<body>
 
+    <h1>Acuitix - Studio de Calage Pro</h1>
+
+    <div class="box">
+        <p id="status-text">1. Prenez la photo globale de la plaque.</p>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div>
+        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+
+        <!-- Panneau d'ajustement interactif enrichi -->
+        <div class="adjust-panel" id="adjust-panel">
+            <p id="step-instruction" class="sub-info">Touchez pour placer. Utilisez les flèches, la rotation ou le zoom.</p>
+            
+            <!-- Contrôles Zoom et Rotation -->
+            <div class="controls-row">
+                <button onclick="adjustZoom(0.2)">🔍+</button>
+                <button onclick="adjustZoom(-0.2)">🔍-</button>
+                <button onclick="adjustAngle(-1)">↺ -1°</button>
+                <button onclick="adjustAngle(1)">↻ +1°</button>
+            </div>
+
+            <!-- Grille de déplacement -->
+            <div class="adjust-grid">
+                <div></div>
+                <button onmousedown="startMove(0, -10)" onmouseup="stopMove()" ontouchstart="startMove(0, -10)" ontouchend="stopMove()">⬆️</button>
+                <div></div>
+                
+                <button onmousedown="startMove(-10, 0)" onmouseup="stopMove()" ontouchstart="startMove(-10, 0)" ontouchend="stopMove()">⬅️</button>
+                <button onclick="resetCurrentPos()" style="background:#444;" title="Centrer">🎯</button>
+                <button onmousedown="startMove(10, 0)" onmouseup="stopMove()" ontouchstart="startMove(10, 0)" ontouchend="stopMove()">➡️</button>
+                
+                <div></div>
+                <button onmousedown="startMove(0, 10)" onmouseup="stopMove()" ontouchstart="startMove(0, 10)" ontouchend="stopMove()">⬇️</button>
+                <div></div>
+            </div>
+
+            <button class="btn" id="btn-validate-step" style="background: #17a2b8; margin-top: 10px;" onclick="validateStep()">Valider & Étape Suivante</button>
+        </div>
+        
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx)</a>
+        <button id="btn-retry" class="btn" style="background: #dc3545; display: none;">🔄 Recommencer</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
+        const btnShoot = document.getElementById('btn-shoot');
+        const btnDownload = document.getElementById('btn-download');
+        const btnRetry = document.getElementById('btn-retry');
+        const adjustPanel = document.getElementById('adjust-panel');
+        const stepInstruction = document.getElementById('step-instruction');
+
+        let currentImg = null;
+        let step = 0; // 1: Carré GAUCHE, 2: Carré DROIT, 3: Mode Perçages Multiples, 4: Terminé
+
+        let box1 = { x: 0, y: 0, size: 0, angle: 0 };
+        let box2 = { x: 0, y: 0, size: 0, angle: 0 };
+        let holes = []; // Liste des perçages multiples [{x, y, radius}]
+
+        let tempX = 0, tempY = 0, tempAngle = 0;
+        let zoomLevel = 1.0; // 1.0 = Vue globale, >1.0 = Zoomé
+        let moveInterval = null;
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImg = img;
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+
+                    step = 1;
+                    zoomLevel = 1.0;
+                    let w = img.naturalWidth;
+                    let h = img.naturalHeight;
+                    
+                    let defaultSize = w * 0.055; 
+                    box1.size = defaultSize;
+                    box2.size = defaultSize;
+
+                    tempX = w * 0.4;
+                    tempY = h * 0.4;
+                    tempAngle = 0;
+
+                    canvas.style.display = 'block';
+                    adjustPanel.style.display = 'block';
+                    btnShoot.style.display = 'none';
+                    
+                    updateUIState();
+                    redrawCanvas();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function handleCanvasTouch(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            // Calcul tenant compte du zoom interne du canvas
+            const scaleX = canvas.width / canvas.clientWidth;
+            const scaleY = canvas.height / canvas.clientHeight;
+            
+            let clickX = (clientX - rect.left) * scaleX;
+            let clickY = (clientY - rect.top) * scaleY;
+
+            if (step === 1 || step === 2) {
+                tempX = clickX;
+                tempY = clickY;
+            } else if (step === 3) {
+                // Mode perçage : un clic ajoute un nouveau trou
+                holes.push({ x: clickX, y: clickY, radius: box1.size * 0.25 });
+            }
+            redrawCanvas();
+        }
+
+        canvas.addEventListener('click', function(e) { handleCanvasTouch(e.clientX, e.clientY); });
+        canvas.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 0) {
+                handleCanvasTouch(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        window.startMove = function(dx, dy) {
+            stopMove();
+            moveStep(dx, dy);
+            moveInterval = setInterval(() => moveStep(dx, dy), 60);
+        }
+        window.stopMove = function() { if (moveInterval) { clearInterval(moveInterval); moveInterval = null; } }
+        function moveStep(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+
+        window.adjustZoom = function(delta) {
+            zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta));
+            redrawCanvas();
+        }
+        window.adjustAngle = function(deltaDeg) {
+            if (step === 1 || step === 2) {
+                tempAngle += deltaDeg;
+                redrawCanvas();
+            }
+        }
+
+        function redrawCanvas() {
+            if (!currentImg) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Gestion du zoom centré sur l'élément en cours de réglage
+            ctx.save();
+            if (zoomLevel > 1.0) {
+                let focusX = (step === 3) ? tempX : tempX;
+                let focusY = (step === 3) ? tempY : tempY;
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(zoomLevel, zoomLevel);
+                ctx.translate(-focusX, -focusY);
+            }
+
+            ctx.drawImage(currentImg, 0, 0);
+
+            let w = currentImg.naturalWidth;
+            ctx.lineWidth = Math.max(5, w / 250);
+
+            // 1. Dessin du carré gauche (validé ou en cours)
+            if (step >= 2 || step === 1) {
+                drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, box1.size, step === 1 ? tempAngle : box1.angle, step === 1);
+            }
+            // 2. Dessin du carré droit (validé ou en cours)
+            if (step >= 3 || step === 2) {
+                drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, box2.size, step === 2 ? tempAngle : box2.angle, step === 2);
+            }
+
+            // 3. Dessin des perçages multiples
+            ctx.fillStyle = "#ff0000";
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = Math.max(3, w / 400);
+            holes.forEach(h => {
+                ctx.beginPath();
+                ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            ctx.restore();
+
+            if (step === 4) {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    btnDownload.href = url;
+                    btnDownload.download = 'acuitix_etalon_complet.jpg';
+                }, 'image/jpeg', 0.98);
+            }
+        }
+
+        function drawRotatedRect(x, y, size, angleDeg, isActive) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = isActive ? "#00ff00" : "#00ff00";
+            if (isActive) {
+                ctx.setLineDash([currentImg.naturalWidth / 70, currentImg.naturalWidth / 90]);
+            } else {
+                ctx.setLineDash([]);
+            }
+            ctx.strokeRect(-size / 2, -size / 2, size, size);
+            ctx.restore();
+        }
+
+        window.resetCurrentPos = function() {
+            tempX = currentImg.naturalWidth * 0.5;
+            tempY = currentImg.naturalHeight * 0.4;
+            tempAngle = 0;
+            redrawCanvas();
+        }
+
+        window.validateStep = function() {
+            stopMove();
+            if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle;
+                step = 2;
+                tempX = box1.x + (currentImg.naturalWidth * 0.2); 
+                tempY = box1.y;
+                tempAngle = box1.angle;
+                zoomLevel = 1.0;
+                updateUIState();
+                redrawCanvas();
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle;
+                step = 3; // Passage au mode perçages multiples
+                zoomLevel = 1.0;
+                updateUIState();
+                redrawCanvas();
+            } else if (step === 3) {
+                // Fin du placement des perçages, passage à l'export
+                step = 4;
+                adjustPanel.style.display = 'none';
+                statusText.innerText = "✅ Calage complet terminé ! Prêt pour AcuTx.";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas();
+            }
+        }
+
+        function updateUIState() {
+            if (step === 1) {
+                statusText.innerText = "Étape 1 / 3 : Carré GAUCHE";
+                stepInstruction.innerText = "Placez et ajustez le carré gauche (utilisez le zoom et la rotation si besoin).";
+            } else if (step === 2) {
+                statusText.innerText = "Étape 2 / 3 : Carré DROIT";
+                stepInstruction.innerText = "Placez et ajustez le carré droit.";
+            } else if (step === 3) {
+                statusText.innerText = "Étape 3 / 3 : Perçages Multiples";
+                stepInstruction.innerText = "Touchez l'écran pour ajouter vos perçages un par un, puis validez.";
+                document.getElementById('btn-validate-step').innerText = "Terminer et Générer l'image";
+            }
+        }
+
+        btnRetry.addEventListener('click', function() {
+            stopMove();
+            canvas.style.display = 'none';
+            adjustPanel.style.display = 'none';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            btnShoot.style.display = 'block';
+            fileInput.value = '';
+            currentImg = null;
+            holes = [];
+            step = 0;
+            statusText.innerText = "1. Prenez la photo globale de la plaque.";
+        });
+    </script>
+</body>
+</html>
