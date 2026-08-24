@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.6 - Studio de Calage Expert</title>
+    <title>Acuitix.7 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,6 +52,7 @@
         .btn-secondary { background: #6c757d; }
         .btn-danger { background: #dc3545; }
         .btn-info { background: #17a2b8; }
+        .btn-warning { background: #ffc107; color: #000; }
         #file-input { display: none; }
         
         .adjust-panel {
@@ -97,7 +98,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.6 - Studio de Calage Expert</h1>
+    <h1>Acuitix.7 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
@@ -107,6 +108,9 @@
     <div>
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo (16:9)</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
+
+        <!-- Bouton de rotation d'urgence si le mobile inverse le 16:9 / 9:16 -->
+        <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
             <p id="step-instruction" class="sub-info">Maintenez les boutons appuyés pour ajuster en continu.</p>
@@ -149,7 +153,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.6)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.7)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -159,6 +163,7 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('status-text');
         const btnShoot = document.getElementById('btn-shoot');
+        const btnRotateImg = document.getElementById('btn-rotate-img');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
@@ -168,6 +173,7 @@
 
         let currentImg = null;
         let step = 0; 
+        let rotationAngle = 0; // 0, 90, 180, 270
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
@@ -194,13 +200,13 @@
                 const img = new Image();
                 img.onload = function() {
                     currentImg = img;
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                    rotationAngle = 0;
+                    updateCanvasDimensions();
 
                     step = 1;
                     zoomLevel = 1.0;
-                    let w = img.naturalWidth;
-                    let h = img.naturalHeight;
+                    let w = canvas.width;
+                    let h = canvas.height;
                     
                     let defaultSize = w * 0.055; 
                     box1.size = defaultSize;
@@ -218,6 +224,7 @@
                     canvas.style.display = 'block';
                     adjustPanel.style.display = 'block';
                     btnShoot.style.display = 'none';
+                    btnRotateImg.style.display = 'block';
                     
                     updateUIState();
                     redrawCanvas();
@@ -226,6 +233,29 @@
             };
             reader.readAsDataURL(file);
         });
+
+        function updateCanvasDimensions() {
+            if (!currentImg) return;
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                canvas.width = currentImg.naturalHeight;
+                canvas.height = currentImg.naturalWidth;
+            } else {
+                canvas.width = currentImg.naturalWidth;
+                canvas.height = currentImg.naturalHeight;
+            }
+        }
+
+        window.rotateImage90 = function() {
+            if (!currentImg) return;
+            rotationAngle = (rotationAngle + 90) % 360;
+            updateCanvasDimensions();
+            
+            // Recadrer temporaire sur le nouveau centre
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            zoomLevel = 1.0;
+            redrawCanvas();
+        }
 
         window.startAction = function(actionFn, speedMs) {
             stopAction();
@@ -288,16 +318,27 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
+
+            // Gestion de la rotation globale de l'image source
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((rotationAngle * Math.PI) / 180);
+            
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
+            } else {
+                ctx.drawImage(currentImg, -currentImg.naturalWidth / 2, -currentImg.naturalHeight / 2);
+            }
+            ctx.restore();
+
+            ctx.save();
             if (zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX, -tempY);
             }
 
-            ctx.drawImage(currentImg, 0, 0);
-
-            let w = currentImg.naturalWidth;
-            ctx.lineWidth = Math.max(4, w / 300);
+            let refW = currentImg.naturalWidth;
+            ctx.lineWidth = Math.max(4, refW / 300);
 
             // 1. Carré GAUCHE (Vert)
             if (step >= 2 || step === 1) {
@@ -326,7 +367,7 @@
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = "#007BFF";
-                ctx.lineWidth = Math.max(3, w / 350);
+                ctx.lineWidth = Math.max(3, refW / 350);
                 ctx.setLineDash([]);
 
                 ctx.beginPath();
@@ -337,11 +378,11 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Curseur actif du perçage en cours de placement (Orange/Jaune clignotant ou distinct)
+                // Curseur actif du perçage en cours
                 ctx.save();
                 ctx.strokeStyle = "#FFC107";
                 ctx.fillStyle = "rgba(255, 193, 7, 0.4)";
-                ctx.lineWidth = Math.max(3, w / 400);
+                ctx.lineWidth = Math.max(3, refW / 400);
                 ctx.beginPath();
                 ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
                 ctx.fill();
@@ -352,7 +393,7 @@
             // 8. Perçages validés (Verts)
             ctx.fillStyle = "#00FF00";
             ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = Math.max(3, w / 400);
+            ctx.lineWidth = Math.max(3, refW / 400);
             holes.forEach(h => {
                 ctx.beginPath();
                 ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
@@ -366,7 +407,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v6.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v7.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -377,7 +418,7 @@
             ctx.rotate((angleDeg * Math.PI) / 180);
             ctx.strokeStyle = color;
             if (isActive) {
-                ctx.setLineDash([currentImg.naturalWidth / 70, currentImg.naturalWidth / 90]);
+                ctx.setLineDash([canvas.width / 70, canvas.width / 90]);
             } else {
                 ctx.setLineDash([]);
             }
@@ -393,12 +434,12 @@
             ctx.fillStyle = color;
             
             if (isActive) {
-                ctx.setLineDash([currentImg.naturalWidth / 80, currentImg.naturalWidth / 100]);
+                ctx.setLineDash([canvas.width / 80, canvas.width / 100]);
             } else {
                 ctx.setLineDash([]);
             }
 
-            ctx.lineWidth = Math.max(4, currentImg.naturalWidth / 250);
+            ctx.lineWidth = Math.max(4, canvas.width / 250);
 
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
@@ -418,11 +459,11 @@
 
         window.resetCurrentPos = function() {
             if (step === 7) {
-                tempX = currentImg.naturalWidth * 0.5;
-                tempY = currentImg.naturalHeight * 0.5;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
             } else {
-                tempX = currentImg.naturalWidth * 0.5;
-                tempY = currentImg.naturalHeight * 0.4;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.4;
                 tempAngle = 0;
             }
             redrawCanvas();
@@ -446,15 +487,15 @@
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
-                tempX = box1.x + (currentImg.naturalWidth * 0.2); 
+                tempX = box1.x + (canvas.width * 0.2); 
                 tempY = box1.y;
                 tempAngle = box1.angle;
                 tempSize = box1.size;
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
-                tempX = currentImg.naturalWidth * 0.25;
-                tempY = currentImg.naturalHeight * 0.25;
+                tempX = canvas.width * 0.25;
+                tempY = canvas.height * 0.25;
                 tempAngle = 0;
                 tempSize = box1.size * 1.2;
             } else if (step >= 3 && step <= 5) {
@@ -465,18 +506,19 @@
                 corners[cornerIdx].size = tempSize;
 
                 step++; 
-                if (step === 4) { tempX = currentImg.naturalWidth * 0.75; tempY = currentImg.naturalHeight * 0.25; }
-                else if (step === 5) { tempX = currentImg.naturalWidth * 0.75; tempY = currentImg.naturalHeight * 0.75; }
-                else if (step === 6) { tempX = currentImg.naturalWidth * 0.25; tempY = currentImg.naturalHeight * 0.75; }
+                if (step === 4) { tempX = canvas.width * 0.75; tempY = canvas.height * 0.25; }
+                else if (step === 5) { tempX = canvas.width * 0.75; tempY = canvas.height * 0.75; }
+                else if (step === 6) { tempX = canvas.width * 0.25; tempY = canvas.height * 0.75; }
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
-                tempX = currentImg.naturalWidth * 0.5;
-                tempY = currentImg.naturalHeight * 0.5;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.6) ! Prêt pour AcuTx.";
+                btnRotateImg.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.7) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas();
@@ -546,6 +588,7 @@
             stopAction();
             canvas.style.display = 'none';
             adjustPanel.style.display = 'none';
+            btnRotateImg.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
@@ -555,6 +598,7 @@
             currentImg = null;
             holes = [];
             step = 0;
+            rotationAngle = 0;
             statusText.innerText = "1. Prenez la photo en mode PAYSAGE (16:9).";
         });
     </script>
