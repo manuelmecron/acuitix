@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix - Studio de Calage Expert</title>
+    <title>Acuitix.3 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
         }
         canvas {
             width: 100%;
-            max-height: 38vh;
+            max-height: 42vh;
             object-fit: contain;
             display: none;
             cursor: crosshair;
@@ -89,21 +89,21 @@
 </head>
 <body>
 
-    <h1>Acuitix - Studio de Calage Expert</h1>
+    <h1>Acuitix.3 - Studio de Calage Expert</h1>
 
     <div class="box">
-        <p id="status-text">1. Prenez la photo globale de la plaque.</p>
+        <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
-        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
+        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo (16:9)</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <div class="adjust-panel" id="adjust-panel">
             <p id="step-instruction" class="sub-info">Maintenez les boutons appuyés pour ajuster en continu.</p>
             
-            <!-- Contrôles Zoom, Rotation et Taille avec appui continu -->
+            <!-- Contrôles Zoom, Rotation et Taille -->
             <div class="controls-row" id="panel-tools">
                 <button onclick="adjustZoom(0.2)">🔍+</button>
                 <button onclick="adjustZoom(-0.2)">🔍-</button>
@@ -131,7 +131,7 @@
             <button class="btn" id="btn-validate-step" style="background: #17a2b8; margin-top: 10px;" onclick="validateStep()">Valider & Étape Suivante</button>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.3)</a>
         <button id="btn-retry" class="btn" style="background: #dc3545; display: none;">🔄 Recommencer</button>
     </div>
 
@@ -153,12 +153,11 @@
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
         
-        // Les 4 coins indépendants
         let corners = [
-            { x: 0, y: 0, size: 0, angle: 0 }, // 0: Coin 1 (Haut-Gauche)
-            { x: 0, y: 0, size: 0, angle: 0 }, // 1: Coin 2 (Haut-Droit)
-            { x: 0, y: 0, size: 0, angle: 0 }, // 2: Coin 3 (Bas-Droit)
-            { x: 0, y: 0, size: 0, angle: 0 }  // 3: Coin 4 (Bas-Gauche)
+            { x: 0, y: 0, size: 0, angle: 0 }, // 0: Haut-Gauche
+            { x: 0, y: 0, size: 0, angle: 0 }, // 1: Haut-Droit
+            { x: 0, y: 0, size: 0, angle: 0 }, // 2: Bas-Droit
+            { x: 0, y: 0, size: 0, angle: 0 }  // 3: Bas-Gauche
         ];
 
         let holes = []; 
@@ -176,6 +175,7 @@
                 const img = new Image();
                 img.onload = function() {
                     currentImg = img;
+                    // Utilisation stricte des dimensions natives pour conserver le format 16:9 réel de la photo
                     canvas.width = img.naturalWidth;
                     canvas.height = img.naturalHeight;
 
@@ -280,7 +280,7 @@
                 drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, step === 2, "#00FF00");
             }
 
-            // 3 à 6. Les 4 coins indépendants avec leur orientation spécifique (Bleu)
+            // 3 à 6. Les 4 coins indépendants avec orientation intérieure précise
             for (let i = 0; i < 4; i++) {
                 let isActive = (step === i + 3);
                 let isPassed = (step > i + 3);
@@ -294,18 +294,18 @@
                 }
             }
 
-            // 7. Une fois les 4 coins validés (step >= 7), tracé UNIQUEMENT des deux diagonales bleues
+            // 7. Diagonales intérieures validées
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = "#007BFF";
                 ctx.lineWidth = Math.max(3, w / 350);
                 ctx.setLineDash([]);
 
-                // Diagonale 1 (Coin 1 [Haut-Gauche] vers Coin 3 [Bas-Droit])
+                // Diagonale 1 (Haut-Gauche vers Bas-Droit)
                 ctx.beginPath();
                 ctx.moveTo(corners[0].x, corners[0].y);
                 ctx.lineTo(corners[2].x, corners[2].y);
-                // Diagonale 2 (Coin 2 [Haut-Droit] vers Coin 4 [Bas-Gauche])
+                // Diagonale 2 (Haut-Droit vers Bas-Gauche)
                 ctx.moveTo(corners[1].x, corners[1].y);
                 ctx.lineTo(corners[3].x, corners[3].y);
                 ctx.stroke();
@@ -329,7 +329,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v3.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -363,26 +363,26 @@
 
             ctx.lineWidth = Math.max(4, currentImg.naturalWidth / 250);
 
-            // Définition des directions d'ouverture selon le coin (pour pointer vers l'intérieur)
-            // 0: Haut-Gauche -> s'ouvre vers le bas/droite (+X, +Y)
-            // 1: Haut-Droit  -> s'ouvre vers le bas/gauche (-X, +Y)
-            // 2: Bas-Droit   -> s'ouvre vers le haut/gauche (-X, -Y)
-            // 3: Bas-Gauche  -> s'ouvre vers le haut/droite (+X, -Y)
-            let signX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
-            let signY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+            // CORRECTION DES 4 SYMBOLES INDÉPENDANTS (Ouverture vers l'intérieur)
+            // 0 (Haut-Gauche) : s'ouvre vers la droite (+X) et le bas (+Y)
+            // 1 (Haut-Droit)  : s'ouvre vers la gauche (-X) et le bas (+Y)
+            // 2 (Bas-Droit)   : s'ouvre vers la gauche (-X) et le haut (-Y)
+            // 3 (Bas-Gauche)  : s'ouvre vers la droite (+X) et le haut (-Y)
+            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
+            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
-            // 1. L'angle droit orienté pour ce coin précis
+            // 1. L'angle droit (90°)
             ctx.beginPath();
-            ctx.moveTo(signX * size, 0);
+            ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
-            ctx.lineTo(0, signY * size);
+            ctx.lineTo(0, dirY * size);
             ctx.stroke();
 
-            // 2. Le trait central à 45° pointant vers l'intérieur (future diagonale)
+            // 2. Le trait central à 45° pointant vers l'intérieur
             ctx.beginPath();
             ctx.moveTo(0, 0);
             let diagLen = size * 0.7;
-            ctx.lineTo(signX * diagLen * 0.707, signY * diagLen * 0.707);
+            ctx.lineTo(dirX * diagLen * 0.707, dirY * diagLen * 0.707);
             ctx.stroke();
 
             // 3. Le point central exact du sommet
@@ -439,14 +439,14 @@
                 redrawCanvas();
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
-                step = 7; // Diagonales tracées + Perçages
+                step = 7; // Diagonales intérieures tracées + Perçages
                 zoomLevel = 1.0;
                 updateUIState();
                 redrawCanvas();
             } else if (step === 7) {
                 step = 8; // Terminé
                 adjustPanel.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.3) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas();
@@ -462,19 +462,19 @@
                 stepInstruction.innerText = "Ajustez position, taille et angle du carré droit.";
             } else if (step === 3) {
                 statusText.innerText = "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)";
-                stepInstruction.innerText = "Placez l'angle droit (ouverture vers le centre) sur le coin Haut-Gauche.";
+                stepInstruction.innerText = "Placez l'angle droit (ouverture vers l'intérieur) sur le coin Haut-Gauche.";
             } else if (step === 4) {
                 statusText.innerText = "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)";
-                stepInstruction.innerText = "Placez l'angle droit (ouverture vers le centre) sur le coin Haut-Droit.";
+                stepInstruction.innerText = "Placez l'angle droit (ouverture vers l'intérieur) sur le coin Haut-Droit.";
             } else if (step === 5) {
                 statusText.innerText = "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)";
-                stepInstruction.innerText = "Placez l'angle droit (ouverture vers le centre) sur le coin Bas-Droit.";
+                stepInstruction.innerText = "Placez l'angle droit (ouverture vers l'intérieur) sur le coin Bas-Droit.";
             } else if (step === 6) {
                 statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
-                stepInstruction.innerText = "Placez l'angle droit (ouverture vers le centre) sur le coin Bas-Gauche.";
+                stepInstruction.innerText = "Placez l'angle droit (ouverture vers l'intérieur) sur le coin Bas-Gauche.";
             } else if (step === 7) {
-                statusText.innerText = "Étape 7 : Diagonales & Perçages";
-                stepInstruction.innerText = "Les diagonales croisées s'alignent parfaitement. Touchez l'écran pour poser les perçages.";
+                statusText.innerText = "Étape 7 : Diagonales intérieures & Perçages";
+                stepInstruction.innerText = "Les diagonales s'entrecroisent à l'intérieur. Touchez l'écran pour poser les perçages.";
                 panelTools.style.display = 'none';
                 document.getElementById('btn-validate-step').innerText = "Terminer et Générer l'image";
             }
@@ -492,7 +492,7 @@
             currentImg = null;
             holes = [];
             step = 0;
-            statusText.innerText = "1. Prenez la photo globale de la plaque.";
+            statusText.innerText = "1. Prenez la photo en mode PAYSAGE (16:9).";
         });
     </script>
 </body>
