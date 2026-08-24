@@ -1,1 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Capture Étalon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 1.2rem; margin-bottom: 10px; text-align: center; }
+        
+        /* Conteneur adaptatif : s'adapte au mode Portrait ou Paysage du téléphone */
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 50vh;
+            min-height: 300px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+        #placeholder {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+            gap: 10px;
+        }
+        .btn-action {
+            padding: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-action:hover { background-color: #218838; }
+        #file-input { display: none; }
+        
+        #instructions {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ccc;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
 
+    <h1>Acuitix - Module Étalon (Auto-Rotation)</h1>
+    
+    <div class="container">
+        <div id="placeholder">Tournez votre téléphone en mode paysage (horizontal) si besoin,<br>puis cliquez sur la caméra.</div>
+        <img id="photo-preview" alt="Aperçu de la capture">
+    </div>
+
+    <div class="controls">
+        <!-- Capture native -->
+        <label for="file-input" class="btn-action">📸 Prendre la photo (Caméra)</label>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+        
+        <!-- Bouton de partage / Enregistrement système -->
+        <button id="share-btn" class="btn-action" style="background-color: #ffc107; color: #000; display: none;">💾 Enregistrer / Partager dans la Galerie</button>
+    </div>
+
+    <div id="instructions">
+        <b>Conseil :</b> Tournez votre téléphone à l'horizontale (16:9) pour cadrer votre plaque avant de photographier.
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const photoPreview = document.getElementById('photo-preview');
+        const placeholder = document.getElementById('placeholder');
+        const shareBtn = document.getElementById('share-btn');
+        const instructions = document.getElementById('instructions');
+
+        let currentFile = null;
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                currentFile = file;
+                const imageURL = URL.createObjectURL(file);
+                
+                // Affichage de l'image
+                photoPreview.src = imageURL;
+                photoPreview.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                // Affichage du bouton de partage universel (qui gère l'enregistrement galerie)
+                if (navigator.share) {
+                    shareBtn.style.display = 'block';
+                }
+
+                instructions.innerHTML = "<b>✅ Photo capturée !</b><br>Cliquez sur le bouton jaune pour l'enregistrer dans votre galerie ou l'envoyer.";
+            }
+        });
+
+        // Déclenchement du menu natif du téléphone (Galerie / Fichiers / Apps)
+        shareBtn.addEventListener('click', async () => {
+            if (currentFile) {
+                if (navigator.canShare && navigator.canShare({ files: [currentFile] })) {
+                    try {
+                        await navigator.share({
+                            files: [currentFile],
+                            title: 'Acuitix Capture',
+                            text: 'Photo étalon Acuitix'
+                        });
+                    } catch (error) {
+                        console.log('Partage annulé', error);
+                    }
+                } else {
+                    // Fallback de secours si le partage de fichier direct est limité
+                    alert("Maintenez votre doigt appuyé sur l'image ci-dessus pour l'enregistrer directement, ou utilisez les options de votre navigateur.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
