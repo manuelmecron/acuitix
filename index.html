@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.5 - Studio de Calage Expert</title>
+    <title>Acuitix.6 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,9 +49,9 @@
             box-sizing: border-box;
             margin-top: 6px;
         }
-        .btn-secondary {
-            background: #6c757d;
-        }
+        .btn-secondary { background: #6c757d; }
+        .btn-danger { background: #dc3545; }
+        .btn-info { background: #17a2b8; }
         #file-input { display: none; }
         
         .adjust-panel {
@@ -97,7 +97,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.5 - Studio de Calage Expert</h1>
+    <h1>Acuitix.6 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
@@ -121,7 +121,7 @@
                 <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" id="btn-size-down" style="background:#007bff;">➖ Taille</button>
             </div>
 
-            <!-- Grille de déplacement continu -->
+            <!-- Grille de déplacement continu (Joystick) -->
             <div class="adjust-grid">
                 <div></div>
                 <button onmousedown="startAction(() => moveStep(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
@@ -136,15 +136,21 @@
                 <div></div>
             </div>
 
-            <!-- Boutons de navigation sécurisés et espacés -->
+            <!-- Boutons spécifiques à l'étape 7 (Gestion des perçages) -->
+            <div id="hole-action-panel" style="display:none; margin-bottom: 8px;">
+                <button class="btn" style="background: #28a745; margin-top:0;" onclick="addCurrentHole()">✅ Ajouter ce perçage</button>
+                <button class="btn btn-danger" style="margin-top:6px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
+            </div>
+
+            <!-- Boutons de navigation sécurisés -->
             <div class="nav-buttons">
                 <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0;">⬅️ Retour</button>
-                <button class="btn" id="btn-validate-step" style="background: #17a2b8; margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
+                <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.5)</a>
-        <button id="btn-retry" class="btn" style="background: #dc3545; display: none;">🔄 Recommencer</button>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.6)</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
     <script>
@@ -158,6 +164,7 @@
         const adjustPanel = document.getElementById('adjust-panel');
         const stepInstruction = document.getElementById('step-instruction');
         const panelTools = document.getElementById('panel-tools');
+        const holeActionPanel = document.getElementById('hole-action-panel');
 
         let currentImg = null;
         let step = 0; 
@@ -220,31 +227,6 @@
             reader.readAsDataURL(file);
         });
 
-        function handleCanvasTouch(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / canvas.clientWidth;
-            const scaleY = canvas.height / canvas.clientHeight;
-            
-            let clickX = (clientX - rect.left) * scaleX;
-            let clickY = (clientY - rect.top) * scaleY;
-
-            if (step >= 1 && step <= 6) {
-                tempX = clickX;
-                tempY = clickY;
-            } else if (step === 7) {
-                holes.push({ x: clickX, y: clickY, radius: box1.size * 0.25 });
-            }
-            redrawCanvas();
-        }
-
-        canvas.addEventListener('click', function(e) { handleCanvasTouch(e.clientX, e.clientY); });
-        canvas.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 0) {
-                handleCanvasTouch(e.touches[0].clientX, e.touches[0].clientY);
-                e.preventDefault();
-            }
-        }, { passive: false });
-
         window.startAction = function(actionFn, speedMs) {
             stopAction();
             actionFn();
@@ -264,6 +246,41 @@
         window.adjustSize = function(deltaSize) {
             tempSize = Math.max(10, tempSize + deltaSize);
             redrawCanvas();
+        }
+
+        window.addCustomHoleAtTouch = function(clientX, clientY) {
+            if (step === 7) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / canvas.clientWidth;
+                const scaleY = canvas.height / canvas.clientHeight;
+                tempX = (clientX - rect.left) * scaleX;
+                tempY = (clientY - rect.top) * scaleY;
+                redrawCanvas();
+            }
+        }
+
+        canvas.addEventListener('click', function(e) {
+            if (step === 7) addCustomHoleAtTouch(e.clientX, e.clientY);
+        });
+        canvas.addEventListener('touchstart', function(e) {
+            if (step === 7 && e.touches.length > 0) {
+                addCustomHoleAtTouch(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        window.addCurrentHole = function() {
+            if (step === 7) {
+                holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                redrawCanvas();
+            }
+        }
+
+        window.removeLastHole = function() {
+            if (step === 7 && holes.length > 0) {
+                holes.pop();
+                redrawCanvas();
+            }
         }
 
         function redrawCanvas() {
@@ -291,7 +308,7 @@
                 drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, step === 2, "#00FF00");
             }
 
-            // 3 à 6. Les 4 coins indépendants (sans la ligne à 45° pour préserver l'algorithme futur)
+            // 3 à 6. Les 4 coins indépendants
             for (let i = 0; i < 4; i++) {
                 let isActive = (step === i + 3);
                 let isPassed = (step > i + 3);
@@ -305,7 +322,7 @@
                 }
             }
 
-            // 7. Diagonales intérieures propres connectant précisément les coins
+            // 7. Diagonales intérieures
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = "#007BFF";
@@ -319,9 +336,20 @@
                 ctx.lineTo(corners[3].x, corners[3].y);
                 ctx.stroke();
                 ctx.restore();
+
+                // Curseur actif du perçage en cours de placement (Orange/Jaune clignotant ou distinct)
+                ctx.save();
+                ctx.strokeStyle = "#FFC107";
+                ctx.fillStyle = "rgba(255, 193, 7, 0.4)";
+                ctx.lineWidth = Math.max(3, w / 400);
+                ctx.beginPath();
+                ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
             }
 
-            // 8. Perçages multiples (Verts)
+            // 8. Perçages validés (Verts)
             ctx.fillStyle = "#00FF00";
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = Math.max(3, w / 400);
@@ -338,7 +366,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v5.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v6.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -375,14 +403,12 @@
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
-            // 1. L'angle droit uniquement (sans trait biaisé à 45°)
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
             ctx.lineTo(0, dirY * size);
             ctx.stroke();
 
-            // 2. Le point central exact du sommet
             ctx.beginPath();
             ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
             ctx.fill();
@@ -391,17 +417,26 @@
         }
 
         window.resetCurrentPos = function() {
-            tempX = currentImg.naturalWidth * 0.5;
-            tempY = currentImg.naturalHeight * 0.4;
-            tempAngle = 0;
+            if (step === 7) {
+                tempX = currentImg.naturalWidth * 0.5;
+                tempY = currentImg.naturalHeight * 0.5;
+            } else {
+                tempX = currentImg.naturalWidth * 0.5;
+                tempY = currentImg.naturalHeight * 0.4;
+                tempAngle = 0;
+            }
             redrawCanvas();
         }
 
         window.askValidateStep = function() {
             stopAction();
-            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Diagonales"];
+            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let label = stepNames[step] || "cette étape";
             
+            if (step === 7 && holes.length === 0) {
+                if (!confirm("Aucun perçage n'a été ajouté. Voulez-vous vraiment terminer sans perçage ?")) return;
+            }
+
             if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
                 validateStep();
             }
@@ -436,10 +471,12 @@
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
+                tempX = currentImg.naturalWidth * 0.5;
+                tempY = currentImg.naturalHeight * 0.5;
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.5) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.6) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas();
@@ -474,6 +511,16 @@
             
             btnPrev.style.display = (step > 1) ? 'block' : 'none';
 
+            if (step === 7) {
+                panelTools.style.display = 'flex';
+                holeActionPanel.style.display = 'block';
+                btnVal.innerText = "Terminer et Générer";
+                stepInstruction.innerText = "Ajustez le curseur (jaune) avec le joystick, puis cliquez sur 'Ajouter ce perçage'.";
+            } else {
+                holeActionPanel.style.display = 'none';
+                btnVal.innerText = "Valider l'étape";
+            }
+
             if (step === 1) {
                 statusText.innerText = "Étape 1 / 6 : Carré GAUCHE (Vert)";
                 stepInstruction.innerText = "Ajustez position, taille et angle du carré gauche.";
@@ -492,11 +539,6 @@
             } else if (step === 6) {
                 statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
                 stepInstruction.innerText = "Placez l'angle droit sur le coin Bas-Gauche.";
-            } else if (step === 7) {
-                statusText.innerText = "Étape 7 : Diagonales intérieures & Perçages";
-                stepInstruction.innerText = "Diagonales propres. Touchez l'écran pour poser vos perçages.";
-                panelTools.style.display = 'none';
-                btnVal.innerText = "Terminer et Générer";
             }
         }
 
@@ -508,6 +550,7 @@
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
             panelTools.style.display = 'flex';
+            holeActionPanel.style.display = 'none';
             fileInput.value = '';
             currentImg = null;
             holes = [];
