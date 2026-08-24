@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.7 - Studio de Calage Expert</title>
+    <title>Acuitix.8 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -98,7 +98,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.7 - Studio de Calage Expert</h1>
+    <h1>Acuitix.8 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
@@ -109,11 +109,11 @@
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo (16:9)</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Bouton de rotation d'urgence si le mobile inverse le 16:9 / 9:16 -->
+        <!-- Bouton de rotation 90° -->
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Maintenez les boutons appuyés pour ajuster en continu.</p>
+            <p id="step-instruction" class="sub-info">Touchez l'écran pour placer instantanément, ou utilisez le joystick.</p>
             
             <!-- Contrôles Zoom, Rotation et Taille -->
             <div class="controls-row" id="panel-tools">
@@ -121,8 +121,8 @@
                 <button onclick="adjustZoom(-0.2)">🔍-</button>
                 <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                 <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" id="btn-size-up" style="background:#007bff;">➕ Taille</button>
-                <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" id="btn-size-down" style="background:#007bff;">➖ Taille</button>
+                <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" style="background:#007bff;">➕ Taille</button>
+                <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" style="background:#007bff;">➖ Taille</button>
             </div>
 
             <!-- Grille de déplacement continu (Joystick) -->
@@ -140,20 +140,20 @@
                 <div></div>
             </div>
 
-            <!-- Boutons spécifiques à l'étape 7 (Gestion des perçages) -->
+            <!-- Boutons spécifiques à l'étape 7 (Perçages) -->
             <div id="hole-action-panel" style="display:none; margin-bottom: 8px;">
                 <button class="btn" style="background: #28a745; margin-top:0;" onclick="addCurrentHole()">✅ Ajouter ce perçage</button>
                 <button class="btn btn-danger" style="margin-top:6px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
             </div>
 
-            <!-- Boutons de navigation sécurisés -->
+            <!-- Boutons de navigation -->
             <div class="nav-buttons">
                 <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0;">⬅️ Retour</button>
                 <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.7)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.8)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -173,7 +173,7 @@
 
         let currentImg = null;
         let step = 0; 
-        let rotationAngle = 0; // 0, 90, 180, 270
+        let rotationAngle = 0; 
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
@@ -249,8 +249,6 @@
             if (!currentImg) return;
             rotationAngle = (rotationAngle + 90) % 360;
             updateCanvasDimensions();
-            
-            // Recadrer temporaire sur le nouveau centre
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             zoomLevel = 1.0;
@@ -272,29 +270,38 @@
         window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         window.adjustZoom = function(delta) { zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta)); redrawCanvas(); }
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
-        
-        window.adjustSize = function(deltaSize) {
-            tempSize = Math.max(10, tempSize + deltaSize);
-            redrawCanvas();
-        }
+        window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        window.addCustomHoleAtTouch = function(clientX, clientY) {
-            if (step === 7) {
+        // Tactile / Clic universel pour positionner instantanément l'élément actif à l'étape 1 à 7
+        function handleCanvasTouch(clientX, clientY) {
+            if (step >= 1 && step <= 7) {
                 const rect = canvas.getBoundingClientRect();
                 const scaleX = canvas.width / canvas.clientWidth;
                 const scaleY = canvas.height / canvas.clientHeight;
-                tempX = (clientX - rect.left) * scaleX;
-                tempY = (clientY - rect.top) * scaleY;
+                
+                let clickX = (clientX - rect.left) * scaleX;
+                let clickY = (clientY - rect.top) * scaleY;
+
+                // Si zoom actif, tenir compte du centrage du zoom viewport
+                if (zoomLevel > 1.0) {
+                    let cx = canvas.width / 2;
+                    let cy = canvas.height / 2;
+                    clickX = cx + (clickX - cx) / zoomLevel;
+                    clickY = cy + (clickY - cy) / zoomLevel;
+                }
+
+                tempX = clickX;
+                tempY = clickY;
                 redrawCanvas();
             }
         }
 
         canvas.addEventListener('click', function(e) {
-            if (step === 7) addCustomHoleAtTouch(e.clientX, e.clientY);
+            handleCanvasTouch(e.clientX, e.clientY);
         });
         canvas.addEventListener('touchstart', function(e) {
-            if (step === 7 && e.touches.length > 0) {
-                addCustomHoleAtTouch(e.touches[0].clientX, e.touches[0].clientY);
+            if (e.touches.length > 0) {
+                handleCanvasTouch(e.touches[0].clientX, e.touches[0].clientY);
                 e.preventDefault();
             }
         }, { passive: false });
@@ -319,10 +326,17 @@
 
             ctx.save();
 
-            // Gestion de la rotation globale de l'image source
+            // Gestion du Zoom Viewport global (fluide et centré)
+            if (zoomLevel > 1.0) {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(zoomLevel, zoomLevel);
+                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            }
+
+            // Rotation de l'image source
+            ctx.save();
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate((rotationAngle * Math.PI) / 180);
-            
             if (rotationAngle === 90 || rotationAngle === 270) {
                 ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
             } else {
@@ -330,14 +344,7 @@
             }
             ctx.restore();
 
-            ctx.save();
-            if (zoomLevel > 1.0) {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-tempX, -tempY);
-            }
-
-            let refW = currentImg.naturalWidth;
+            let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
             // 1. Carré GAUCHE (Vert)
@@ -378,10 +385,10 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Curseur actif du perçage en cours
+                // Curseur actif du perçage en cours (Cyan transparent)
                 ctx.save();
-                ctx.strokeStyle = "#FFC107";
-                ctx.fillStyle = "rgba(255, 193, 7, 0.4)";
+                ctx.strokeStyle = "#00FFFF";
+                ctx.fillStyle = "rgba(0, 255, 255, 0.35)";
                 ctx.lineWidth = Math.max(3, refW / 400);
                 ctx.beginPath();
                 ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
@@ -390,9 +397,9 @@
                 ctx.restore();
             }
 
-            // 8. Perçages validés (Verts)
-            ctx.fillStyle = "#00FF00";
-            ctx.strokeStyle = "#FFFFFF";
+            // 8. Perçages validés (Cyan transparent haute visibilité)
+            ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+            ctx.strokeStyle = "#00FFFF";
             ctx.lineWidth = Math.max(3, refW / 400);
             holes.forEach(h => {
                 ctx.beginPath();
@@ -407,7 +414,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v7.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v8.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -458,14 +465,9 @@
         }
 
         window.resetCurrentPos = function() {
-            if (step === 7) {
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-            } else {
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.4;
-                tempAngle = 0;
-            }
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            if (step <= 2) tempAngle = 0;
             redrawCanvas();
         }
 
@@ -518,7 +520,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.7) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.8) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas();
@@ -557,7 +559,7 @@
                 panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Ajustez le curseur (jaune) avec le joystick, puis cliquez sur 'Ajouter ce perçage'.";
+                stepInstruction.innerText = "Touchez l'écran ou utilisez le joystick, puis cliquez sur 'Ajouter ce perçage'.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
@@ -565,22 +567,16 @@
 
             if (step === 1) {
                 statusText.innerText = "Étape 1 / 6 : Carré GAUCHE (Vert)";
-                stepInstruction.innerText = "Ajustez position, taille et angle du carré gauche.";
             } else if (step === 2) {
                 statusText.innerText = "Étape 2 / 6 : Carré DROIT (Vert)";
-                stepInstruction.innerText = "Ajustez position, taille et angle du carré droit.";
             } else if (step === 3) {
                 statusText.innerText = "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)";
-                stepInstruction.innerText = "Placez l'angle droit sur le coin Haut-Gauche.";
             } else if (step === 4) {
                 statusText.innerText = "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)";
-                stepInstruction.innerText = "Placez l'angle droit sur le coin Haut-Droit.";
             } else if (step === 5) {
                 statusText.innerText = "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)";
-                stepInstruction.innerText = "Placez l'angle droit sur le coin Bas-Droit.";
             } else if (step === 6) {
                 statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
-                stepInstruction.innerText = "Placez l'angle droit sur le coin Bas-Gauche.";
             }
         }
 
