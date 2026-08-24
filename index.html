@@ -1,1 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Module Étalon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 1.2rem; margin-bottom: 10px; text-align: center; }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 50vh;
+            min-height: 300px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
 
+        #placeholder {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+            gap: 10px;
+        }
+        .btn-action {
+            padding: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-action:hover { background-color: #218838; }
+        #file-input { display: none; }
+        
+        #instructions {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ccc;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Acuitix - Étalon Métrologique</h1>
+    
+    <div class="container" id="view-container">
+        <div id="placeholder">
+            Tournez votre téléphone en mode paysage (horizontal),<br>
+            puis cliquez sur le bouton vert pour lancer la caméra.
+        </div>
+        <canvas id="photo-canvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <!-- Déclencheur natif haute compatibilité -->
+        <label for="file-input" class="btn-action">📸 Prendre la photo (Caméra)</label>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+        
+        <button id="download-btn" class="btn-action" style="background-color: #007bff; display: none;">💾 Télécharger l'image avec l'étalon</button>
+        <button id="share-btn" class="btn-action" style="background-color: #ffc107; color: #000; display: none;">📤 Partager / Envoyer la photo</button>
+        <button id="retake-btn" class="btn-action" style="background-color: #dc3545; display: none;">🔄 Recommencer</button>
+    </div>
+
+    <div id="instructions">
+        <b>Garantie :</b> Les carrés verts d'étalonnage seront automatiquement incrustés sur la photo finale.
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('photo-canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('placeholder');
+        const downloadBtn = document.getElementById('download-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const retakeBtn = document.getElementById('retake-btn');
+        const instructions = document.getElementById('instructions');
+
+        let finalImageBlob = null;
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Configuration du Canvas aux dimensions réelles de la photo (zéro perte)
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+
+                        // 1. Dessine la photo originale
+                        ctx.drawImage(img, 0, 0);
+
+                        // 2. Incruste les deux carrés verts de référence sur l'image
+                        ctx.strokeStyle = "#00ff00";
+                        ctx.lineWidth = Math.max(12, img.naturalWidth / 180);
+                        ctx.setLineDash([img.naturalWidth / 50, img.naturalWidth / 80]);
+
+                        let w = img.naturalWidth;
+                        let h = img.naturalHeight;
+                        
+                        // Traçage des deux carrés (gauche et droit)
+                        ctx.strokeRect(w * 0.18, h * 0.22, w * 0.22, h * 0.35); // Carré gauche
+                        ctx.strokeRect(w * 0.60, h * 0.22, w * 0.22, h * 0.35); // Carré droit
+
+                        // Affichage du canvas final
+                        canvas.style.display = 'block';
+                        placeholder.style.display = 'none';
+
+                        // Gestion des boutons
+                        fileInput.parentElement.style.display = 'none';
+                        downloadBtn.style.display = 'block';
+                        retakeBtn.style.display = 'block';
+                        if (navigator.share) {
+                            shareBtn.style.display = 'block';
+                        }
+
+                        // Génération du fichier Blob en haute qualité (98%)
+                        canvas.toBlob(function(blob) {
+                            finalImageBlob = blob;
+                            const blobUrl = URL.createObjectURL(blob);
+
+                            downloadBtn.onclick = function() {
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = 'acuitix_etalon_controle.jpg';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            };
+                        }, 'image/jpeg', 0.98);
+
+                        instructions.innerHTML = "<b>✅ Photo traitée avec succès !</b><br>L'étalon est gravé sur l'image en pleine résolution.";
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Bouton pour recommencer
+        retakeBtn.addEventListener('click', function() {
+            canvas.style.display = 'none';
+            placeholder.style.display = 'block';
+            fileInput.parentElement.style.display = 'block';
+            downloadBtn.style.display = 'none';
+            shareBtn.style.display = 'none';
+            retakeBtn.style.display = 'none';
+            fileInput.value = '';
+            instructions.innerHTML = "<b>Garantie :</b> Les carrés verts d'étalonnage seront automatiquement incrustés sur la photo finale.";
+        });
+
+        // Bouton de partage natif
+        shareBtn.addEventListener('click', async () => {
+            if (finalImageBlob) {
+                const fileObj = new File([finalImageBlob], 'acuitix_etalon_controle.jpg', { type: 'image/jpeg' });
+                if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+                    try {
+                        await navigator.share({
+                            files: [fileObj],
+                            title: 'Contrôle Acuitix',
+                            text: 'Photo avec étalon de contrôle intégré.'
+                        });
+                    } catch (error) {
+                        console.log('Partage annulé', error);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
