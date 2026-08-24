@@ -1,1 +1,131 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Étalon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 { font-size: 1.2rem; }
+        .box {
+            background: #2a2a2a;
+            border: 2px solid #555;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        canvas {
+            width: 100%;
+            max-height: 40vh;
+            object-fit: contain;
+            display: none;
+            margin-top: 10px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Acuitix - Étalon Métrologique</h1>
+
+    <div class="box">
+        <p id="status-text">Cliquez sur le bouton pour prendre la photo de contrôle.</p>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div>
+        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+        
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image avec l'étalon</a>
+        <button id="btn-retry" class="btn" style="background: #dc3545; display: none;">🔄 Recommencer</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
+        const btnShoot = document.getElementById('btn-shoot');
+        const btnDownload = document.getElementById('btn-download');
+        const btnRetry = document.getElementById('btn-retry');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Dimensions réelles de la photo
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+
+                    // 1. Dessiner la photo
+                    ctx.drawImage(img, 0, 0);
+
+                    // 2. Incrustation des carrés verts métrologiques
+                    ctx.strokeStyle = "#00ff00";
+                    ctx.lineWidth = Math.max(10, img.naturalWidth / 200);
+                    ctx.setLineDash([img.naturalWidth / 40, img.naturalWidth / 60]);
+
+                    let w = img.naturalWidth;
+                    let h = img.naturalHeight;
+                    ctx.strokeRect(w * 0.18, h * 0.20, w * 0.25, h * 0.60);
+                    ctx.strokeRect(w * 0.57, h * 0.20, w * 0.25, h * 0.60);
+
+                    // Affichage du résultat
+                    canvas.style.display = 'block';
+                    statusText.innerText = "✅ Étalon gravé avec succès sur la photo !";
+                    btnShoot.style.display = 'none';
+                    btnDownload.style.display = 'block';
+                    btnRetry.style.display = 'block';
+
+                    // Préparation du téléchargement
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        btnDownload.href = url;
+                        btnDownload.download = 'acuitix_etalon.jpg';
+                    }, 'image/jpeg', 0.95);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        btnRetry.addEventListener('click', function() {
+            canvas.style.display = 'none';
+            statusText.innerText = "Cliquez sur le bouton pour prendre la photo de contrôle.";
+            btnShoot.style.display = 'block';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            fileInput.value = '';
+        });
+    </script>
+</body>
+</html>
