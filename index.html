@@ -1,1 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Module Étalon & Métrologie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 1.2rem; margin-bottom: 10px; text-align: center; }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 50vh;
+            min-height: 300px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Canvas pour afficher l'image et graver l'étalon */
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
 
+        #placeholder {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Repères visuels des carrés verts d'étalonnage en surbrillance */
+        .calibration-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+        .cal-square {
+            position: absolute;
+            border: 3px dashed #00ff00;
+            box-sizing: border-box;
+        }
+        #sq1 { top: 25%; left: 20%; width: 20%; height: 30%; }
+        #sq2 { top: 25%; right: 20%; width: 20%; height: 30%; }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+            gap: 10px;
+        }
+        .btn-action {
+            padding: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-action:hover { background-color: #218838; }
+        #file-input { display: none; }
+        
+        #instructions {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ccc;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Acuitix - Étalon Métrologique</h1>
+    
+    <div class="container" id="view-container">
+        <div id="placeholder">Cadrez votre plaque en mode paysage (16:9),<br>puis lancez la capture.</div>
+        <canvas id="photo-canvas"></canvas>
+        
+        <!-- Repères visuels à l'écran -->
+        <div class="calibration-overlay" id="overlay">
+            <div class="cal-square" id="sq1"></div>
+            <div class="cal-square" id="sq2"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <label for="file-input" class="btn-action">📸 Prendre la photo (Haute Résolution)</label>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
+        
+        <button id="download-btn" class="btn-action" style="background-color: #007bff; display: none;">💾 Télécharger l'image étalon (Pixels d'origine)</button>
+        <button id="share-btn" class="btn-action" style="background-color: #ffc107; color: #000; display: none;">📤 Partager la photo étalon</button>
+    </div>
+
+    <div id="instructions">
+        <b>Garantie métrologie :</b> Les carrés verts d'étalonnage sont directement incrustés sur l'image exportée sans perte de pixels.
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('photo-canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('placeholder');
+        const overlay = document.getElementById('overlay');
+        const downloadBtn = document.getElementById('download-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const instructions = document.getElementById('instructions');
+
+        let finalImageBlob = null;
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Configuration du Canvas aux dimensions RÉELLES de la photo (0 perte de pixels)
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+
+                        // 1. Dessine la photo originale en haute résolution
+                        ctx.drawImage(img, 0, 0);
+
+                        // 2. Incruste définitivement les carrés verts de l'étalon sur l'image
+                        ctx.strokeStyle = "#00ff00";
+                        ctx.lineWidth = Math.max(10, img.naturalWidth / 200); // Épaisseur proportionnelle
+                        ctx.setLineDash([img.naturalWidth / 60, img.naturalWidth / 100]); // Effet pointillé/tiret
+
+                        // Coordonnées proportionnelles des deux carrés étalons
+                        let w = img.naturalWidth;
+                        let h = img.naturalHeight;
+                        ctx.strokeRect(w * 0.20, h * 0.25, w * 0.20, h * 0.30); // Carré gauche
+                        ctx.strokeRect(w * 0.60, h * 0.25, w * 0.20, h * 0.30); // Carré droit
+
+                        // Affichage du canvas et masquage du texte
+                        canvas.style.display = 'block';
+                        placeholder.style.display = 'none';
+                        overlay.style.display = 'block';
+
+                        // Conversion du canvas en Blob haute qualité pour partage/téléchargement
+                        canvas.toBlob(function(blob) {
+                            finalImageBlob = blob;
+                            const blobUrl = URL.createObjectURL(blob);
+
+                            // Configuration du bouton de téléchargement direct
+                            downloadBtn.style.display = 'block';
+                            downloadBtn.onclick = function() {
+                                const a = document.createElement('a');
+                                a.href = blobUrl;
+                                a.download = 'acuitix_etalon_controle.jpg';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            };
+
+                            // Configuration du bouton de partage natif
+                            if (navigator.share) {
+                                shareBtn.style.display = 'block';
+                            }
+                        }, 'image/jpeg', 0.98); // Qualité JPEG maximale (98%)
+
+                        instructions.innerHTML = "<b>✅ Étalon appliqué avec succès !</b><br>La photo conserve 100% de sa résolution avec les carrés intégrés.";
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        shareBtn.addEventListener('click', async () => {
+            if (finalImageBlob) {
+                const fileObj = new File([finalImageBlob], 'acuitix_etalon_controle.jpg', { type: 'image/jpeg' });
+                if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+                    try {
+                        await navigator.share({
+                            files: [fileObj],
+                            title: 'Contrôle Acuitix',
+                            text: 'Photo avec étalon de contrôle intégré.'
+                        });
+                    } catch (error) {
+                        console.log('Partage annulé', error);
+                    }
+                } else {
+                    alert("Le partage direct de fichier n'est pas supporté par ce navigateur. Utilisez le bouton de téléchargement.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
