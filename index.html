@@ -152,10 +152,18 @@
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        let template = { x: 0, y: 0, width: 0, height: 0, angle: 0 }; // Gabarit 170x100 avec diagonales
+        
+        // Les 4 coins indépendants (angles droits)
+        let corners = [
+            { x: 0, y: 0, size: 0, angle: 0 }, // 0: Coin 1 (Haut-Gauche)
+            { x: 0, y: 0, size: 0, angle: 0 }, // 1: Coin 2 (Haut-Droit)
+            { x: 0, y: 0, size: 0, angle: 0 }, // 2: Coin 3 (Bas-Droit)
+            { x: 0, y: 0, size: 0, angle: 0 }  // 3: Coin 4 (Bas-Gauche)
+        ];
+
         let holes = []; 
 
-        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0, tempW = 0, tempH = 0;
+        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let zoomLevel = 1.0;
         let actionInterval = null;
 
@@ -180,8 +188,9 @@
                     box1.size = defaultSize;
                     box2.size = defaultSize;
 
-                    template.width = w * 0.7;
-                    template.height = template.width * (100 / 170);
+                    for(let i=0; i<4; i++) {
+                        corners[i].size = w * 0.06;
+                    }
 
                     tempX = w * 0.4;
                     tempY = h * 0.4;
@@ -208,10 +217,10 @@
             let clickX = (clientX - rect.left) * scaleX;
             let clickY = (clientY - rect.top) * scaleY;
 
-            if (step === 1 || step === 2 || step === 3) {
+            if (step >= 1 && step <= 6) {
                 tempX = clickX;
                 tempY = clickY;
-            } else if (step === 4) {
+            } else if (step === 7) {
                 holes.push({ x: clickX, y: clickY, radius: box1.size * 0.25 });
             }
             redrawCanvas();
@@ -225,7 +234,6 @@
             }
         }, { passive: false });
 
-        // Maintien continu universel
         window.startAction = function(actionFn, speedMs) {
             stopAction();
             actionFn();
@@ -240,17 +248,11 @@
 
         window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         window.adjustZoom = function(delta) { zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta)); redrawCanvas(); }
-        window.adjustAngle = function(deltaDeg) { if (step <= 3) { tempAngle += deltaDeg; redrawCanvas(); } }
+        window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         
         window.adjustSize = function(deltaSize) {
-            if (step === 1 || step === 2) {
-                tempSize = Math.max(10, tempSize + deltaSize);
-                redrawCanvas();
-            } else if (step === 3) {
-                tempW = Math.max(50, tempW + (deltaSize * 4));
-                tempH = Math.max(30, tempH + (deltaSize * 2.5));
-                redrawCanvas();
-            }
+            tempSize = Math.max(10, tempSize + deltaSize);
+            redrawCanvas();
         }
 
         function redrawCanvas() {
@@ -277,39 +279,40 @@
             if (step >= 3 || step === 2) {
                 drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, step === 2, "#00FF00");
             }
-            // 3. Gabarit 170x100 (BLEU avec 4 coins et 2 diagonales croisées)
-            if (step >= 4 || step === 3) {
-                let rx = step === 3 ? tempX : template.x;
-                let ry = step === 3 ? tempY : template.y;
-                let rw = step === 3 ? tempW : template.width;
-                let rh = step === 3 ? tempH : template.height;
-                let ra = step === 3 ? tempAngle : template.angle;
 
-                ctx.save();
-                ctx.translate(rx, ry);
-                ctx.rotate((ra * Math.PI) / 180);
-                ctx.strokeStyle = "#007BFF"; // BLEU
-                if (step === 3) {
-                    ctx.setLineDash([w / 70, w / 90]);
-                } else {
-                    ctx.setLineDash([]);
+            // 3 à 6. Les 4 coins indépendants (Bleu - Angle droit 90° avec trait central à 45° et point central)
+            for (let i = 0; i < 4; i++) {
+                let isActive = (step === i + 3);
+                let isPassed = (step > i + 3);
+                if (isPassed || isActive) {
+                    let cx = isActive ? tempX : corners[i].x;
+                    let cy = isActive ? tempY : corners[i].y;
+                    let csize = isActive ? tempSize : corners[i].size;
+                    let cangle = isActive ? tempAngle : corners[i].angle;
+
+                    drawCornerMarker(cx, cy, csize, cangle, isActive, "#007BFF");
                 }
-                
-                // Tracé du rectangle 170x100
-                ctx.strokeRect(-rw / 2, -rh / 2, rw, rh);
+            }
 
-                // Tracé des deux diagonales pour le contrôle croisé
+            // 7. Une fois les 4 coins validés (step >= 7), tracé UNIQUEMENT des deux diagonales bleues reliant les coins
+            if (step >= 7) {
+                ctx.save();
+                ctx.strokeStyle = "#007BFF";
+                ctx.lineWidth = Math.max(3, w / 350);
+                ctx.setLineDash([]);
+
+                // Diagonale 1 (Coin 1 [Haut-Gauche] vers Coin 3 [Bas-Droit])
                 ctx.beginPath();
-                ctx.moveTo(-rw / 2, -rh / 2);
-                ctx.lineTo(rw / 2, rh / 2);
-                ctx.moveTo(rw / 2, -rh / 2);
-                ctx.lineTo(-rw / 2, rh / 2);
+                ctx.moveTo(corners[0].x, corners[0].y);
+                ctx.lineTo(corners[2].x, corners[2].y);
+                // Diagonale 2 (Coin 2 [Haut-Droit] vers Coin 4 [Bas-Gauche])
+                ctx.moveTo(corners[1].x, corners[1].y);
+                ctx.lineTo(corners[3].x, corners[3].y);
                 ctx.stroke();
-
                 ctx.restore();
             }
 
-            // 4. Perçages multiples (Verts)
+            // 8. Perçages multiples (Verts)
             ctx.fillStyle = "#00FF00";
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = Math.max(3, w / 400);
@@ -322,7 +325,7 @@
 
             ctx.restore();
 
-            if (step === 5) {
+            if (step === 8) {
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
@@ -342,6 +345,44 @@
                 ctx.setLineDash([]);
             }
             ctx.strokeRect(-size / 2, -size / 2, size, size);
+            ctx.restore();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, isActive, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            
+            if (isActive) {
+                ctx.setLineDash([currentImg.naturalWidth / 80, currentImg.naturalWidth / 100]);
+            } else {
+                ctx.setLineDash([]);
+            }
+
+            ctx.lineWidth = Math.max(4, currentImg.naturalWidth / 250);
+            
+            // 1. L'angle droit (L-shape)
+            ctx.beginPath();
+            ctx.moveTo(-size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, -size);
+            ctx.stroke();
+
+            // 2. Le trait central à 45° représentant l'amorce de la diagonale future
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            // Vecteur à 45 degrés sortant vers l'intérieur de l'angle
+            let diagLen = size * 0.7;
+            ctx.lineTo(diagLen * 0.707, diagLen * 0.707);
+            ctx.stroke();
+
+            // 3. Le point central exact du sommet de l'angle droit
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
         }
 
@@ -366,23 +407,38 @@
                 redrawCanvas();
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
-                step = 3; // Gabarit 170x100 + Diagonales (Bleu)
-                tempX = currentImg.naturalWidth * 0.5;
-                tempY = currentImg.naturalHeight * 0.5;
-                tempW = template.width;
-                tempH = template.height;
+                step = 3; // Début du Coin 1
+                tempX = currentImg.naturalWidth * 0.25;
+                tempY = currentImg.naturalHeight * 0.25;
                 tempAngle = 0;
+                tempSize = box1.size * 1.2;
                 zoomLevel = 1.0;
                 updateUIState();
                 redrawCanvas();
-            } else if (step === 3) {
-                template.x = tempX; template.y = tempY; template.width = tempW; template.height = tempH; template.angle = tempAngle;
-                step = 4; // Perçages (Verts)
+            } else if (step >= 3 && step <= 5) {
+                let cornerIdx = step - 3;
+                corners[cornerIdx].x = tempX;
+                corners[cornerIdx].y = tempY;
+                corners[cornerIdx].angle = tempAngle;
+                corners[cornerIdx].size = tempSize;
+
+                step++; // Coin suivant
+                if (step === 4) { tempX = currentImg.naturalWidth * 0.75; tempY = currentImg.naturalHeight * 0.25; }
+                else if (step === 5) { tempX = currentImg.naturalWidth * 0.75; tempY = currentImg.naturalHeight * 0.75; }
+                else if (step === 6) { tempX = currentImg.naturalWidth * 0.25; tempY = currentImg.naturalHeight * 0.75; }
+                
                 zoomLevel = 1.0;
                 updateUIState();
                 redrawCanvas();
-            } else if (step === 4) {
-                step = 5; // Terminé
+            } else if (step === 6) {
+                // Validation du 4ème coin
+                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
+                step = 7; // Diagonales tracées + Perçages
+                zoomLevel = 1.0;
+                updateUIState();
+                redrawCanvas();
+            } else if (step === 7) {
+                step = 8; // Terminé
                 adjustPanel.style.display = 'none';
                 statusText.innerText = "✅ Calage expert terminé ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
@@ -393,19 +449,26 @@
 
         function updateUIState() {
             if (step === 1) {
-                statusText.innerText = "Étape 1 / 4 : Carré GAUCHE (Vert)";
-                stepInstruction.innerText = "Maintenez les flèches ou la taille pour ajuster rapidement.";
+                statusText.innerText = "Étape 1 / 6 : Carré GAUCHE (Vert)";
+                stepInstruction.innerText = "Ajustez position, taille et angle du carré gauche.";
             } else if (step === 2) {
-                statusText.innerText = "Étape 2 / 4 : Carré DROIT (Vert)";
-                stepInstruction.innerText = "Maintenez les flèches ou la taille pour ajuster rapidement.";
+                statusText.innerText = "Étape 2 / 6 : Carré DROIT (Vert)";
+                stepInstruction.innerText = "Ajustez position, taille et angle du carré droit.";
             } else if (step === 3) {
-                statusText.innerText = "Étape 3 / 4 : Gabarit 170x100 + Diagonales (Bleu)";
-                stepInstruction.innerText = "Ajustez les 4 coins et l'angle pour aligner les diagonales.";
-                document.getElementById('btn-size-up').innerText = "➕ Grand.";
-                document.getElementById('btn-size-down').innerText = "➖ Grand.";
+                statusText.innerText = "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)";
+                stepInstruction.innerText = "Placez l'angle droit de référence sur le coin Haut-Gauche.";
             } else if (step === 4) {
-                statusText.innerText = "Étape 4 / 4 : Perçages Multiples (Verts)";
-                stepInstruction.innerText = "Touchez l'écran pour poser les cercles de perçage.";
+                statusText.innerText = "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)";
+                stepInstruction.innerText = "Placez l'angle droit de référence sur le coin Haut-Droit.";
+            } else if (step === 5) {
+                statusText.innerText = "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)";
+                stepInstruction.innerText = "Placez l'angle droit de référence sur le coin Bas-Droit.";
+            } else if (step === 6) {
+                statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
+                stepInstruction.innerText = "Placez l'angle droit de référence sur le coin Bas-Gauche.";
+            } else if (step === 7) {
+                statusText.innerText = "Étape 7 : Diagonales & Perçages";
+                stepInstruction.innerText = "Les diagonales croisées sont tracées. Touchez l'écran pour poser les perçages.";
                 panelTools.style.display = 'none';
                 document.getElementById('btn-validate-step').innerText = "Terminer et Générer l'image";
             }
