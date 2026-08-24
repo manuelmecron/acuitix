@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuitix - Visée Étalon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { font-size: 1.2rem; margin-bottom: 10px; text-align: center; }
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 65vh;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+        video, canvas, img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .overlay-guide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .square-target {
+            position: absolute;
+            width: 35px; 
+            height: 35px;
+            border: 2px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.15);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #square-left { left: 12%; }
+        #square-right { right: 12%; }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 500px;
+            gap: 10px;
+        }
+        button {
+            padding: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        button#action-btn { background-color: #007bff; display: none; }
+        button#retry-btn { background-color: #dc3545; display: none; }
+        button:hover { opacity: 0.9; }
+        #instructions {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #aaa;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Visée Étalon - Acuitix</h1>
+    
+    <div class="container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <img id="photo-preview" style="display:none;" alt="Aperçu capture">
+        
+        <div class="overlay-guide" id="guide">
+            <div class="square-target" id="square-left"></div>
+            <div class="square-target" id="square-right"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="capture-btn">📸 Capturer la photo</button>
+        <button id="action-btn">💾 Enregistrer / Partager la photo</button>
+        <button id="retry-btn">🔄 Reprendre</button>
+    </div>
+
+    <div id="instructions">Calez vos carrés rouges dans les repères verts, puis capturez.</div>
+
+    <script>
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const photoPreview = document.getElementById('photo-preview');
+        const captureBtn = document.getElementById('capture-btn');
+        const actionBtn = document.getElementById('action-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const guide = document.getElementById('guide');
+        const instructions = document.getElementById('instructions');
+
+        let capturedBlob = null;
+
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { exact: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                    video.srcObject = stream;
+                } catch (e) {
+                    alert("Impossible d'accéder à la caméra arrière.");
+                }
+            }
+        }
+
+        initCamera();
+
+        // 1. Capturer
+        captureBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                capturedBlob = blob;
+                const imageURL = URL.createObjectURL(blob);
+                photoPreview.src = imageURL;
+                
+                photoPreview.style.display = 'block';
+                video.style.display = 'none';
+                guide.style.display = 'none';
+
+                captureBtn.style.display = 'none';
+                actionBtn.style.display = 'block';
+                retryBtn.style.display = 'block';
+                
+                instructions.innerHTML = "<b>Photo figée !</b> Cliquez sur le bouton bleu pour l'enregistrer dans votre galerie ou l'envoyer.";
+            }, 'image/jpeg', 0.95);
+        });
+
+        // 2. Enregistrer / Partager (Ouvre le menu natif du téléphone)
+        actionBtn.addEventListener('click', async () => {
+            if (!capturedBlob) return;
+
+            const file = new File([capturedBlob], "capture_etalon_acuitix.jpg", { type: "image/jpeg" });
+
+            // Si le téléphone supporte le partage de fichiers natif (iOS / Android modernes)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Photo Étalon Acuitix',
+                        text: 'Voici la photo capturée avec les repères étalons.'
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.log("Partage annulé ou non abouti", err);
+                    }
+                }
+            }
+
+            // Fallback : Téléchargement direct classique si le partage natif n'est pas dispo
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(capturedBlob);
+            link.download = 'capture_etalon_acuitix.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // 3. Reprendre
+        retryBtn.addEventListener('click', () => {
+            photoPreview.style.display = 'none';
+            video.style.display = 'block';
+            guide.style.display = 'block';
+            captureBtn.style.display = 'block';
+            actionBtn.style.display = 'none';
+            retryBtn.style.display = 'none';
+            instructions.innerHTML = "Calez vos carrés rouges dans les repères verts, puis capturez.";
+        });
+    </script>
+</body>
+</html>
