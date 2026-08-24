@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.11 - Studio de Calage Expert</title>
+    <title>Acuitix.12 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
         }
         canvas {
             width: 100%;
-            max-height: 40vh;
+            max-height: 45vh;
             object-fit: contain;
             display: none;
             cursor: grab;
@@ -101,15 +101,15 @@
 </head>
 <body>
 
-    <h1>Acuitix.11 - Studio de Calage Expert</h1>
+    <h1>Acuitix.12 - Studio de Calage Expert</h1>
 
     <div class="box">
-        <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
+        <p id="status-text">1. Prenez la photo du gabarit.</p>
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
-        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo (16:9)</label>
+        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <!-- Bouton de rotation 90° -->
@@ -143,9 +143,9 @@
                 <div></div>
             </div>
 
-            <!-- Boutons spécifiques à l'étape 7 (Perçages) -->
+            <!-- Boutons spécifiques à l'étape 7 (Perçages avec Double Validation) -->
             <div id="hole-action-panel" style="display:none; margin-bottom: 8px;">
-                <button class="btn" style="background: #28a745; margin-top:0;" onclick="addCurrentHole()">✅ Ajouter ce perçage</button>
+                <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
                 <button class="btn btn-danger" style="margin-top:6px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
             </div>
 
@@ -156,7 +156,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.11)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.12)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -246,6 +246,7 @@
 
         function updateCanvasDimensions() {
             if (!currentImg) return;
+            // Garantit que les dimensions englobent parfaitement l'image pivotée sans rognage
             if (rotationAngle === 90 || rotationAngle === 270) {
                 canvas.width = currentImg.naturalHeight;
                 canvas.height = currentImg.naturalWidth;
@@ -293,16 +294,17 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
+        // Conversion stable des coordonnées tactiles et souris indépendante des zooms successifs
         function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / canvas.clientWidth;
-            const scaleY = canvas.height / canvas.clientHeight;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             
             let clientClickX = (clientX - rect.left) * scaleX;
             let clientClickY = (clientY - rect.top) * scaleY;
 
-            let imgX = (clientClickX - canvas.width / 2) / zoomLevel + tempX - manualPanX;
-            let imgY = (clientClickY - canvas.height / 2) / zoomLevel + tempY - manualPanY;
+            let imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
+            let imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
             return { x: imgX, y: imgY };
         }
 
@@ -314,10 +316,12 @@
 
         window.addEventListener('mousemove', function(e) {
             if (!isDragging || zoomLevel <= 1.0) return;
-            const scaleX = canvas.width / canvas.clientWidth;
-            const scaleY = canvas.height / canvas.clientHeight;
-            manualPanX += (e.clientX - startTouchX) * scaleX / zoomLevel;
-            manualPanY += (e.clientY - startTouchY) * scaleY / zoomLevel;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            manualPanX -= (e.clientX - startTouchX) * scaleX / zoomLevel;
+            manualPanY -= (e.clientY - startTouchY) * scaleY / zoomLevel;
             startTouchX = e.clientX;
             startTouchY = e.clientY;
             redrawCanvas();
@@ -338,10 +342,12 @@
 
         canvas.addEventListener('touchmove', function(e) {
             if (e.touches.length === 1 && isDragging && zoomLevel > 1.0) {
-                const scaleX = canvas.width / canvas.clientWidth;
-                const scaleY = canvas.height / canvas.clientHeight;
-                manualPanX += (e.touches[0].clientX - startTouchX) * scaleX / zoomLevel;
-                manualPanY += (e.touches[0].clientY - startTouchY) * scaleY / zoomLevel;
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                manualPanX -= (e.touches[0].clientX - startTouchX) * scaleX / zoomLevel;
+                manualPanY -= (e.touches[0].clientY - startTouchY) * scaleY / zoomLevel;
                 startTouchX = e.touches[0].clientX;
                 startTouchY = e.touches[0].clientY;
                 redrawCanvas();
@@ -352,7 +358,7 @@
         canvas.addEventListener('touchend', function(e) {
             if (isDragging && e.changedTouches.length === 1) {
                 let dist = Math.hypot(e.changedTouches[0].clientX - startTouchX, e.changedTouches[0].clientY - startTouchY);
-                if (dist < 5 && step >= 1 && step <= 7) {
+                if (dist < 6 && step >= 1 && step <= 7) {
                     let coords = getCanvasCoords(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
                     tempX = coords.x;
                     tempY = coords.y;
@@ -371,23 +377,27 @@
             }
         });
 
-        window.addCurrentHole = function() {
+        // Double validation sécurisée pour l'ajout des perçages
+        window.askAddHole = function() {
             if (step === 7) {
-                holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
-                // Réinitialiser le curseur du prochain perçage au centre de l'image (au lieu de rester sur le dernier perçage)
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                manualPanX = 0;
-                manualPanY = 0;
-                zoomLevel = 1.0;
-                redrawCanvas();
+                if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
+                    holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                    manualPanX = 0;
+                    manualPanY = 0;
+                    zoomLevel = 1.0;
+                    redrawCanvas();
+                }
             }
         }
 
         window.removeLastHole = function() {
             if (step === 7 && holes.length > 0) {
-                holes.pop();
-                redrawCanvas();
+                if (confirm("Voulez-vous supprimer le dernier perçage ajouté ?")) {
+                    holes.pop();
+                    redrawCanvas();
+                }
             }
         }
 
@@ -397,14 +407,13 @@
 
             ctx.save();
 
-            // Si on génère l'export final, on ignore le zoom et le pan pour capturer TOUTE l'image
             if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
 
-            // Rotation de l'image source
+            // Rotation de l'image source intégrale
             ctx.save();
             ctx.translate(canvas.width / 2, canvas.height / 2);
             ctx.rotate((rotationAngle * Math.PI) / 180);
@@ -456,7 +465,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Curseur actif du perçage en cours (uniquement si pas en mode export)
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = "#00FFFF";
@@ -470,7 +478,7 @@
                 }
             }
 
-            // 8. Perçages validés (Cyan transparent haute visibilité)
+            // 8. Perçages validés
             ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
             ctx.strokeStyle = "#00FFFF";
             ctx.lineWidth = Math.max(3, refW / 400);
@@ -487,7 +495,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v11.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v12.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -597,11 +605,11 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.11) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.12) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
-                redrawCanvas(true); // Génère l'export complet sans zoom
+                redrawCanvas(true);
                 return;
             }
             zoomLevel = 1.0;
@@ -639,7 +647,7 @@
                 panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez pour placer un perçage, glissez pour naviguer.";
+                stepInstruction.innerText = "Touchez pour placer un perçage, confirmez avec le bouton vert.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
@@ -678,7 +686,7 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
-            statusText.innerText = "1. Prenez la photo en mode PAYSAGE (16:9).";
+            statusText.innerText = "1. Prenez la photo du gabarit.";
         });
     </script>
 </body>
