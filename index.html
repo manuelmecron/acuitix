@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.9 - Studio de Calage Expert</title>
+    <title>Acuitix.10 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -101,7 +101,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.9 - Studio de Calage Expert</h1>
+    <h1>Acuitix.10 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo en mode PAYSAGE (16:9).</p>
@@ -116,12 +116,12 @@
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez l'écran pour placer, glissez pour naviguer, ou utilisez le joystick.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour placer, glissez pour naviguer, ou utilisez le joystick.</p>
             
             <!-- Contrôles Zoom, Rotation et Taille -->
             <div class="controls-row" id="panel-tools">
-                <button onclick="adjustZoom(0.3)">🔍+</button>
-                <button onclick="adjustZoom(-0.3)">🔍-</button>
+                <button onclick="adjustZoom(0.4)">🔍+</button>
+                <button onclick="adjustZoom(-0.4)">🔍-</button>
                 <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                 <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
                 <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" style="background:#007bff;">➕ Taille</button>
@@ -156,7 +156,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.9)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.10)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -192,8 +192,8 @@
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let zoomLevel = 1.0;
-        let panX = 0; // Décalage de navigation (Pan)
-        let panY = 0;
+        let manualPanX = 0; // Décalage manuel si l'utilisateur glisse l'image
+        let manualPanY = 0;
         let actionInterval = null;
 
         let isDragging = false;
@@ -213,8 +213,8 @@
 
                     step = 1;
                     zoomLevel = 1.0;
-                    panX = 0;
-                    panY = 0;
+                    manualPanX = 0;
+                    manualPanY = 0;
                     let w = canvas.width;
                     let h = canvas.height;
                     
@@ -226,8 +226,8 @@
                         corners[i].size = w * 0.06;
                     }
 
-                    tempX = w * 0.4;
-                    tempY = h * 0.4;
+                    tempX = w * 0.5;
+                    tempY = h * 0.5;
                     tempAngle = 0;
                     tempSize = defaultSize;
 
@@ -262,8 +262,8 @@
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             zoomLevel = 1.0;
-            panX = 0;
-            panY = 0;
+            manualPanX = 0;
+            manualPanY = 0;
             redrawCanvas();
         }
 
@@ -281,13 +281,11 @@
 
         window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         
-        // Zoom ciblé sur l'élément actif
         window.adjustZoom = function(delta) {
-            let oldZoom = zoomLevel;
             zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta));
             if (zoomLevel === 1.0) {
-                panX = 0;
-                panY = 0;
+                manualPanX = 0;
+                manualPanY = 0;
             }
             redrawCanvas();
         }
@@ -295,7 +293,6 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        // Gestion Tactile / Souris pour Glisser (Pan) et Toucher (Placement)
         function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / canvas.clientWidth;
@@ -304,9 +301,9 @@
             let clientClickX = (clientX - rect.left) * scaleX;
             let clientClickY = (clientY - rect.top) * scaleY;
 
-            // Convertir par rapport au zoom et au pan
-            let imgX = (clientClickX - canvas.width / 2 - panX) / zoomLevel + canvas.width / 2;
-            let imgY = (clientClickY - canvas.height / 2 - panY) / zoomLevel + canvas.height / 2;
+            // Inversion propre de la matrice de centrage sur tempX/tempY
+            let imgX = (clientClickX - canvas.width / 2) / zoomLevel + tempX - manualPanX;
+            let imgY = (clientClickY - canvas.height / 2) / zoomLevel + tempY - manualPanY;
             return { x: imgX, y: imgY };
         }
 
@@ -320,8 +317,8 @@
             if (!isDragging || zoomLevel <= 1.0) return;
             const scaleX = canvas.width / canvas.clientWidth;
             const scaleY = canvas.height / canvas.clientHeight;
-            panX += (e.clientX - startTouchX) * scaleX;
-            panY += (e.clientY - startTouchY) * scaleY;
+            manualPanX += (e.clientX - startTouchX) * scaleX / zoomLevel;
+            manualPanY += (e.clientY - startTouchY) * scaleY / zoomLevel;
             startTouchX = e.clientX;
             startTouchY = e.clientY;
             redrawCanvas();
@@ -331,8 +328,6 @@
             isDragging = false;
         });
 
-        // Touch support pour mobile (glissement et tap)
-        let lastTouchDist = 0;
         canvas.addEventListener('touchstart', function(e) {
             if (e.touches.length === 1) {
                 isDragging = true;
@@ -346,8 +341,8 @@
             if (e.touches.length === 1 && isDragging && zoomLevel > 1.0) {
                 const scaleX = canvas.width / canvas.clientWidth;
                 const scaleY = canvas.height / canvas.clientHeight;
-                panX += (e.touches[0].clientX - startTouchX) * scaleX;
-                panY += (e.touches[0].clientY - startTouchY) * scaleY;
+                manualPanX += (e.touches[0].clientX - startTouchX) * scaleX / zoomLevel;
+                manualPanY += (e.touches[0].clientY - startTouchY) * scaleY / zoomLevel;
                 startTouchX = e.touches[0].clientX;
                 startTouchY = e.touches[0].clientY;
                 redrawCanvas();
@@ -358,7 +353,7 @@
         canvas.addEventListener('touchend', function(e) {
             if (isDragging && e.changedTouches.length === 1) {
                 let dist = Math.hypot(e.changedTouches[0].clientX - startTouchX, e.changedTouches[0].clientY - startTouchY);
-                if (dist < 5 && step >= 1 && step <= 7) { // C'était un simple tap
+                if (dist < 5 && step >= 1 && step <= 7) {
                     let coords = getCanvasCoords(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
                     tempX = coords.x;
                     tempY = coords.y;
@@ -369,7 +364,6 @@
         });
 
         canvas.addEventListener('click', function(e) {
-            // Uniquement si pas un drag significatif
             let coords = getCanvasCoords(e.clientX, e.clientY);
             if (step >= 1 && step <= 7) {
                 tempX = coords.x;
@@ -398,15 +392,12 @@
 
             ctx.save();
 
-            // Centrage automatique du zoom sur l'élément actif ou selon le Pan utilisateur
+            // Focalisation rigoureuse et propre du zoom sur l'élément actif (tempX, tempY)
             if (zoomLevel > 1.0) {
-                // Si l'utilisateur n'a pas bougé le pan manuellement, on centre automatiquement sur la position active (tempX, tempY)
-                let targetPanX = panX;
-                let targetPanY = panY;
-                
-                ctx.translate(canvas.width / 2 + targetPanX, canvas.height / 2 + targetPanY);
+                ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                // On centre directement sur la position active de l'élément en cours de réglage
+                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
 
             // Rotation de l'image source
@@ -490,7 +481,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v9.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v10.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -543,8 +534,8 @@
         window.resetCurrentPos = function() {
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
-            panX = 0;
-            panY = 0;
+            manualPanX = 0;
+            manualPanY = 0;
             if (step <= 2) tempAngle = 0;
             redrawCanvas();
         }
@@ -564,8 +555,8 @@
         }
 
         function validateStep() {
-            panX = 0;
-            panY = 0;
+            manualPanX = 0;
+            manualPanY = 0;
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
@@ -600,7 +591,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.9) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.10) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas();
@@ -613,8 +604,8 @@
 
         window.prevStep = function() {
             stopAction();
-            panX = 0;
-            panY = 0;
+            manualPanX = 0;
+            manualPanY = 0;
             if (step > 1) {
                 step--;
                 if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
@@ -678,8 +669,8 @@
             step = 0;
             rotationAngle = 0;
             zoomLevel = 1.0;
-            panX = 0;
-            panY = 0;
+            manualPanX = 0;
+            manualPanY = 0;
             statusText.innerText = "1. Prenez la photo en mode PAYSAGE (16:9).";
         });
     </script>
