@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.18 - Studio de Calage Expert</title>
+    <title>Acuitix.20 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,7 +53,10 @@
         .btn-danger { background: #dc3545; }
         .btn-info { background: #17a2b8; }
         .btn-warning { background: #ffc107; color: #000; }
-        #file-input { display: none; }
+        
+        #file-input { 
+            display: none; 
+        }
         
         .adjust-panel {
             display: none;
@@ -67,7 +70,7 @@
         }
         .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
 
-        /* Panneau de déplacement de l'image (au-dessus pour clarté) */
+        /* Panneau déplacement de l'image (Panoramique) */
         .camera-pan-container {
             background: #262626;
             border: 1px solid #444;
@@ -101,7 +104,7 @@
         }
         .camera-pan-grid button:active { background: #007bff; }
 
-        /* Style Game Boy : 2 colonnes (D-Pad de la cible à gauche, Boutons à droite) */
+        /* Style Game Boy : 2 colonnes */
         .gameboy-container {
             display: flex;
             justify-content: space-between;
@@ -110,7 +113,7 @@
             margin-bottom: 8px;
         }
 
-        /* Croix directionnelle de la CIBLE (à gauche) */
+        /* Croix directionnelle de la CIBLE */
         .dpad-container {
             display: flex;
             flex-direction: column;
@@ -147,7 +150,6 @@
         }
         .dpad-grid button:active { background: #007bff; }
 
-        /* Colonne de droite : lignes de réglages bien classées */
         .controls-right {
             display: flex;
             flex-direction: column;
@@ -173,7 +175,6 @@
         .control-row button:active { background: #007bff; }
         .btn-action-blue { background: #007bff !important; }
 
-        /* Bouton Centrer isolé */
         .center-row {
             margin-top: 4px;
             display: flex;
@@ -199,7 +200,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.18 - Studio de Calage Expert</h1>
+    <h1>Acuitix.20 - Assistant CAO</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -207,15 +208,15 @@
     </div>
 
     <div>
-        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
-        <input type="file" id="file-input" accept="image/*" capture="environment">
+        <button class="btn" id="btn-shoot" onclick="triggerFileInput()">📸 Prendre la photo / Choisir</button>
+        <input type="file" id="file-input" accept="image/*">
 
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
             <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, commandes ci-dessous pour l'image.</p>
             
-            <!-- Bloc dédié au déplacement de l'image (Panoramique de la caméra) -->
+            <!-- Bloc déplacement de l'image (Panoramique) -->
             <div class="camera-pan-container">
                 <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
                 <div class="camera-pan-grid">
@@ -228,7 +229,6 @@
 
             <!-- Interface style Game Boy -->
             <div class="gameboy-container">
-                <!-- Croix directionnelle CIBLE à gauche -->
                 <div class="dpad-container" title="Déplacer la cible précisément">
                     <div class="dpad-label">Cible</div>
                     <div class="dpad-grid">
@@ -244,24 +244,19 @@
                     </div>
                 </div>
 
-                <!-- Commandes classées par lignes à droite -->
                 <div class="controls-right" id="panel-tools">
-                    <!-- Ligne 1 : Zoom d'affichage -->
                     <div class="control-row">
                         <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
-                    <!-- Ligne 2 : Échelle / Calibrage du motif -->
                     <div class="control-row">
                         <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
                         <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
                     </div>
-                    <!-- Ligne 3 : Inclinaison / Rotation -->
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                         <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
                     </div>
-                    <!-- Bouton Centrer isolé en bas à droite -->
                     <div class="center-row">
                         <button onclick="resetCurrentPos()" title="Remettre au centre">🎯 Centrer la cible</button>
                     </div>
@@ -279,7 +274,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.18)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.20)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -294,7 +289,6 @@
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
         const stepInstruction = document.getElementById('step-instruction');
-        const panelTools = document.getElementById('panel-tools');
         const holeActionPanel = document.getElementById('hole-action-panel');
 
         let currentImg = null;
@@ -303,14 +297,12 @@
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        
         let corners = [
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }  
         ];
-
         let holes = []; 
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
@@ -318,6 +310,10 @@
         let manualPanX = 0; 
         let manualPanY = 0;
         let actionInterval = null;
+
+        window.triggerFileInput = function() {
+            fileInput.click();
+        }
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -486,16 +482,13 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Carré GAUCHE
             if (step >= 2 || step === 1) {
                 drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, step === 1 ? tempSize : box1.size, step === 1 ? tempAngle : box1.angle, (step === 1 && !isForExport), "#00FF00");
             }
-            // Carré DROIT
             if (step >= 3 || step === 2) {
                 drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, (step === 2 && !isForExport), "#00FF00");
             }
 
-            // 4 Coins
             for (let i = 0; i < 4; i++) {
                 let isActive = (step === i + 3 && !isForExport);
                 let isPassed = (step > i + 3 || isForExport);
@@ -509,7 +502,6 @@
                 }
             }
 
-            // Diagonales
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = "#007BFF";
@@ -537,7 +529,6 @@
                 }
             }
 
-            // Perçages validés
             holes.forEach(h => {
                 ctx.save();
                 ctx.strokeStyle = isForExport ? "#00FF00" : "#00FFFF";
@@ -556,7 +547,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v18.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v20.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -676,7 +667,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.18) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.20) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
