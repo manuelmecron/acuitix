@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.17 - Studio de Calage Expert</title>
+    <title>Acuitix.18 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,6 +67,40 @@
         }
         .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
 
+        /* Panneau de déplacement de l'image (au-dessus pour clarté) */
+        .camera-pan-container {
+            background: #262626;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .camera-pan-title {
+            font-size: 0.78rem;
+            color: #17a2b8;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+        .camera-pan-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+        .camera-pan-grid button {
+            padding: 8px 4px;
+            background: #495057;
+            color: white;
+            border: 1px solid #6c757d;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .camera-pan-grid button:active { background: #007bff; }
+
         /* Style Game Boy : 2 colonnes (D-Pad de la cible à gauche, Boutons à droite) */
         .gameboy-container {
             display: flex;
@@ -77,17 +111,29 @@
         }
 
         /* Croix directionnelle de la CIBLE (à gauche) */
-        .dpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 44px);
-            grid-template-rows: repeat(3, 44px);
-            gap: 3px;
+        .dpad-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             background: #222;
             padding: 6px;
             border-radius: 8px;
             border: 1px solid #444;
             flex-shrink: 0;
             margin: auto 0;
+        }
+        .dpad-label {
+            font-size: 0.72rem;
+            color: #00FF00;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 42px);
+            grid-template-rows: repeat(3, 42px);
+            gap: 3px;
         }
         .dpad-grid button {
             background: #444;
@@ -126,7 +172,6 @@
         }
         .control-row button:active { background: #007bff; }
         .btn-action-blue { background: #007bff !important; }
-        .btn-action-camera { background: #495057 !important; border: 1px solid #6c757d; }
 
         /* Bouton Centrer isolé */
         .center-row {
@@ -154,7 +199,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.17 - Studio de Calage Expert</h1>
+    <h1>Acuitix.18 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -168,43 +213,50 @@
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, flèches caméra pour bouger l'image.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, commandes ci-dessous pour l'image.</p>
             
+            <!-- Bloc dédié au déplacement de l'image (Panoramique de la caméra) -->
+            <div class="camera-pan-container">
+                <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
+                <div class="camera-pan-grid">
+                    <button onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                </div>
+            </div>
+
             <!-- Interface style Game Boy -->
             <div class="gameboy-container">
                 <!-- Croix directionnelle CIBLE à gauche -->
-                <div class="dpad-grid" title="Déplacer la cible">
-                    <div></div>
-                    <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
-                    <div></div>
-                    <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                    <div style="background:#2a2a2a; border-radius:4px;" title="Cible"></div>
-                    <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
-                    <div></div>
-                    <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
-                    <div></div>
+                <div class="dpad-container" title="Déplacer la cible précisément">
+                    <div class="dpad-label">Cible</div>
+                    <div class="dpad-grid">
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                        <div style="background:#2a2a2a; border-radius:4px;" title="Centre"></div>
+                        <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                        <div></div>
+                    </div>
                 </div>
 
                 <!-- Commandes classées par lignes à droite -->
                 <div class="controls-right" id="panel-tools">
-                    <!-- Ligne 1 : Zoom -->
+                    <!-- Ligne 1 : Zoom d'affichage -->
                     <div class="control-row">
                         <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
-                    <!-- Ligne 2 : Navigation Caméra (Corrigé : sens inversé pour un rendu visuel naturel) -->
+                    <!-- Ligne 2 : Échelle / Calibrage du motif -->
                     <div class="control-row">
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">📷 ⬆️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">📷 ⬅️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">📷 ➡️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">📷 ⬇️</button>
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
                     </div>
-                    <!-- Ligne 3 : Taille -->
-                    <div class="control-row">
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Taille</button>
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Taille</button>
-                    </div>
-                    <!-- Ligne 4 : Inclinaison -->
+                    <!-- Ligne 3 : Inclinaison / Rotation -->
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                         <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
@@ -227,7 +279,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.17)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.18)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -504,7 +556,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v17.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v18.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -624,7 +676,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.17) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.18) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -663,7 +715,6 @@
             btnPrev.style.display = (step > 1) ? 'block' : 'none';
 
             if (step === 7) {
-                panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
                 stepInstruction.innerText = "Touchez pour placer un perçage, ou utilisez les flèches.";
@@ -695,7 +746,6 @@
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
-            panelTools.style.display = 'flex';
             holeActionPanel.style.display = 'none';
             fileInput.value = '';
             currentImg = null;
