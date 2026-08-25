@@ -208,8 +208,9 @@
     </div>
 
     <div>
-        <button class="btn" id="btn-shoot" onclick="triggerFileInput()">📸 Prendre la photo / Choisir</button>
-        <input type="file" id="file-input" accept="image/*">
+        <button class="btn" id="btn-shoot" onclick="triggerFileInput()">📸 Prendre la photo</button>
+        <!-- Ajout de capture="environment" pour ouvrir directement l'appareil photo -->
+        <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
