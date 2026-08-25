@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.16 - Studio de Calage Expert</title>
+    <title>Acuitix.17 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -154,7 +154,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.16 - Studio de Calage Expert</h1>
+    <h1>Acuitix.17 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -192,12 +192,12 @@
                         <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
-                    <!-- Ligne 2 : Navigation Caméra (Bouger dans l'image) -->
+                    <!-- Ligne 2 : Navigation Caméra (Corrigé : sens inversé pour un rendu visuel naturel) -->
                     <div class="control-row">
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">📷 ⬆️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">📷 ⬅️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">📷 ➡️</button>
-                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">📷 ⬇️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">📷 ⬆️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">📷 ⬅️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">📷 ➡️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">📷 ⬇️</button>
                     </div>
                     <!-- Ligne 3 : Taille -->
                     <div class="control-row">
@@ -227,7 +227,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.16)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.17)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -362,7 +362,6 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        // Toucher direct sur le canvas positionne instantanément la cible (intuitif sans conflit)
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -505,7 +504,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v16.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v17.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -586,10 +585,6 @@
         function validateStep() {
             manualPanX = 0;
             manualPanY = 0;
-            let minX = Math.min(box1.x, box2.x);
-            let maxX = Math.max(box1.x, box2.x);
-            let minY = Math.min(box1.y, box2.y);
-            let maxY = Math.max(box1.y, box2.y);
 
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
@@ -601,7 +596,6 @@
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
-                // Coin 1 : Haut-Gauche
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
                 tempAngle = 0;
@@ -609,19 +603,16 @@
             } else if (step === 3) {
                 corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
                 step = 4;
-                // Coin 2 : Haut-Droit
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
             } else if (step === 4) {
                 corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
                 step = 5;
-                // Coin 3 : CORRIGÉ - Bas-Droit (Visé correctement sous le carré droit max Y)
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
             } else if (step === 5) {
                 corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
                 step = 6;
-                // Coin 4 : Bas-Gauche
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
             } else if (step === 6) {
@@ -633,7 +624,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.16) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.17) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
