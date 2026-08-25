@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.22 - Assistant CAO</title>
+    <title>Acuitix.23 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,9 +55,7 @@
         .btn-info { background: #17a2b8; }
         .btn-warning { background: #ffc107; color: #000; }
         
-        #file-input { 
-            display: none; 
-        }
+        #file-input { display: none; }
         
         .adjust-panel {
             display: none;
@@ -71,7 +69,6 @@
         }
         .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
 
-        /* Panneau déplacement de l'image (Panoramique) */
         .camera-pan-container {
             background: #262626;
             border: 1px solid #444;
@@ -105,7 +102,6 @@
         }
         .camera-pan-grid button:active { background: #007bff; }
 
-        /* Style Game Boy : 2 colonnes */
         .gameboy-container {
             display: flex;
             justify-content: space-between;
@@ -114,7 +110,6 @@
             margin-bottom: 8px;
         }
 
-        /* Croix directionnelle de la CIBLE */
         .dpad-container {
             display: flex;
             flex-direction: column;
@@ -201,7 +196,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.22 - Assistant CAO</h1>
+    <h1>Acuitix.23 - Assistant CAO</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -209,16 +204,14 @@
     </div>
 
     <div>
-        <!-- Label lié à l'input masqué pour garantir le déclenchement direct de l'appareil photo sur mobile -->
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, commandes ci-dessous pour l'image.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches pour la cible, commandes ci-dessous pour l'image.</p>
             
-            <!-- Bloc déplacement de l'image (Panoramique) -->
             <div class="camera-pan-container">
                 <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
                 <div class="camera-pan-grid">
@@ -229,7 +222,6 @@
                 </div>
             </div>
 
-            <!-- Interface style Game Boy -->
             <div class="gameboy-container">
                 <div class="dpad-container" title="Déplacer la cible précisément">
                     <div class="dpad-label">Cible</div>
@@ -276,7 +268,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.22)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.23)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -461,6 +453,7 @@
 
             ctx.save();
 
+            // Si c'est pour l'export, on ne zoome/panne pas pour garder TOUTE l'image complète
             if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
@@ -545,7 +538,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v22.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v23.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -598,14 +591,10 @@
         window.resetCurrentPos = function() {
             manualPanX = 0;
             manualPanY = 0;
-            if (step === 1) { tempX = box1.x; tempY = box1.y; }
-            else if (step === 2) { tempX = box2.x; tempY = box2.y; }
-            else if (step >= 3 && step <= 6) {
-                let idx = step - 3;
-                tempX = corners[idx].x; tempY = corners[idx].y;
-            } else if (step === 7) {
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
-            }
+            // Recentrage strict de la cible au milieu exact de l'image
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            zoomLevel = 1.0;
             redrawCanvas();
         }
 
@@ -665,7 +654,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.22) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.23) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
