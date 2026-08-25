@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.13 - Studio de Calage Expert</title>
+    <title>Acuitix.14 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,34 +64,89 @@
             padding: 10px;
             border-radius: 8px;
             margin-top: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .controls-row {
+        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
+
+        /* Style Game Boy : 2 colonnes (D-Pad à gauche, Boutons alignés à droite) */
+        .gameboy-container {
             display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 6px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
         }
-        .adjust-grid {
+
+        /* Croix directionnelle type Game Boy */
+        .dpad-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            max-width: 160px;
-            margin: 0 auto 10px auto;
+            grid-template-columns: repeat(3, 44px);
+            grid-template-rows: repeat(3, 44px);
+            gap: 3px;
+            background: #222;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            flex-shrink: 0;
+            margin: auto 0;
         }
-        .adjust-grid button, .controls-row button {
-            padding: 9px;
+        .dpad-grid button {
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .dpad-grid button:active { background: #007bff; }
+
+        /* Colonne de droite : lignes de réglages bien classées */
+        .controls-right {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex-grow: 1;
+        }
+        .control-row {
+            display: flex;
+            gap: 5px;
+        }
+        .control-row button {
+            flex: 1;
+            padding: 9px 4px;
             background: #555;
             color: white;
             border: none;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             cursor: pointer;
             touch-action: manipulation;
         }
-        .adjust-grid button:active, .controls-row button:active { background: #007bff; }
-        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 6px; }
+        .control-row button:active { background: #007bff; }
+        .btn-action-blue { background: #007bff !important; }
+
+        /* Bouton Centrer isolé */
+        .center-row {
+            margin-top: 4px;
+            display: flex;
+        }
+        .center-row button {
+            width: 100%;
+            padding: 8px;
+            background: #3a3a3a;
+            border: 1px dashed #777;
+            color: #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .center-row button:active { background: #555; }
+
         .nav-buttons {
             display: flex;
             gap: 8px;
@@ -101,7 +156,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.13 - Studio de Calage Expert</h1>
+    <h1>Acuitix.14 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -115,29 +170,45 @@
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour placer, glissez pour naviguer, ou utilisez le joystick.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour placer, glissez pour naviguer, ou utilisez la console.</p>
             
-            <div class="controls-row" id="panel-tools">
-                <button onclick="adjustZoom(0.4)">🔍+</button>
-                <button onclick="adjustZoom(-0.4)">🔍-</button>
-                <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
-                <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" style="background:#007bff;">➕ Taille</button>
-                <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" style="background:#007bff;">➖ Taille</button>
-            </div>
+            <!-- Interface style Game Boy -->
+            <div class="gameboy-container">
+                <!-- Croix directionnelle à gauche -->
+                <div class="dpad-grid">
+                    <div></div>
+                    <button onmousedown="startAction(() => moveStep(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                    <div></div>
+                    <button onmousedown="startAction(() => moveStep(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                    <div style="background:#2a2a2a; border-radius:4px;"></div>
+                    <button onmousedown="startAction(() => moveStep(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                    <div></div>
+                    <button onmousedown="startAction(() => moveStep(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                    <div></div>
+                </div>
 
-            <div class="adjust-grid">
-                <div></div>
-                <button onmousedown="startAction(() => moveStep(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
-                <div></div>
-                
-                <button onmousedown="startAction(() => moveStep(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                <button onclick="resetCurrentPos()" style="background:#444;" title="Centrer">🎯</button>
-                <button onmousedown="startAction(() => moveStep(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(6, 0), 40)" ontouchend="stopAction()">➡️</button>
-                
-                <div></div>
-                <button onmousedown="startAction(() => moveStep(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
-                <div></div>
+                <!-- Commandes classées par lignes à droite -->
+                <div class="controls-right" id="panel-tools">
+                    <!-- Ligne 1 : Zoom -->
+                    <div class="control-row">
+                        <button onclick="adjustZoom(0.4)">🔍+ Zoom</button>
+                        <button onclick="adjustZoom(-0.4)">🔍- Zoom</button>
+                    </div>
+                    <!-- Ligne 2 : Taille -->
+                    <div class="control-row">
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Taille</button>
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Taille</button>
+                    </div>
+                    <!-- Ligne 3 : Inclinaison -->
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                        <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                    </div>
+                    <!-- Bouton Centrer isolé en bas à droite -->
+                    <div class="center-row">
+                        <button onclick="resetCurrentPos()" title="Remettre au centre">🎯 Centrer la cible</button>
+                    </div>
+                </div>
             </div>
 
             <div id="hole-action-panel" style="display:none; margin-bottom: 8px;">
@@ -151,7 +222,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.13)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.14)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -288,7 +359,6 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        // Correction de la visée au toucher pour éviter le saut du point au second touché
         function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -461,7 +531,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Pendant l'étape 7, affichage en cyan pour viser, mais basculera en vert à l'export pour l'algo
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = "#00FFFF";
@@ -475,7 +544,7 @@
                 }
             }
 
-            // Perçages validés : Vert pur (#00FF00) pour l'algorithme Acuitix à l'export, cyan (#00FFFF) en cours de visée interactive
+            // Perçages validés
             holes.forEach(h => {
                 ctx.save();
                 ctx.strokeStyle = isForExport ? "#00FF00" : "#00FFFF";
@@ -494,7 +563,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v13.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v14.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -604,7 +673,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.13) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.14) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -646,7 +715,7 @@
                 panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez pour placer un perçage (visée cyan), validé en vert pour l'algo.";
+                stepInstruction.innerText = "Touchez pour placer un perçage, confirmez avec le bouton vert.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
