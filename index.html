@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.15 - Studio de Calage Expert</title>
+    <title>Acuitix.16 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,14 +27,11 @@
         }
         canvas {
             width: 100%;
-            max-height: 50vh;
+            max-height: 48vh;
             object-fit: contain;
             display: none;
-            cursor: grab;
-            touch-action: none;
-        }
-        canvas:active {
-            cursor: grabbing;
+            cursor: pointer;
+            touch-action: manipulation;
         }
         #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 6px; font-weight: bold; }
         .btn {
@@ -70,7 +67,7 @@
         }
         .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
 
-        /* Style Game Boy : 2 colonnes (D-Pad à gauche, Boutons alignés à droite) */
+        /* Style Game Boy : 2 colonnes (D-Pad de la cible à gauche, Boutons à droite) */
         .gameboy-container {
             display: flex;
             justify-content: space-between;
@@ -79,7 +76,7 @@
             margin-bottom: 8px;
         }
 
-        /* Croix directionnelle type Game Boy */
+        /* Croix directionnelle de la CIBLE (à gauche) */
         .dpad-grid {
             display: grid;
             grid-template-columns: repeat(3, 44px);
@@ -123,12 +120,13 @@
             border: none;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             cursor: pointer;
             touch-action: manipulation;
         }
         .control-row button:active { background: #007bff; }
         .btn-action-blue { background: #007bff !important; }
+        .btn-action-camera { background: #495057 !important; border: 1px solid #6c757d; }
 
         /* Bouton Centrer isolé */
         .center-row {
@@ -156,7 +154,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.15 - Studio de Calage Expert</h1>
+    <h1>Acuitix.16 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -170,20 +168,20 @@
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Zoomez et glissez pour naviguer, ou utilisez la console.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, flèches caméra pour bouger l'image.</p>
             
             <!-- Interface style Game Boy -->
             <div class="gameboy-container">
-                <!-- Croix directionnelle à gauche -->
-                <div class="dpad-grid">
+                <!-- Croix directionnelle CIBLE à gauche -->
+                <div class="dpad-grid" title="Déplacer la cible">
                     <div></div>
-                    <button onmousedown="startAction(() => moveStep(0, -8), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -8), 40)" ontouchend="stopAction()">⬆️</button>
+                    <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
                     <div></div>
-                    <button onmousedown="startAction(() => moveStep(-8, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(-8, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                    <div style="background:#2a2a2a; border-radius:4px;"></div>
-                    <button onmousedown="startAction(() => moveStep(8, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(8, 0), 40)" ontouchend="stopAction()">➡️</button>
+                    <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                    <div style="background:#2a2a2a; border-radius:4px;" title="Cible"></div>
+                    <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
                     <div></div>
-                    <button onmousedown="startAction(() => moveStep(0, 8), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, 8), 40)" ontouchend="stopAction()">⬇️</button>
+                    <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
                     <div></div>
                 </div>
 
@@ -194,12 +192,19 @@
                         <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
-                    <!-- Ligne 2 : Taille -->
+                    <!-- Ligne 2 : Navigation Caméra (Bouger dans l'image) -->
+                    <div class="control-row">
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">📷 ⬆️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">📷 ⬅️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">📷 ➡️</button>
+                        <button class="btn-action-camera" onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">📷 ⬇️</button>
+                    </div>
+                    <!-- Ligne 3 : Taille -->
                     <div class="control-row">
                         <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Taille</button>
                         <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Taille</button>
                     </div>
-                    <!-- Ligne 3 : Inclinaison -->
+                    <!-- Ligne 4 : Inclinaison -->
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                         <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
@@ -222,7 +227,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.15)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (AcuTx.16)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -261,9 +266,6 @@
         let manualPanX = 0; 
         let manualPanY = 0;
         let actionInterval = null;
-
-        let isDragging = false;
-        let startTouchX = 0, startTouchY = 0;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -325,7 +327,6 @@
             if (!currentImg) return;
             rotationAngle = (rotationAngle + 90) % 360;
             updateCanvasDimensions();
-            // Recentrage automatique après rotation pour éviter de perdre les repères
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             zoomLevel = 1.0;
@@ -346,7 +347,8 @@
             } 
         }
 
-        window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
         
         window.adjustZoom = function(delta) {
             zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
@@ -360,13 +362,14 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        function getCanvasCoords(clientX, clientY) {
+        // Toucher direct sur le canvas positionne instantanément la cible (intuitif sans conflit)
+        canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             
-            let clientClickX = (clientX - rect.left) * scaleX;
-            let clientClickY = (clientY - rect.top) * scaleY;
+            let clientClickX = (e.clientX - rect.left) * scaleX;
+            let clientClickY = (e.clientY - rect.top) * scaleY;
 
             let imgX, imgY;
             if (zoomLevel > 1.0) {
@@ -376,73 +379,10 @@
                 imgX = clientClickX;
                 imgY = clientClickY;
             }
-            return { x: imgX, y: imgY };
-        }
 
-        // Gestion du Glissement (Panoramique de l'image)
-        canvas.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            startTouchX = e.clientX;
-            startTouchY = e.clientY;
-        });
-
-        window.addEventListener('mousemove', function(e) {
-            if (!isDragging) return;
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            
-            manualPanX -= (e.clientX - startTouchX) * scaleX / (zoomLevel > 1 ? zoomLevel : 1);
-            manualPanY -= (e.clientY - startTouchY) * scaleX / (zoomLevel > 1 ? zoomLevel : 1);
-            startTouchX = e.clientX;
-            startTouchY = e.clientY;
-            redrawCanvas();
-        });
-
-        window.addEventListener('mouseup', function() {
-            isDragging = false;
-        });
-
-        canvas.addEventListener('touchstart', function(e) {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                startTouchX = e.touches[0].clientX;
-                startTouchY = e.touches[0].clientY;
-            }
-            e.preventDefault();
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', function(e) {
-            if (e.touches.length === 1 && isDragging) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                
-                manualPanX -= (e.touches[0].clientX - startTouchX) * scaleX / (zoomLevel > 1 ? zoomLevel : 1);
-                manualPanY -= (e.touches[0].clientY - startTouchY) * scaleX / (zoomLevel > 1 ? zoomLevel : 1);
-                startTouchX = e.touches[0].clientX;
-                startTouchY = e.touches[0].clientY;
-                redrawCanvas();
-            }
-            e.preventDefault();
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', function(e) {
-            if (isDragging && e.changedTouches.length === 1) {
-                let dist = Math.hypot(e.changedTouches[0].clientX - startTouchX, e.changedTouches[0].clientY - startTouchY);
-                if (dist < 6 && step >= 1 && step <= 7) {
-                    let coords = getCanvasCoords(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-                    tempX = coords.x;
-                    tempY = coords.y;
-                    redrawCanvas();
-                }
-            }
-            isDragging = false;
-        });
-
-        canvas.addEventListener('click', function(e) {
-            let coords = getCanvasCoords(e.clientX, e.clientY);
             if (step >= 1 && step <= 7) {
-                tempX = coords.x;
-                tempY = coords.y;
+                tempX = imgX;
+                tempY = imgY;
                 redrawCanvas();
             }
         });
@@ -476,8 +416,7 @@
 
             ctx.save();
 
-            // Vue centrée sur l'élément en cours de réglage avec support du Panoramique manuel
-            if (!isForExport) {
+            if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
@@ -566,7 +505,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v15.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v16.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -617,7 +556,6 @@
         }
 
         window.resetCurrentPos = function() {
-            // Recentrage instantané sur l'élément en cours
             manualPanX = 0;
             manualPanY = 0;
             if (step === 1) { tempX = box1.x; tempY = box1.y; }
@@ -648,6 +586,11 @@
         function validateStep() {
             manualPanX = 0;
             manualPanY = 0;
+            let minX = Math.min(box1.x, box2.x);
+            let maxX = Math.max(box1.x, box2.x);
+            let minY = Math.min(box1.y, box2.y);
+            let maxY = Math.max(box1.y, box2.y);
+
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
@@ -658,22 +601,29 @@
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
-                // Positionner proprement sur le 1er coin (Haut-Gauche) estimé par rapport aux carrés
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.1);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.1);
+                // Coin 1 : Haut-Gauche
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
                 tempAngle = 0;
                 tempSize = box1.size * 1.2;
-            } else if (step >= 3 && step <= 5) {
-                let cornerIdx = step - 3;
-                corners[cornerIdx].x = tempX;
-                corners[cornerIdx].y = tempY;
-                corners[cornerIdx].angle = tempAngle;
-                corners[cornerIdx].size = tempSize;
-
-                step++; 
-                if (step === 4) { tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.1); tempY = corners[0].y; }
-                else if (step === 5) { tempX = corners[1].x; tempY = corners[1].y + (canvas.height * 0.2); }
-                else if (step === 6) { tempX = corners[0].x; tempY = corners[2].y; }
+            } else if (step === 3) {
+                corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
+                step = 4;
+                // Coin 2 : Haut-Droit
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+            } else if (step === 4) {
+                corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
+                step = 5;
+                // Coin 3 : CORRIGÉ - Bas-Droit (Visé correctement sous le carré droit max Y)
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+            } else if (step === 5) {
+                corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
+                step = 6;
+                // Coin 4 : Bas-Gauche
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
@@ -683,7 +633,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.15) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.16) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -725,7 +675,7 @@
                 panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez ou déplacez la loupe pour placer un perçage, confirmez avec le bouton vert.";
+                stepInstruction.innerText = "Touchez pour placer un perçage, ou utilisez les flèches.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
