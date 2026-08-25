@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.20 - Assistant CAO</title>
+    <title>Acuitix.20 - Studio de Calage Expert</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,11 +27,14 @@
         }
         canvas {
             width: 100%;
-            max-height: 48vh;
+            max-height: 45vh;
             object-fit: contain;
             display: none;
-            cursor: pointer;
-            touch-action: manipulation;
+            cursor: grab;
+            touch-action: none;
+        }
+        canvas:active {
+            cursor: grabbing;
         }
         #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 6px; font-weight: bold; }
         .btn {
@@ -48,15 +51,13 @@
             text-decoration: none;
             box-sizing: border-box;
             margin-top: 6px;
+            text-align: center;
         }
         .btn-secondary { background: #6c757d; }
         .btn-danger { background: #dc3545; }
         .btn-info { background: #17a2b8; }
         .btn-warning { background: #ffc107; color: #000; }
-        
-        #file-input { 
-            display: none; 
-        }
+        #file-input { display: none; }
         
         .adjust-panel {
             display: none;
@@ -64,133 +65,34 @@
             padding: 10px;
             border-radius: 8px;
             margin-top: 8px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
-        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
-
-        /* Panneau déplacement de l'image (Panoramique) */
-        .camera-pan-container {
-            background: #262626;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 10px;
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
         }
-        .camera-pan-title {
-            font-size: 0.78rem;
-            color: #17a2b8;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
-        }
-        .camera-pan-grid {
+        .adjust-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 5px;
+            max-width: 160px;
+            margin: 0 auto 10px auto;
         }
-        .camera-pan-grid button {
-            padding: 8px 4px;
-            background: #495057;
-            color: white;
-            border: 1px solid #6c757d;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-        .camera-pan-grid button:active { background: #007bff; }
-
-        /* Style Game Boy : 2 colonnes */
-        .gameboy-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        /* Croix directionnelle de la CIBLE */
-        .dpad-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #222;
-            padding: 6px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            flex-shrink: 0;
-            margin: auto 0;
-        }
-        .dpad-label {
-            font-size: 0.72rem;
-            color: #00FF00;
-            font-weight: bold;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-        .dpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 42px);
-            grid-template-rows: repeat(3, 42px);
-            gap: 3px;
-        }
-        .dpad-grid button {
-            background: #444;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-        .dpad-grid button:active { background: #007bff; }
-
-        .controls-right {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            flex-grow: 1;
-        }
-        .control-row {
-            display: flex;
-            gap: 5px;
-        }
-        .control-row button {
-            flex: 1;
-            padding: 9px 4px;
+        .adjust-grid button, .controls-row button {
+            padding: 9px;
             background: #555;
             color: white;
             border: none;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.82rem;
+            font-size: 0.95rem;
             cursor: pointer;
             touch-action: manipulation;
         }
-        .control-row button:active { background: #007bff; }
-        .btn-action-blue { background: #007bff !important; }
-
-        .center-row {
-            margin-top: 4px;
-            display: flex;
-        }
-        .center-row button {
-            width: 100%;
-            padding: 8px;
-            background: #3a3a3a;
-            border: 1px dashed #777;
-            color: #ddd;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .center-row button:active { background: #555; }
-
+        .adjust-grid button:active, .controls-row button:active { background: #007bff; }
+        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 6px; }
         .nav-buttons {
             display: flex;
             gap: 8px;
@@ -200,7 +102,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.20 - Assistant CAO</h1>
+    <h1>Acuitix.20 - Studio de Calage Expert</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -208,67 +110,48 @@
     </div>
 
     <div>
-        <button class="btn" id="btn-shoot" onclick="triggerFileInput()">📸 Prendre la photo</button>
-        <!-- Ajout de capture="environment" pour ouvrir directement l'appareil photo -->
+        <!-- Utilisation d'un label lié à l'input file pour garantir l'ouverture de l'appareil photo sur mobile -->
+        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
+        <!-- Bouton de rotation 90° -->
         <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches gauche pour la cible, commandes ci-dessous pour l'image.</p>
+            <p id="step-instruction" class="sub-info">Touchez pour placer, glissez pour naviguer, ou utilisez le joystick.</p>
             
-            <!-- Bloc déplacement de l'image (Panoramique) -->
-            <div class="camera-pan-container">
-                <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
-                <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
-                </div>
+            <!-- Contrôles Zoom, Rotation et Taille -->
+            <div class="controls-row" id="panel-tools">
+                <button onclick="adjustZoom(0.4)">🔍+</button>
+                <button onclick="adjustZoom(-0.4)">🔍-</button>
+                <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()" style="background:#007bff;">➕ Taille</button>
+                <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()" style="background:#007bff;">➖ Taille</button>
             </div>
 
-            <!-- Interface style Game Boy -->
-            <div class="gameboy-container">
-                <div class="dpad-container" title="Déplacer la cible précisément">
-                    <div class="dpad-label">Cible</div>
-                    <div class="dpad-grid">
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <div style="background:#2a2a2a; border-radius:4px;" title="Centre"></div>
-                        <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
-                        <div></div>
-                    </div>
-                </div>
-
-                <div class="controls-right" id="panel-tools">
-                    <div class="control-row">
-                        <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                        <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
-                    </div>
-                    <div class="control-row">
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
-                    </div>
-                    <div class="control-row">
-                        <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
-                        <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                    </div>
-                    <div class="center-row">
-                        <button onclick="resetCurrentPos()" title="Remettre au centre">🎯 Centrer la cible</button>
-                    </div>
-                </div>
+            <!-- Grille de déplacement continu (Joystick) -->
+            <div class="adjust-grid">
+                <div></div>
+                <button onmousedown="startAction(() => moveStep(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                <div></div>
+                
+                <button onmousedown="startAction(() => moveStep(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                <button onclick="resetCurrentPos()" style="background:#444;" title="Centrer">🎯</button>
+                <button onmousedown="startAction(() => moveStep(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                
+                <div></div>
+                <button onmousedown="startAction(() => moveStep(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveStep(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                <div></div>
             </div>
 
+            <!-- Boutons spécifiques à l'étape 7 (Perçages avec Double Validation) -->
             <div id="hole-action-panel" style="display:none; margin-bottom: 8px;">
                 <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
                 <button class="btn btn-danger" style="margin-top:6px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
             </div>
 
+            <!-- Boutons de navigation -->
             <div class="nav-buttons">
                 <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0;">⬅️ Retour</button>
                 <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
@@ -290,6 +173,7 @@
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
         const stepInstruction = document.getElementById('step-instruction');
+        const panelTools = document.getElementById('panel-tools');
         const holeActionPanel = document.getElementById('hole-action-panel');
 
         let currentImg = null;
@@ -298,12 +182,14 @@
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
+        
         let corners = [
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }, 
             { x: 0, y: 0, size: 0, angle: 0 }  
         ];
+
         let holes = []; 
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
@@ -312,9 +198,8 @@
         let manualPanY = 0;
         let actionInterval = null;
 
-        window.triggerFileInput = function() {
-            fileInput.click();
-        }
+        let isDragging = false;
+        let startTouchX = 0, startTouchY = 0;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -396,11 +281,10 @@
             } 
         }
 
-        window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
-        window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
+        window.moveStep = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         
         window.adjustZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
+            zoomLevel = Math.max(1.0, Math.min(4.0, zoomLevel + delta));
             if (zoomLevel === 1.0) {
                 manualPanX = 0;
                 manualPanY = 0;
@@ -411,26 +295,84 @@
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
-        canvas.addEventListener('click', function(e) {
+        function getCanvasCoords(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             
-            let clientClickX = (e.clientX - rect.left) * scaleX;
-            let clientClickY = (e.clientY - rect.top) * scaleY;
+            let clientClickX = (clientX - rect.left) * scaleX;
+            let clientClickY = (clientY - rect.top) * scaleY;
 
-            let imgX, imgY;
-            if (zoomLevel > 1.0) {
-                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
-                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
-            } else {
-                imgX = clientClickX;
-                imgY = clientClickY;
+            let imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
+            let imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
+            return { x: imgX, y: imgY };
+        }
+
+        canvas.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startTouchX = e.clientX;
+            startTouchY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isDragging || zoomLevel <= 1.0) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            manualPanX -= (e.clientX - startTouchX) * scaleX / zoomLevel;
+            manualPanY -= (e.clientY - startTouchY) * scaleY / zoomLevel;
+            startTouchX = e.clientX;
+            startTouchY = e.clientY;
+            redrawCanvas();
+        });
+
+        window.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startTouchX = e.touches[0].clientX;
+                startTouchY = e.touches[0].clientY;
             }
+            e.preventDefault();
+        }, { passive: false });
 
+        canvas.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 1 && isDragging && zoomLevel > 1.0) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                manualPanX -= (e.touches[0].clientX - startTouchX) * scaleX / zoomLevel;
+                manualPanY -= (e.touches[0].clientY - startTouchY) * scaleY / zoomLevel;
+                startTouchX = e.touches[0].clientX;
+                startTouchY = e.touches[0].clientY;
+                redrawCanvas();
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', function(e) {
+            if (isDragging && e.changedTouches.length === 1) {
+                let dist = Math.hypot(e.changedTouches[0].clientX - startTouchX, e.changedTouches[0].clientY - startTouchY);
+                if (dist < 6 && step >= 1 && step <= 7) {
+                    let coords = getCanvasCoords(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                    tempX = coords.x;
+                    tempY = coords.y;
+                    redrawCanvas();
+                }
+            }
+            isDragging = false;
+        });
+
+        canvas.addEventListener('click', function(e) {
+            let coords = getCanvasCoords(e.clientX, e.clientY);
             if (step >= 1 && step <= 7) {
-                tempX = imgX;
-                tempY = imgY;
+                tempX = coords.x;
+                tempY = coords.y;
                 redrawCanvas();
             }
         });
@@ -530,16 +472,14 @@
                 }
             }
 
+            ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+            ctx.strokeStyle = "#00FFFF";
+            ctx.lineWidth = Math.max(3, refW / 400);
             holes.forEach(h => {
-                ctx.save();
-                ctx.strokeStyle = isForExport ? "#00FF00" : "#00FFFF";
-                ctx.fillStyle = isForExport ? "rgba(0, 255, 0, 0.3)" : "rgba(0, 255, 255, 0.3)";
-                ctx.lineWidth = Math.max(3, refW / 400);
                 ctx.beginPath();
                 ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
-                ctx.restore();
             });
 
             ctx.restore();
@@ -599,16 +539,11 @@
         }
 
         window.resetCurrentPos = function() {
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
             manualPanX = 0;
             manualPanY = 0;
-            if (step === 1) { tempX = box1.x; tempY = box1.y; }
-            else if (step === 2) { tempX = box2.x; tempY = box2.y; }
-            else if (step >= 3 && step <= 6) {
-                let idx = step - 3;
-                tempX = corners[idx].x; tempY = corners[idx].y;
-            } else if (step === 7) {
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
-            }
+            if (step <= 2) tempAngle = 0;
             redrawCanvas();
         }
 
@@ -629,36 +564,31 @@
         function validateStep() {
             manualPanX = 0;
             manualPanY = 0;
-
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
-                tempX = box1.x + (canvas.width * 0.15); 
+                tempX = box1.x + (canvas.width * 0.2); 
                 tempY = box1.y;
                 tempAngle = box1.angle;
                 tempSize = box1.size;
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                tempX = canvas.width * 0.25;
+                tempY = canvas.height * 0.25;
                 tempAngle = 0;
                 tempSize = box1.size * 1.2;
-            } else if (step === 3) {
-                corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
-                step = 4;
-                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-            } else if (step === 4) {
-                corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
-                step = 5;
-                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
-                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-            } else if (step === 5) {
-                corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
-                step = 6;
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
-                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+            } else if (step >= 3 && step <= 5) {
+                let cornerIdx = step - 3;
+                corners[cornerIdx].x = tempX;
+                corners[cornerIdx].y = tempY;
+                corners[cornerIdx].angle = tempAngle;
+                corners[cornerIdx].size = tempSize;
+
+                step++; 
+                if (step === 4) { tempX = canvas.width * 0.75; tempY = canvas.height * 0.25; }
+                else if (step === 5) { tempX = canvas.width * 0.75; tempY = canvas.height * 0.75; }
+                else if (step === 6) { tempX = canvas.width * 0.25; tempY = canvas.height * 0.75; }
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
@@ -707,9 +637,10 @@
             btnPrev.style.display = (step > 1) ? 'block' : 'none';
 
             if (step === 7) {
+                panelTools.style.display = 'flex';
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez pour placer un perçage, ou utilisez les flèches.";
+                stepInstruction.innerText = "Touchez pour placer un perçage, confirmez avec le bouton vert.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
@@ -738,6 +669,7 @@
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
+            panelTools.style.display = 'flex';
             holeActionPanel.style.display = 'none';
             fileInput.value = '';
             currentImg = null;
