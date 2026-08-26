@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.24 - Assistant CAO</title>
+    <title>Acuitix.25 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
         }
         canvas {
             width: 100%;
-            height: auto; /* Ajustement automatique dynamique pour préserver le ratio natif */
+            height: auto;
             display: none;
             cursor: pointer;
             touch-action: manipulation;
@@ -67,6 +67,26 @@
             margin-right: auto;
         }
         .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
+
+        /* Barre supérieure image : Rotation + Recentrage */
+        .image-tools-bar {
+            display: none;
+            gap: 6px;
+            margin-top: 6px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .image-tools-bar button {
+            flex: 1;
+            padding: 9px 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
 
         .camera-pan-container {
             background: #262626;
@@ -170,22 +190,6 @@
         .control-row button:active { background: #007bff; }
         .btn-action-blue { background: #007bff !important; }
 
-        .center-row {
-            margin-top: 4px;
-            display: flex;
-        }
-        .center-row button {
-            width: 100%;
-            padding: 8px;
-            background: #3a3a3a;
-            border: 1px dashed #777;
-            color: #ddd;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .center-row button:active { background: #555; }
-
         .nav-buttons {
             display: flex;
             gap: 8px;
@@ -195,7 +199,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.24 - Assistant CAO</h1>
+    <h1>Acuitix.25 - Assistant CAO</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -206,7 +210,11 @@
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <button class="btn btn-warning" id="btn-rotate-img" style="display:none; margin-top:6px;" onclick="rotateImage90()">🔄 Pivoter la photo (90°)</button>
+        <!-- Barre regroupant rotation et recentrage de l'élément -->
+        <div class="image-tools-bar" id="image-tools-bar">
+            <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
+            <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+        </div>
 
         <div class="adjust-panel" id="adjust-panel">
             <p id="step-instruction" class="sub-info">Touchez pour poser, flèches pour la cible, commandes ci-dessous pour l'image.</p>
@@ -243,15 +251,12 @@
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
                     <div class="control-row">
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
+                        <button class="btn-action-blue" onclick="promptAdjustSize(2)">➕ Échelle</button>
+                        <button class="btn-action-blue" onclick="promptAdjustSize(-2)">➖ Échelle</button>
                     </div>
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                         <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                    </div>
-                    <div class="center-row">
-                        <button onclick="resetCurrentPos()" title="Remettre au centre">🎯 Centrer la cible</button>
                     </div>
                 </div>
             </div>
@@ -267,7 +272,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.24)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.25)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -277,7 +282,7 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('status-text');
         const btnShoot = document.getElementById('btn-shoot');
-        const btnRotateImg = document.getElementById('btn-rotate-img');
+        const imageToolsBar = document.getElementById('image-tools-bar');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
@@ -339,7 +344,7 @@
                     canvas.style.display = 'block';
                     adjustPanel.style.display = 'block';
                     btnShoot.style.display = 'none';
-                    btnRotateImg.style.display = 'block';
+                    imageToolsBar.style.display = 'flex';
                     
                     updateUIState();
                     redrawCanvas();
@@ -397,11 +402,17 @@
         }
 
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
-        window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
+        
+        // Demande de confirmation obligatoire pour modifier l'échelle
+        window.promptAdjustSize = function(deltaSize) {
+            if (confirm("Voulez-vous modifier la taille / l'échelle de l'élément ?")) {
+                tempSize = Math.max(10, tempSize + deltaSize);
+                redrawCanvas();
+            }
+        }
 
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
-            // Utilisation du ratio réel affiché pour garantir un mapping parfait des clics tactiles/souris
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             
@@ -537,7 +548,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v24.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v25.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -651,8 +662,8 @@
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
-                btnRotateImg.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.24) ! Prêt pour AcuTx.";
+                imageToolsBar.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.25) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -718,7 +729,7 @@
             stopAction();
             canvas.style.display = 'none';
             adjustPanel.style.display = 'none';
-            btnRotateImg.style.display = 'none';
+            imageToolsBar.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
