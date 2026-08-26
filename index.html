@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.58 - Assistant CAO</title>
+    <title>Acuitix V.59 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -278,7 +278,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.58 - Assistant CAO</h1>
+    <h1>Acuitix V.59 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
@@ -353,6 +353,18 @@
                 <div id="swatch-bg" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
                 <span style="font-size: 0.8rem;">Traçage :</span>
                 <div id="swatch-trace" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
+            </div>
+
+            <!-- Choix manuel direct de la couleur de traçage si l'auto ne convient pas -->
+            <div id="color-manual-override" style="display: none; margin-top: 6px;">
+                <p style="font-size: 0.75rem; color: #ffc107; margin: 2px 0;">Forcer la couleur de traçage :</p>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                    <button onclick="overrideTraceColor('#00FFFF')" style="background:#00FFFF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Cyan</button>
+                    <button onclick="overrideTraceColor('#FFFF00')" style="background:#FFFF00; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Jaune</button>
+                    <button onclick="overrideTraceColor('#FF00FF')" style="background:#FF00FF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#fff; cursor:pointer; font-size:0.75rem;">Magenta</button>
+                    <button onclick="overrideTraceColor('#00FF00')" style="background:#00FF00; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Vert</button>
+                    <button onclick="overrideTraceColor('#FFFFFF')" style="background:#FFFFFF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Blanc</button>
+                </div>
             </div>
             
             <div id="color-actions" style="display: none; gap: 6px; flex-direction: column; margin-top: 6px;">
@@ -430,7 +442,7 @@
             </div>
         </div>
 
-        <!-- ACCUEIL avec symboles détaillés (Pickguard Strat profil réaliste) -->
+        <!-- ACCUEIL avec symboles détaillés -->
         <div id="welcome-panel">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📷 📷</div>
@@ -441,9 +453,7 @@
                     <b>Toutes les extrémités et contours doivent être parfaitement visibles</b> sur la photo pour garantir une modélisation CAO exacte.
                 </p>
                 
-                <!-- Galerie de silhouettes corrigées -->
                 <div class="pickguards-gallery">
-                    <!-- 1. Stratocaster -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 200 320">
                             <path d="M70,25 C85,20 115,30 135,45 C150,60 162,85 158,110 C152,140 138,155 125,175 C110,195 90,215 75,230 C62,242 55,230 52,210 C48,185 55,160 52,135 C48,105 38,90 38,70 C38,50 48,32 70,25 Z" />
@@ -451,34 +461,24 @@
                             <rect x="62" y="105" width="42" height="16" rx="4" />
                             <rect x="58" y="148" width="48" height="18" rx="4" />
                             <line x1="112" y1="125" x2="132" y2="105" />
-                            <circle cx="68" cy="38" r="3" />
-                            <circle cx="110" cy="42" r="3" />
-                            <circle cx="132" cy="70" r="3" />
-                            <circle cx="122" cy="115" r="3" />
-                            <circle cx="135" cy="142" r="3" />
-                            <circle cx="115" cy="172" r="3" />
-                            <circle cx="68" cy="218" r="3" />
-                            <circle cx="52" cy="180" r="3" />
-                            <circle cx="44" cy="120" r="3" />
-                            <circle cx="45" cy="75" r="3" />
+                            <circle cx="68" cy="38" r="3" /><circle cx="110" cy="42" r="3" /><circle cx="132" cy="70" r="3" />
+                            <circle cx="122" cy="115" r="3" /><circle cx="135" cy="142" r="3" /><circle cx="115" cy="172" r="3" />
+                            <circle cx="68" cy="218" r="3" /><circle cx="52" cy="180" r="3" /><circle cx="44" cy="120" r="3" /><circle cx="45" cy="75" r="3" />
                         </svg>
                         Pickguard Strat
                     </div>
-                    <!-- 2. Acoustique -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
                             <path d="M50,10 C70,20 80,40 80,70 C80,85 60,90 50,90 C35,90 25,75 25,50 C25,30 35,15 50,10 Z" />
                         </svg>
                         Pickguard Acoustique
                     </div>
-                    <!-- 3. Plaque électronique -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
                             <rect x="25" y="20" width="50" height="60" rx="10" />
                         </svg>
                         Plaque cavité électronique
                     </div>
-                    <!-- 4. Plaque ressort -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
                             <rect x="30" y="20" width="40" height="60" rx="6" />
@@ -515,6 +515,7 @@
         
         const colorInstruction = document.getElementById('color-instruction');
         const colorPreviewContainer = document.getElementById('color-preview-container');
+        const colorManualOverride = document.getElementById('color-manual-override');
         const colorActions = document.getElementById('color-actions');
         const swatchBg = document.getElementById('swatch-bg');
         const swatchTrace = document.getElementById('swatch-trace');
@@ -658,25 +659,31 @@
                     sampledBgColor = `rgb(${r},${g},${b})`;
                     swatchBg.style.backgroundColor = sampledBgColor;
 
+                    // Logique de contraste améliorée pour le traçage
                     let brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                    if (brightness < 90) {
-                        elementColor = "#FFFF00"; 
-                    } else if (r > 150 && g < 100 && b < 100) {
-                        elementColor = "#00FFFF"; 
-                    } else if (brightness > 180) {
-                        elementColor = "#FF00FF"; 
+                    if (brightness < 100) {
+                        elementColor = "#00FFFF"; // Cyan vif sur fond sombre
+                    } else if (brightness > 170) {
+                        elementColor = "#FF00FF"; // Magenta vif sur fond clair
                     } else {
-                        elementColor = "#00FFFF"; 
+                        elementColor = "#FFFF00"; // Jaune vif par défaut
                     }
                     swatchTrace.style.backgroundColor = elementColor;
 
                     colorSelected = true;
-                    colorInstruction.innerHTML = "<b>Couleur détectée :</b> Validez ou recommencez.";
+                    colorInstruction.innerHTML = "<b>Couleur détectée :</b> Ajustez ou validez.";
                     colorPreviewContainer.style.display = 'flex';
+                    colorManualOverride.style.display = 'block';
                     colorActions.style.display = 'flex';
                     redrawCanvas();
                 }
             }
+        }
+
+        window.overrideTraceColor = function(colorHex) {
+            elementColor = colorHex;
+            swatchTrace.style.backgroundColor = elementColor;
+            redrawCanvas();
         }
 
         window.validerCouleurFond = function() {
@@ -696,6 +703,7 @@
         window.recommencerPipette = function() {
             colorSelected = false;
             colorPreviewContainer.style.display = 'none';
+            colorManualOverride.style.display = 'none';
             colorActions.style.display = 'none';
             colorInstruction.innerHTML = "Utilisez la croix pour positionner l'échantillonneur et la vue simultanément.";
             redrawCanvas();
@@ -959,12 +967,11 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v58.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v59.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
 
-        // Ligne continue (setLineDash([]) vide)
         function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
             ctx.save();
             ctx.translate(x, y);
@@ -1110,7 +1117,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.58) !";
+                statusText.innerText = "✅ Calage expert terminé (v.59) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
