@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.46 - Assistant CAO</title>
+    <title>Acuitix V.47 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,16 +96,7 @@
             margin-top: 4px;
         }
 
-        #color-management-panel {
-            display: none;
-            background: #3a3a3a;
-            border: 2px solid #ffc107;
-            border-radius: 6px;
-            padding: 6px;
-            margin-bottom: 6px;
-        }
-        #color-management-panel h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 4px 0; text-transform: uppercase;}
-
+        /* Panneau Orientation (Étape 0) */
         #pre-capture-tools {
             display: none;
             background: #3a3a3a;
@@ -115,6 +106,17 @@
             margin-bottom: 6px;
         }
         #pre-capture-tools h3 { font-size: 0.9rem; color: #17a2b8; margin: 0 0 4px 0; text-transform: uppercase;}
+
+        /* Panneau Gestion des couleurs (Étape 0.5) */
+        #color-management-panel {
+            display: none;
+            background: #3a3a3a;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 6px;
+            margin-bottom: 6px;
+        }
+        #color-management-panel h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 4px 0; text-transform: uppercase;}
 
         #general-tools-container { display: none; }
 
@@ -285,8 +287,8 @@
 </head>
 <body>
 
-    <h1>Acuitix V.46</h1>
-    <div id="status-text">Gestion des couleurs</div>
+    <h1>Acuitix V.47</h1>
+    <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
         <canvas id="canvas"></canvas>
@@ -295,60 +297,9 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Étape 0.A : Gestion des couleurs (Pipette / Échantillonneur + Zoom + Flèches de précision) -->
-        <div id="color-management-panel" class="adjust-panel">
-            <h3>🎨 Gestion des couleurs</h3>
-            <p id="color-instruction" style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
-                Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.
-            </p>
-
-            <!-- Bouton d'activation de la Pipette -->
-            <button id="btn-toggle-pipette" class="btn btn-warning" style="margin-top:0; margin-bottom: 6px; padding: 8px;" onclick="togglePipetteActiveState()">
-                🧪 Mode Pipette : ACTIF
-            </button>
-
-            <!-- Outils de déplacement du curseur pipette par flèches -->
-            <div class="camera-pan-container" style="margin-bottom: 6px;">
-                <div class="tool-section-title">🎯 Ajustement fin du curseur (Pipette)</div>
-                <div class="camera-pan-grid" style="margin-bottom: 4px;">
-                    <button onmousedown="startAction(() => movePipetteTarget(0, -2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, -2), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => movePipetteTarget(-2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(-2, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => movePipetteTarget(2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(2, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => movePipetteTarget(0, 2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, 2), 50)" ontouchend="stopAction()">⬇️ Bas</button>
-                </div>
-                <button class="btn" style="background: #28a745; margin-top:0; padding: 6px; font-size: 0.75rem;" onclick="sampleCurrentPipettePosition()">📥 Échantillonner ce pixel ciblé</button>
-            </div>
-
-            <div class="camera-pan-container" style="margin-bottom: 6px;">
-                <div class="tool-section-title">🔍 Zoom & Déplacement Vue</div>
-                <div class="image-tools-bar" style="margin-bottom: 3px;">
-                    <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                    <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Zoom</button>
-                    <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
-                </div>
-                <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas</button>
-                </div>
-            </div>
-
-            <div id="color-preview-container" style="display: none; margin-bottom: 6px; align-items: center; justify-content: center; gap: 8px;">
-                <span style="font-size: 0.75rem;">Fond détecté :</span>
-                <div id="swatch-bg" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
-                <span style="font-size: 0.75rem;">Traçage conseillé :</span>
-                <div id="swatch-trace" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
-            </div>
-            <div id="color-actions" style="display: none; gap: 4px;">
-                <button class="btn" style="margin-top:0; padding: 8px;" onclick="validerCouleurFond()">Valider cette couleur</button>
-                <button class="btn btn-danger" style="margin-top:0; padding: 8px;" onclick="recommencerPipette()">Recommencer</button>
-            </div>
-        </div>
-
-        <!-- Étape 0.B : Contrôle de la prise de vue & Orientation -->
+        <!-- Étape 0 : Orientation et Cadrage initial -->
         <div id="pre-capture-tools" class="adjust-panel">
-            <h3>📷 Orientation et Cadrage</h3>
+            <h3>📷 1. Orientation & Cadrage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.2;">Positionne l'image (les 4 coins du gabarit doivent être visibles).</p>
             
             <div class="camera-pan-container" style="margin-bottom: 4px;">
@@ -368,13 +319,46 @@
                 <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="validatePreCaptureStep()">Valider cette orientation</button>
+            <button class="btn" style="margin-top: 4px;" onclick="validatePreCaptureStep()">Valider l'orientation</button>
+            <button class="btn btn-danger" style="margin-top: 4px; padding: 6px; font-size: 0.75rem;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+        </div>
+
+        <!-- Étape 0.5 : Gestion des couleurs avec Pipette mobile -->
+        <div id="color-management-panel" class="adjust-panel">
+            <h3>🎨 2. Gestion des couleurs (Pipette)</h3>
+            <p id="color-instruction" style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
+                Utilise les flèches pour déplacer le <b>symbole Pipette</b> sur le fond, puis échantillonne.
+            </p>
+
+            <!-- Contrôles du curseur Pipette -->
+            <div class="camera-pan-container" style="margin-bottom: 6px;">
+                <div class="tool-section-title">🎯 Déplacement du curseur Pipette</div>
+                <div class="camera-pan-grid" style="margin-bottom: 4px;">
+                    <button onmousedown="startAction(() => movePipetteTarget(0, -3), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, -3), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(-3, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(-3, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(3, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(3, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(0, 3), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, 3), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                </div>
+                <button class="btn" style="background: #28a745; margin-top:0; padding: 6px; font-size: 0.75rem;" onclick="sampleCurrentPipettePosition()">🧪 Échantillonner ce pixel</button>
+            </div>
+
+            <div id="color-preview-container" style="display: none; margin-bottom: 6px; align-items: center; justify-content: center; gap: 8px;">
+                <span style="font-size: 0.75rem;">Fond détecté :</span>
+                <div id="swatch-bg" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
+                <span style="font-size: 0.75rem;">Traçage conseillé :</span>
+                <div id="swatch-trace" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
+            </div>
+            <div id="color-actions" style="display: none; gap: 4px;">
+                <button class="btn" style="margin-top:0; padding: 8px;" onclick="validerCouleurFond()">Valider cette couleur</button>
+                <button class="btn btn-danger" style="margin-top:0; padding: 8px;" onclick="recommencerPipette()">Recommencer</button>
+            </div>
+            <button class="btn btn-secondary" style="margin-top: 6px; padding: 6px; font-size: 0.75rem;" onclick="backToPreCapture()">⬅️ Retour orientation</button>
         </div>
 
         <!-- Panneau outils généraux (Étapes 1 à 7) -->
         <div id="general-tools-container">
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">80</span>% (Mode « À raz »)</label>
+                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">80</span>%</label>
                 <input type="range" id="opacity-slider" min="10" max="100" value="80" oninput="changerOpacite(this.value)">
             </div>
 
@@ -391,7 +375,7 @@
 
             <div class="adjust-panel" id="adjust-panel">
                 <div class="camera-pan-container">
-                    <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
+                    <div class="tool-section-title">🔍 Panoramique de la vue</div>
                     <div class="camera-pan-grid">
                         <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
                         <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
@@ -455,8 +439,8 @@
             <p style="color: #fff; font-weight: bold; font-size: 0.9rem; margin: 4px 0;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
             <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">
                 Prendre la photo de l'élément à modéliser en CAO.<br>
-                Nous vous conseillons le <b>mode paysage</b> pour plus de précisions.<br>
-                <span style="color: #ffc107;">ATTENTION</span> à bien vérifier de prendre l'ensemble <b>ENTIER</b> de l'élément à modéliser.
+                Nous vous conseillons le <b>mode paysage</b>.<br>
+                <span style="color: #ffc107;">ATTENTION</span> à bien prendre l'ensemble <b>ENTIER</b>.
             </p>
             <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
         </div>
@@ -471,8 +455,8 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('status-text');
         const welcomePanel = document.getElementById('welcome-panel');
-        const colorManagementPanel = document.getElementById('color-management-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
+        const colorManagementPanel = document.getElementById('color-management-panel');
         const generalToolsContainer = document.getElementById('general-tools-container');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
@@ -484,10 +468,9 @@
         const colorActions = document.getElementById('color-actions');
         const swatchBg = document.getElementById('swatch-bg');
         const swatchTrace = document.getElementById('swatch-trace');
-        const btnTogglePipette = document.getElementById('btn-toggle-pipette');
 
         let currentImg = null;
-        let step = 0; // 0 = Gestion des couleurs, 0.5 = Pré-capture/orientation, 1..7 = Calage
+        let step = 0; // 0 = Orientation, 0.5 = Couleur, 1..7 = Calage, 8 = Fin
         let rotationAngle = 0; 
 
         let imgOffsetX = 0;
@@ -512,7 +495,6 @@
         let elementColor = "#00FFFF";
         let sampledBgColor = "#000000";
         let colorSelected = false;
-        let pipetteActive = true; // Mode pipette actif par défaut à l'étape 0
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -528,9 +510,7 @@
                     imgOffsetY = 0;
                     updateCanvasDimensions();
 
-                    step = 0; // Mode Gestion des couleurs
-                    colorSelected = false;
-                    pipetteActive = true;
+                    step = 0; // Étape 0 : Orientation et Cadrage
                     zoomLevel = 1.0;
                     manualPanX = 0;
                     manualPanY = 0;
@@ -548,19 +528,13 @@
                     tempAngle = 0;
                     tempSize = defaultSize;
 
-                    // Masquer l'accueil et afficher le canvas et l'étape couleur
                     welcomePanel.style.display = 'none';
                     canvas.style.display = 'block';
                     statusText.style.display = 'block';
-                    statusText.innerText = "Étape 0 : Définition de la couleur du fond";
+                    statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
-                    colorManagementPanel.style.display = 'block';
-                    colorInstruction.innerHTML = "Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.";
-                    btnTogglePipette.innerText = "🧪 Mode Pipette : ACTIF";
-                    btnTogglePipette.style.background = "#ffc107";
-                    btnTogglePipette.style.color = "#000";
-                    colorPreviewContainer.style.display = 'none';
-                    colorActions.style.display = 'none';
+                    preCaptureTools.style.display = 'block';
+                    colorManagementPanel.style.display = 'none';
 
                     redrawCanvas();
                 };
@@ -569,21 +543,6 @@
             reader.readAsDataURL(file);
         });
 
-        window.togglePipetteActiveState = function() {
-            pipetteActive = !pipetteActive;
-            if (pipetteActive) {
-                btnTogglePipette.innerText = "🧪 Mode Pipette : ACTIF";
-                btnTogglePipette.style.background = "#ffc107";
-                btnTogglePipette.style.color = "#000";
-            } else {
-                btnTogglePipette.innerText = "🧪 Mode Pipette : INACTIF";
-                btnTogglePipette.style.background = "#6c757d";
-                btnTogglePipette.style.color = "#fff";
-            }
-            redrawCanvas();
-        }
-
-        // Gestion du clic sur le canvas
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -601,16 +560,6 @@
                 imgY = clientClickY;
             }
 
-            // Si on est à l'étape 0 et que le mode Pipette est actif, un toucher sélectionne directement le pixel
-            if (step === 0) {
-                if (pipetteActive) {
-                    tempX = imgX;
-                    tempY = imgY;
-                    sampleCurrentPipettePosition();
-                }
-                return;
-            }
-
             if (step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
@@ -621,7 +570,7 @@
         });
 
         window.movePipetteTarget = function(dx, dy) {
-            if (step === 0) {
+            if (step === 0.5) {
                 tempX += dx;
                 tempY += dy;
                 redrawCanvas();
@@ -629,7 +578,7 @@
         }
 
         window.sampleCurrentPipettePosition = function() {
-            if (step === 0) {
+            if (step === 0.5) {
                 let pX = Math.floor(tempX);
                 let pY = Math.floor(tempY);
                 if (pX >= 0 && pX < canvas.width && pY >= 0 && pY < canvas.height) {
@@ -646,14 +595,15 @@
                     } else if (r > 150 && g < 100 && b < 100) {
                         elementColor = "#00FFFF"; // Cyan pour fond rouge
                     } else if (brightness > 180) {
-                        elementColor = "#FF00FF"; // Magenta pour fond très clair
+                        elementColor = "#FF00FF"; // Magenta pour fond clair
                     } else {
-                        elementColor = "#00FFFF"; // Cyan universel par défaut
+                        elementColor = "#00FFFF"; // Cyan par défaut
                     }
                     swatchTrace.style.backgroundColor = elementColor;
 
                     colorSelected = true;
-                    colorInstruction.innerHTML = "<b>2. Validation :</b> Couleur détectée. Regarde l'échantillon ci-dessous et valide ou recommence.";
+                    colorInstruction.innerHTML = "<b>Couleur détectée :</b> Vérifie l'échantillon et valide.";
+                    colorvenPreviewContainerShow = true;
                     colorPreviewContainer.style.display = 'flex';
                     colorActions.style.display = 'flex';
                     redrawCanvas();
@@ -663,10 +613,15 @@
 
         window.validerCouleurFond = function() {
             colorManagementPanel.style.display = 'none';
-            step = 0.5; // Passage à l'orientation / cadrage
-            statusText.innerText = "Étape 0 : Contrôle et orientation de la photo";
-            preCaptureTools.style.display = 'block';
+            step = 1; // Passage aux étapes de calage (1 à 7)
+            generalToolsContainer.style.display = 'block';
+            adjustPanel.style.display = 'block';
             resetCanvasAndTempPos();
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            tempAngle = 0;
+            tempSize = canvas.width * 0.055;
+            updateUIState();
             redrawCanvas();
         }
 
@@ -674,8 +629,41 @@
             colorSelected = false;
             colorPreviewContainer.style.display = 'none';
             colorActions.style.display = 'none';
-            colorInstruction.innerHTML = "Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.";
+            colorInstruction.innerHTML = "Utilise les flèches pour déplacer le <b>symbole Pipette</b> sur le fond, puis échantillonne.";
             redrawCanvas();
+        }
+
+        window.backToPreCapture = function() {
+            colorManagementPanel.style.display = 'none';
+            step = 0;
+            preCaptureTools.style.display = 'block';
+            resetCanvasAndTempPos();
+            statusText.innerText = "Étape 0 : Orientation et Cadrage";
+            redrawCanvas();
+        }
+
+        window.resetToWelcome = function() {
+            stopAction();
+            canvas.style.display = 'none';
+            preCaptureTools.style.display = 'none';
+            colorManagementPanel.style.display = 'none';
+            generalToolsContainer.style.display = 'none';
+            adjustPanel.style.display = 'none';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'none';
+            fileInput.value = '';
+            currentImg = null;
+            holes = [];
+            step = 0;
+            rotationAngle = 0;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            colorSelected = false;
         }
 
         window.changerOpacite = function(val) {
@@ -764,7 +752,8 @@
 
             ctx.save();
 
-            if (!isForExport && (zoomLevel > 1.0 || step === 0)) {
+            // Gestion du Zoom / Panoramique actif pendant le calage ou la pipette
+            if (!isForExport && (zoomLevel > 1.0 || step === 0.5)) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
@@ -783,24 +772,33 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Affichage du réticule de la pipette à l'étape 0 si actif
-            if (step === 0 && !isForExport) {
+            // Affichage du symbole Pipette à l'étape 0.5
+            if (step === 0.5 && !isForExport) {
                 ctx.save();
                 ctx.strokeStyle = '#ffc107';
+                ctx.fillStyle = '#ffc107';
                 ctx.lineWidth = 3;
+                // Dessin d'un symbole Pipette simplifié (bulbe + tube)
                 ctx.beginPath();
-                ctx.arc(tempX, tempY, 15, 0, Math.PI * 2);
-                ctx.stroke();
-                // Petite croix au centre du réticule
+                ctx.arc(tempX, tempY - 10, 8, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.beginPath();
-                ctx.moveTo(tempX - 6, tempY); ctx.lineTo(tempX + 6, tempY);
-                ctx.moveTo(tempX, tempY - 6); ctx.lineTo(tempX, tempY + 6);
+                ctx.moveTo(tempX - 6, tempY - 2);
+                ctx.lineTo(tempX + 6, tempY - 2);
+                ctx.lineTo(tempX + 2, tempY + 14);
+                ctx.lineTo(tempX - 2, tempY + 14);
+                ctx.closePath();
+                ctx.fill();
+                // Réticule précis au bout de la pipette
+                ctx.strokeStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(tempX, tempY + 14, 4, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.restore();
             }
 
             ctx.save();
-            ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
+            ctx.globalAlpha = isForExport ? 1.0 : (currentOpacity || 0.8);
 
             if (step >= 1) {
                 let rx = step === 1 ? tempX : box1.x;
@@ -849,7 +847,7 @@
                     ctx.save();
                     ctx.strokeStyle = elementColor;
                     ctx.fillStyle = elementColor;
-                    ctx.globalAlpha = currentOpacity * 0.4;
+                    ctx.globalAlpha = (currentOpacity || 0.8) * 0.4;
                     ctx.lineWidth = Math.max(3, refW / 400);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
@@ -864,7 +862,7 @@
                 ctx.save();
                 ctx.strokeStyle = elementColor;
                 ctx.fillStyle = elementColor;
-                ctx.globalAlpha = currentOpacity * 0.3;
+                ctx.globalAlpha = (currentOpacity || 0.8) * 0.3;
                 ctx.lineWidth = Math.max(3, refW / 400);
                 ctx.beginPath();
                 ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
@@ -881,7 +879,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v46.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v47.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -940,16 +938,13 @@
 
         window.validatePreCaptureStep = function() {
             preCaptureTools.style.display = 'none';
-            generalToolsContainer.style.display = 'block';
-            adjustPanel.style.display = 'block';
-
-            step = 1;
+            step = 0.5; // Passage à la gestion des couleurs
+            statusText.innerText = "Étape 0.5 : Gestion des couleurs (Pipette)";
+            colorManagementPanel.style.display = 'block';
             resetCanvasAndTempPos();
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
-            tempAngle = 0;
-            tempSize = canvas.width * 0.055;
-            updateUIState();
+            zoomLevel = 1.5; // Zoom pour bien voir le curseur pipette
             redrawCanvas();
         }
 
@@ -969,10 +964,21 @@
 
         window.askPrevStep = function() {
             stopAction();
+            if (step === 1) {
+                // Retour vers l'étape couleur
+                generalToolsContainer.style.display = 'none';
+                adjustPanel.style.display = 'none';
+                step = 0.5;
+                statusText.innerText = "Étape 0.5 : Gestion des couleurs (Pipette)";
+                colorManagementPanel.style.display = 'block';
+                zoomLevel = 1.5;
+                redrawCanvas();
+                return;
+            }
             let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let prevLabel = stepNames[step - 1] || "l'étape précédente";
             
-            if (confirm("⚠️ Voulez-vous vraiment revenir en arrière vers l'étape : " + prevLabel + " ? (Les modifications de l'étape en cours seront remises à plat)")) {
+            if (confirm("⚠️ Voulez-vous vraiment revenir en arrière vers l'étape : " + prevLabel + " ?")) {
                 prevStep();
             }
         }
@@ -1024,7 +1030,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.46) !";
+                statusText.innerText = "✅ Calage expert terminé (v.47) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1055,7 +1061,7 @@
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
             
-            btnPrev.style.display = (step > 1) ? 'block' : 'none';
+            btnPrev.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
@@ -1079,27 +1085,7 @@
         }
 
         btnRetry.addEventListener('click', function() {
-            stopAction();
-            canvas.style.display = 'none';
-            colorManagementPanel.style.display = 'none';
-            preCaptureTools.style.display = 'none';
-            generalToolsContainer.style.display = 'none';
-            adjustPanel.style.display = 'none';
-            btnDownload.style.display = 'none';
-            btnRetry.style.display = 'none';
-            welcomePanel.style.display = 'block';
-            statusText.style.display = 'none';
-            fileInput.value = '';
-            currentImg = null;
-            holes = [];
-            step = 0;
-            rotationAngle = 0;
-            imgOffsetX = 0;
-            imgOffsetY = 0;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            colorSelected = false;
+            resetToWelcome();
         });
     </script>
 </body>
