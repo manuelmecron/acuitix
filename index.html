@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.31 - Assistant CAO (Protocole Strict)</title>
+    <title>Acuitix.32 - Assistant CAO (Protocole Strict)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,7 +43,7 @@
         
         /* Zone d'accueil avec icône de mimétisme */
         #welcome-panel {
-            display: block; /* Visible par défaut */
+            display: block;
             padding: 20px;
             background: #2a2a2a;
             border-radius: 8px;
@@ -92,14 +92,13 @@
         #file-input { display: none; }
         
         .adjust-panel {
-            display: none; /* Caché par défaut */
+            display: none;
             background: #333;
             padding: 8px;
             border-radius: 8px;
             margin-top: 6px;
         }
 
-        /* Panneau de contrôle UNIQUEMENT pour l'étape 0 (Contrôle de prise de vue) */
         #pre-capture-tools {
             display: none;
             background: #444;
@@ -110,9 +109,8 @@
         }
         #pre-capture-tools h3 { font-size: 1rem; color: #ffc107; margin: 0 0 8px 0; text-transform: uppercase;}
 
-        /* Panneau des outils généraux (Échelle, Panoramique, Cible) pour les étapes 1 à 7 */
         #general-tools-container {
-            display: none; /* Caché par défaut */
+            display: none;
         }
         .image-tools-container {
             background: #262626;
@@ -144,7 +142,6 @@
             border: none;
             cursor: pointer;
             touch-action: manipulation;
-            transition: opacity 0.2s;
         }
 
         .scale-control-box {
@@ -267,11 +264,10 @@
 </head>
 <body>
 
-    <h1>Acuitix.31</h1>
+    <h1>Acuitix.32</h1>
 
-    <!-- Zone d'accueil avec icône de mimétisme pour forcer le mode paysage -->
+    <!-- Zone d'accueil avec icône de mimétisme et label natif pour déclencher la photo -->
     <div id="welcome-panel">
-        <!-- Icône SVG d'un téléphone en orientation paysage (largeur > hauteur) -->
         <svg id="mimic-icon" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="2" width="60" height="40" rx="4" stroke="#FFC107" stroke-width="4"/>
             <line x1="2" y1="10" x2="62" y2="10" stroke="#FFC107" stroke-width="2"/>
@@ -285,7 +281,9 @@
         </svg>
         <p style="color: #fff; font-weight: bold; font-size: 0.95rem;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
         <p style="color: #ddd; font-size: 0.85rem;">Orientez votre téléphone en mode **PAYSAGE (horizontal)**, comme l'icône ci-dessus, pour capturer l'intégralité de la plaque.</p>
-        <button class="btn" onclick="startCameraCapture()">📸 J'ai compris, lancer l'appareil photo</button>
+        
+        <!-- Le label pointe vers l'input file masqué pour garantir l'ouverture de l'appareil photo sur mobile -->
+        <label for="file-input" class="btn">📸 Lancer l'appareil photo</label>
     </div>
 
     <div class="box">
@@ -296,7 +294,7 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Panneau de contrôle UNIQUEMENT pour l'étape 0 (Contrôle de prise de vue) -->
+        <!-- Panneau de contrôle étape 0 (Contrôle de prise de vue) -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 Étape 0 : Contrôle de la prise de vue</h3>
             <p style="font-size: 0.8rem; color: #ddd; margin-bottom: 10px;">Vérifiez l'orientation de la photo. Vous pouvez la pivoter ici.</p>
@@ -307,7 +305,7 @@
              <button class="btn" id="btn-validate-step0" onclick="validateStep()">Valider cette orientation</button>
         </div>
 
-        <!-- Panneau des outils généraux (Échelle, Panoramique, Cible) pour les étapes 1 à 7 -->
+        <!-- Panneau des outils généraux (Étapes 1 à 7) -->
         <div id="general-tools-container">
             <div class="image-tools-container">
                 <div class="scale-control-box">
@@ -323,4 +321,504 @@
                 <div class="camera-pan-container">
                     <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
                     <div class="camera-pan-grid">
-                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️
+                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                        <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                        <button onmousedown="startAction(() => panCamera(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                        <button onmousedown="startAction(() => panCamera(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    </div>
+                </div>
+
+                <div class="gameboy-container">
+                    <div class="dpad-container">
+                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Cible</div>
+                        <div class="dpad-grid">
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                            <div style="background:#2a2a2a; border-radius:4px;"></div>
+                            <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="controls-right">
+                        <div class="control-row">
+                            <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
+                            <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
+                        </div>
+                        <div class="control-row">
+                            <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                            <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                        </div>
+                        <div class="control-row">
+                            <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hole-action-panel" style="display:none; margin-bottom: 6px;">
+                    <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:6px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0; display:none;">⬅️ Retour</button>
+                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
+                </div>
+            </div>
+        </div>
+        
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
+        const welcomePanel = document.getElementById('welcome-panel');
+        const preCaptureTools = document.getElementById('pre-capture-tools');
+        const generalToolsContainer = document.getElementById('general-tools-container');
+        const btnDownload = document.getElementById('btn-download');
+        const btnRetry = document.getElementById('btn-retry');
+        const adjustPanel = document.getElementById('adjust-panel');
+        const holeActionPanel = document.getElementById('hole-action-panel');
+
+        let currentImg = null;
+        let step = 0; 
+        let rotationAngle = 0; 
+
+        let box1 = { x: 0, y: 0, size: 0, angle: 0 };
+        let box2 = { x: 0, y: 0, size: 0, angle: 0 };
+        let corners = [
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }  
+        ];
+        let holes = []; 
+
+        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
+        let zoomLevel = 1.0;
+        let manualPanX = 0; 
+        let manualPanY = 0;
+        let actionInterval = null;
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImg = img;
+                    rotationAngle = 0;
+                    updateCanvasDimensions();
+
+                    // ÉTAPE 0 : Contrôle de prise de vue
+                    step = 0;
+                    zoomLevel = 1.0;
+                    manualPanX = 0;
+                    manualPanY = 0;
+                    
+                    let w = canvas.width;
+                    let h = canvas.height;
+                    let defaultSize = w * 0.055; 
+
+                    box1.size = defaultSize;
+                    box2.size = defaultSize;
+                    for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
+
+                    tempX = w * 0.5;
+                    tempY = h * 0.5;
+                    tempAngle = 0;
+                    tempSize = defaultSize;
+
+                    // Affichage des éléments de l'étape 0
+                    welcomePanel.style.display = 'none';
+                    canvas.style.display = 'block';
+                    statusText.style.display = 'block';
+                    statusText.innerText = "Étape 0 : Contrôle et orientation de la photo";
+                    preCaptureTools.style.display = 'block';
+                    
+                    redrawCanvas();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function updateCanvasDimensions() {
+            if (!currentImg) return;
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                canvas.width = currentImg.naturalHeight;
+                canvas.height = currentImg.naturalWidth;
+            } else {
+                canvas.width = currentImg.naturalWidth;
+                canvas.height = currentImg.naturalHeight;
+            }
+        }
+
+        window.rotateImage90 = function() {
+            if (!currentImg) return;
+            rotationAngle = (rotationAngle + 90) % 360;
+            updateCanvasDimensions();
+            resetCanvasAndTempPos();
+        }
+
+        window.resetCanvasAndTempPos = function() {
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            redrawCanvas();
+        }
+
+        window.startAction = function(actionFn, speedMs) {
+            stopAction();
+            actionFn();
+            actionInterval = setInterval(actionFn, speedMs);
+        }
+        window.stopAction = function() { 
+            if (actionInterval) { 
+                clearInterval(actionInterval); 
+                actionInterval = null; 
+            } 
+        }
+
+        window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
+        
+        window.adjustZoom = function(delta) {
+            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
+            if (zoomLevel === 1.0) { manualPanX = 0; manualPanY = 0; }
+            redrawCanvas();
+        }
+
+        window.adjustAngle = function(deltaDeg) { if (step >= 1 && step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
+        window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
+
+        canvas.addEventListener('click', function(e) {
+            if (step === 0) return; // Pas de clic interactif en étape 0
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientClickX = (e.clientX - rect.left) * scaleX;
+            let clientClickY = (e.clientY - rect.top) * scaleY;
+
+            let imgX, imgY;
+            if (zoomLevel > 1.0) {
+                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
+                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
+            } else {
+                imgX = clientClickX;
+                imgY = clientClickY;
+            }
+
+            if (step >= 1 && step <= 7) {
+                tempX = imgX;
+                tempY = imgY;
+                redrawCanvas();
+            }
+        });
+
+        window.askAddHole = function() {
+            if (step === 7) {
+                if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
+                    holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                    resetCanvasAndTempPos();
+                }
+            }
+        }
+
+        window.removeLastHole = function() {
+            if (step === 7 && holes.length > 0) {
+                if (confirm("Voulez-vous supprimer le dernier perçage ajouté ?")) {
+                    holes.pop();
+                    redrawCanvas();
+                }
+            }
+        }
+
+        function redrawCanvas(isForExport = false) {
+            if (!currentImg) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+
+            if (!isForExport && zoomLevel > 1.0) {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(zoomLevel, zoomLevel);
+                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
+            }
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((rotationAngle * Math.PI) / 180);
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
+            } else {
+                ctx.drawImage(currentImg, -currentImg.naturalWidth / 2, -currentImg.naturalHeight / 2);
+            }
+            ctx.restore();
+
+            let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
+            ctx.lineWidth = Math.max(4, refW / 300);
+
+            if (step >= 1) {
+                drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, step === 1 ? tempSize : box1.size, step === 1 ? tempAngle : box1.angle, (step === 1 && !isForExport), "#00FF00");
+            }
+            if (step >= 2) {
+                drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, (step === 2 && !isForExport), "#00FF00");
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let isActive = (step === i + 3 && !isForExport);
+                let isPassed = (step > i + 3 || isForExport);
+                if (isPassed || isActive) {
+                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
+                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
+                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
+                    let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
+
+                    drawCornerMarker(cx, cy, csize, cangle, isActive, "#007BFF", i);
+                }
+            }
+
+            if (step >= 7) {
+                ctx.save();
+                ctx.strokeStyle = "#007BFF";
+                ctx.lineWidth = Math.max(3, refW / 350);
+                ctx.beginPath();
+                ctx.moveTo(corners[0].x, corners[0].y);
+                ctx.lineTo(corners[2].x, corners[2].y);
+                ctx.moveTo(corners[1].x, corners[1].y);
+                ctx.lineTo(corners[3].x, corners[3].y);
+                ctx.stroke();
+                ctx.restore();
+
+                if (!isForExport && step === 7) {
+                    ctx.save();
+                    ctx.strokeStyle = "#00FFFF";
+                    ctx.fillStyle = "rgba(0, 255, 255, 0.35)";
+                    ctx.lineWidth = Math.max(3, refW / 400);
+                    ctx.beginPath();
+                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            holes.forEach(h => {
+                ctx.save();
+                ctx.strokeStyle = isForExport ? "#00FF00" : "#00FFFF";
+                ctx.fillStyle = isForExport ? "rgba(0, 255, 0, 0.3)" : "rgba(0, 255, 255, 0.3)";
+                ctx.lineWidth = Math.max(3, refW / 400);
+                ctx.beginPath();
+                ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            ctx.restore();
+
+            if (step === 8 && isForExport) {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    btnDownload.href = url;
+                    btnDownload.download = 'acuitix_etalon_expert_v32.jpg';
+                }, 'image/jpeg', 0.98);
+            }
+        }
+
+        function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = color;
+            ctx.setLineDash(isActive ? [canvas.width / 70, canvas.width / 90] : []);
+            ctx.strokeRect(-size / 2, -size / 2, size, size);
+            ctx.restore();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, isActive, color, cornerIdx) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.setLineDash(isActive ? [canvas.width / 80, canvas.width / 100] : []);
+            ctx.lineWidth = Math.max(4, canvas.width / 250);
+
+            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
+            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+
+            ctx.beginPath();
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        window.resetCurrentPos = function() {
+            resetCanvasAndTempPos();
+        }
+
+        window.askValidateStep = function() {
+            stopAction();
+            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let label = stepNames[step] || "cette étape";
+            
+            if (step === 7 && holes.length === 0) {
+                if (!confirm("Aucun perçage n'a été ajouté. Voulez-vous vraiment terminer sans perçage ?")) return;
+            }
+
+            if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+                validateStep();
+            }
+        }
+
+        window.validateStep = function() {
+            stopAction();
+            resetCanvasAndTempPos();
+
+            if (step === 0) {
+                // Passage de l'étape 0 (contrôle) à l'étape 1 (Carré gauche) avec verrouillage de rotation
+                step = 1;
+                preCaptureTools.style.display = 'none';
+                generalToolsContainer.style.display = 'block';
+                adjustPanel.style.display = 'block';
+
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                tempAngle = 0;
+                tempSize = canvas.width * 0.055;
+            } else if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
+                step = 2;
+                tempX = box1.x + (canvas.width * 0.15); 
+                tempY = box1.y;
+                tempAngle = box1.angle;
+                tempSize = box1.size;
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                step = 3; 
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                tempAngle = 0;
+                tempSize = box1.size * 1.2;
+            } else if (step === 3) {
+                corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
+                step = 4;
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+            } else if (step === 4) {
+                corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
+                step = 5;
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+            } else if (step === 5) {
+                corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
+                step = 6;
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+            } else if (step === 6) {
+                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
+                step = 7; 
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            } else if (step === 7) {
+                step = 8; 
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.32) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        window.prevStep = function() {
+            stopAction();
+            resetCanvasAndTempPos();
+            if (step > 1) {
+                step--;
+                if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
+                else if (step === 2) { tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size; }
+                else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+                } else if (step === 7) {
+                    tempX = corners[3].x; tempY = corners[3].y; tempAngle = corners[3].angle; tempSize = corners[3].size;
+                }
+                updateUIState();
+                redrawCanvas();
+            }
+        }
+
+        function updateUIState() {
+            let btnVal = document.getElementById('btn-validate-step');
+            let btnPrev = document.getElementById('btn-prev-step');
+            
+            btnPrev.style.display = (step > 1) ? 'block' : 'none';
+
+            if (step === 7) {
+                holeActionPanel.style.display = 'block';
+                btnVal.innerText = "Terminer et Générer";
+            } else {
+                holeActionPanel.style.display = 'none';
+                btnVal.innerText = "Valider l'étape";
+            }
+
+            const descriptions = [
+                "",
+                "Étape 1 / 6 : Carré GAUCHE (Vert)",
+                "Étape 2 / 6 : Carré DROIT (Vert)",
+                "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)",
+                "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)",
+                "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
+                "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)",
+                "Étape 7 : Ajout des perçages"
+            ];
+            statusText.innerText = descriptions[step] || "";
+        }
+
+        btnRetry.addEventListener('click', function() {
+            stopAction();
+            canvas.style.display = 'none';
+            preCaptureTools.style.display = 'none';
+            generalToolsContainer.style.display = 'none';
+            adjustPanel.style.display = 'none';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'none';
+            fileInput.value = '';
+            currentImg = null;
+            holes = [];
+            step = 0;
+            rotationAngle = 0;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+        });
+    </script>
+</body>
+</html>
