@@ -90,11 +90,11 @@
             gap: 4px;
         }
         .pickguard-thumb svg {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             stroke: #ffc107;
             fill: none;
-            stroke-width: 3;
+            stroke-width: 2.5;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
@@ -430,7 +430,7 @@
             </div>
         </div>
 
-        <!-- ACCUEIL avec symboles bruts et épurés (uniquement les découpes plates) -->
+        <!-- ACCUEIL avec symboles détaillés (Pickguard Strat incluant micros et vis) -->
         <div id="welcome-panel">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📷 📷</div>
@@ -441,33 +441,50 @@
                     <b>Toutes les extrémités et contours doivent être parfaitement visibles</b> sur la photo pour garantir une modélisation CAO exacte.
                 </p>
                 
-                <!-- Galerie de silhouettes brutes et épurées -->
+                <!-- Galerie de silhouettes détaillées -->
                 <div class="pickguards-gallery">
-                    <!-- 1. Stratocaster (Silhouette pure) -->
+                    <!-- 1. Stratocaster (Silhouette détaillée avec micros et trous) -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
-                            <path d="M32,8 C45,8 55,14 62,25 C68,32 72,42 70,55 C68,68 60,78 52,85 C45,92 30,95 24,90 C20,86 20,78 22,70 C24,62 18,55 18,45 C18,32 22,20 28,14 Z" fill="none" />
+                            <!-- Contour principal Strat -->
+                            <path d="M25,10 C38,10 48,15 56,26 C62,33 67,44 65,58 C63,71 55,81 47,88 C40,95 25,97 19,92 C15,88 15,80 17,72 C19,64 13,57 13,47 C13,34 17,22 23,16 Z" />
+                            <!-- Micros (rectangles arrondis) -->
+                            <rect x="26" y="28" width="18" height="8" rx="3" />
+                            <rect x="26" y="44" width="18" height="8" rx="3" />
+                            <rect x="24" y="60" width="20" height="9" rx="3" />
+                            <!-- Sélecteur de micros -->
+                            <line x1="50" y1="52" x2="57" y2="44" />
+                            <!-- Trous de vis (cercles) -->
+                            <circle cx="23" cy="18" r="1.5" />
+                            <circle cx="48" cy="20" r="1.5" />
+                            <circle cx="59" cy="31" r="1.5" />
+                            <circle cx="56" cy="53" r="1.5" />
+                            <circle cx="61" cy="62" r="1.5" />
+                            <circle cx="55" cy="74" r="1.5" />
+                            <circle cx="21" cy="85" r="1.5" />
+                            <circle cx="16" cy="66" r="1.5" />
+                            <circle cx="16" cy="46" r="1.5" />
                         </svg>
                         Pickguard Strat
                     </div>
-                    <!-- 2. Acoustique (Silhouette pure) -->
+                    <!-- 2. Acoustique -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
-                            <path d="M50,10 C70,20 80,40 80,70 C80,85 60,90 50,90 C35,90 25,75 25,50 C25,30 35,15 50,10 Z" fill="none" />
+                            <path d="M50,10 C70,20 80,40 80,70 C80,85 60,90 50,90 C35,90 25,75 25,50 C25,30 35,15 50,10 Z" />
                         </svg>
                         Pickguard Acoustique
                     </div>
-                    <!-- 3. Plaque électronique (Silhouette pure) -->
+                    <!-- 3. Plaque électronique -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
-                            <rect x="25" y="20" width="50" height="60" rx="10" fill="none" />
+                            <rect x="25" y="20" width="50" height="60" rx="10" />
                         </svg>
                         Plaque cavité électronique
                     </div>
-                    <!-- 4. Plaque ressort (Silhouette pure) -->
+                    <!-- 4. Plaque ressort -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
-                            <rect x="30" y="20" width="40" height="60" rx="6" fill="none" />
+                            <rect x="30" y="20" width="40" height="60" rx="6" />
                         </svg>
                         Plaque cavité de ressort
                     </div>
