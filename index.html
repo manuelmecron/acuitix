@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.37 - Assistant CAO</title>
+    <title>Acuitix.38 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.37</h1>
+    <h1>Acuitix.38</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -273,10 +273,11 @@
             <div class="camera-pan-container" style="margin-bottom: 4px;">
                 <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <!-- Correction des axes Y inversés (Haut monte l'image -> -30, Bas descend l'image -> +30) -->
+                    <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
                     <button onmousedown="startAction(() => panImage(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
                     <button onmousedown="startAction(() => panImage(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                 </div>
             </div>
 
@@ -649,7 +650,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v37.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v38.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -706,7 +707,6 @@
             }
         }
 
-        // Nouvelle fonction de double action pour sécuriser le retour
         window.askPrevStep = function() {
             stopAction();
             let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
@@ -775,7 +775,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.37) !";
+                statusText.innerText = "✅ Calage expert terminé (v.38) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
