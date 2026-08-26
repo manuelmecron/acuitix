@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.30 - Assistant CAO (Protocole Strict)</title>
+    <title>Acuitix.31 - Assistant CAO (Protocole Strict)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,7 +17,7 @@
             margin-left: auto;
             margin-right: auto;
         }
-        h1 { font-size: 1rem; margin: 4px 0 6px 0; }
+        h1 { font-size: 1.1rem; margin: 4px 0 6px 0; text-transform: uppercase; color: #ffc107;}
         .box {
             background: #2a2a2a;
             border: 2px solid #555;
@@ -29,8 +29,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            max-height: 50vh;
-            /* On laisse le canvas s'adapter naturellement à la largeur, la hauteur est limitée par max-height */
+            max-height: 55vh;
         }
         canvas {
             max-width: 100%;
@@ -40,67 +39,82 @@
             touch-action: manipulation;
             object-fit: contain;
         }
-        #status-text { font-size: 0.85rem; color: #ffc107; margin-bottom: 4px; font-weight: bold; }
+        #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 6px; font-weight: bold; padding: 4px; background: rgba(0,0,0,0.5); border-radius: 4px;}
         
-        /* Image guide pour la prise de photo (affichée avant la photo) */
-        #guide-container {
-            display: none;
-            text-align: center;
+        /* Zone d'accueil avec icône de mimétisme */
+        #welcome-panel {
+            display: block; /* Visible par défaut */
             padding: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-top: 10px;
         }
-        #guide-img {
-            max-width: 80%;
+        #mimic-icon {
+            width: 100px;
             height: auto;
-            border: 4px solid #ffc107;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 5px rgba(255, 193, 7/0.5));
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #28a745;
             color: white;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: bold;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             box-sizing: border-box;
-            margin-top: 5px;
+            margin-top: 10px;
             text-align: center;
+            transition: background 0.2s;
         }
+        .btn:active { background: #1e7e34; }
         .btn-secondary { background: #6c757d; }
+        .btn-secondary:active { background: #5a6268; }
         .btn-danger { background: #dc3545; }
+        .btn-danger:active { background: #bd2130; }
         .btn-info { background: #17a2b8; }
+        .btn-info:active { background: #117a8b; }
         .btn-warning { background: #ffc107; color: #000; }
+        .btn-warning:active { background: #e0a800; }
         
         #file-input { display: none; }
         
         .adjust-panel {
-            display: none;
+            display: none; /* Caché par défaut */
             background: #333;
             padding: 8px;
             border-radius: 8px;
             margin-top: 6px;
         }
 
-        /* Panneau d'outils image (Pivoter, Recentrer) UNIQUEMENT à l'étape 0 */
-        .pre-capture-tools {
+        /* Panneau de contrôle UNIQUEMENT pour l'étape 0 (Contrôle de prise de vue) */
+        #pre-capture-tools {
             display: none;
             background: #444;
-            border: 1px solid #666;
-            border-radius: 6px;
-            padding: 6px;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 8px;
             margin-bottom: 10px;
         }
-        .pre-capture-tools h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 5px 0; }
+        #pre-capture-tools h3 { font-size: 1rem; color: #ffc107; margin: 0 0 8px 0; text-transform: uppercase;}
 
-        /* Panneau d'outils généraux de l'image (Pivoter, Recentrer, Échelle) */
+        /* Panneau des outils généraux (Échelle, Panoramique, Cible) pour les étapes 1 à 7 */
+        #general-tools-container {
+            display: none; /* Caché par défaut */
+        }
         .image-tools-container {
-            display: none; /* Caché par défaut, géré par updateUIState */
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
@@ -119,17 +133,18 @@
         .image-tools-bar {
             display: flex;
             gap: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .image-tools-bar button {
             flex: 1;
-            padding: 8px 6px;
+            padding: 10px 6px;
             font-size: 0.8rem;
             font-weight: bold;
             border-radius: 6px;
             border: none;
             cursor: pointer;
             touch-action: manipulation;
+            transition: opacity 0.2s;
         }
 
         .scale-control-box {
@@ -145,7 +160,7 @@
         }
         .scale-buttons-row button {
             flex: 1;
-            padding: 7px;
+            padding: 10px;
             background: #007bff;
             color: white;
             border: none;
@@ -170,13 +185,13 @@
             gap: 4px;
         }
         .camera-pan-grid button {
-            padding: 7px 2px;
+            padding: 10px 2px;
             background: #495057;
             color: white;
             border: 1px solid #6c757d;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             cursor: pointer;
             touch-action: manipulation;
         }
@@ -203,8 +218,8 @@
         }
         .dpad-grid {
             display: grid;
-            grid-template-columns: repeat(3, 38px);
-            grid-template-rows: repeat(3, 38px);
+            grid-template-columns: repeat(3, 42px);
+            grid-template-rows: repeat(3, 42px);
             gap: 2px;
         }
         .dpad-grid button {
@@ -212,7 +227,7 @@
             color: white;
             border: none;
             border-radius: 4px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             touch-action: manipulation;
@@ -231,13 +246,13 @@
         }
         .control-row button {
             flex: 1;
-            padding: 8px 4px;
+            padding: 12px 4px;
             background: #555;
             color: white;
             border: none;
             border-radius: 4px;
             font-weight: bold;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             cursor: pointer;
             touch-action: manipulation;
         }
@@ -252,59 +267,60 @@
 </head>
 <body>
 
-    <h1>Acuitix.30 - Assistant CAO</h1>
+    <h1>Acuitix.31</h1>
 
-    <!-- Image guide pour forcer le mode paysage (16/9) -->
-    <div id="guide-container">
-        <img id="guide-img" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23333'/%3E%3Cpath d='M14 2h-3.5L9.33.33C9.15.14 8.89 0 8.61 0H7.39c-.28 0-.54.14-.72.33L5.5 2H2c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 5H2V4h3.5l1.17-1.67C6.84 2.14 6.99 2 7.14 2h1.72c.15 0 .3.14.31.33L10.5 4H14v3z' fill='%23fff'/%3E%3Ccircle cx='8' cy='5.5' r='1.5' fill='%23fff'/%3E%3C/svg%3E" alt="Guide photo paysage">
-        <p style="color: #fff; font-weight: bold;">ATTENTION : Orientez votre téléphone en mode PAYSAGE (16/9) pour prendre la photo.</p>
-        <button class="btn" onclick="startCameraCapture()">J'ai compris, prendre la photo</button>
+    <!-- Zone d'accueil avec icône de mimétisme pour forcer le mode paysage -->
+    <div id="welcome-panel">
+        <!-- Icône SVG d'un téléphone en orientation paysage (largeur > hauteur) -->
+        <svg id="mimic-icon" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="60" height="40" rx="4" stroke="#FFC107" stroke-width="4"/>
+            <line x1="2" y1="10" x2="62" y2="10" stroke="#FFC107" stroke-width="2"/>
+            <circle cx="8" cy="6" r="2" fill="#FFC107"/>
+            <circle cx="16" cy="6" r="2" fill="#FFC107"/>
+            <rect x="52" y="30" width="8" height="4" rx="2" fill="#FFC107"/>
+            <rect x="52" y="22" width="8" height="4" rx="2" fill="#FFC107"/>
+            <path d="M32 19C35.3137 19 38 21.6863 38 25C38 28.3137 35.3137 31 32 31C28.6863 31 26 28.3137 26 25C26 21.6863 28.6863 19 32 19Z" stroke="#FFC107" stroke-width="2"/>
+            <path d="M32 21V29" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
+            <path d="M28 25H36" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p style="color: #fff; font-weight: bold; font-size: 0.95rem;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
+        <p style="color: #ddd; font-size: 0.85rem;">Orientez votre téléphone en mode **PAYSAGE (horizontal)**, comme l'icône ci-dessus, pour capturer l'intégralité de la plaque.</p>
+        <button class="btn" onclick="startCameraCapture()">📸 J'ai compris, lancer l'appareil photo</button>
     </div>
 
     <div class="box">
-        <p id="status-text" style="position: absolute; top: 6px; z-index: 10; background: rgba(0,0,0,0.7); padding: 3px 6px; border-radius: 4px; font-size: 0.78rem;">1. Prenez la photo du gabarit.</p>
+        <p id="status-text" style="display:none;">1. Prenez la photo du gabarit.</p>
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
-        <label class="btn" id="btn-shoot" onclick="showCaptureGuide()">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <!-- Panneau de contrôle UNIQUEMENT pour l'étape 0 (Contrôle de prise de vue) -->
-        <div class="pre-capture-tools" id="pre-capture-tools">
-            <h3>Étape 0 : Contrôle de la prise de vue</h3>
-            <p style="font-size: 0.8rem; color: #ddd; margin-bottom: 5px;">Vérifiez l'orientation de la photo. Vous pouvez la pivoter ici.</p>
+        <div id="pre-capture-tools" class="adjust-panel">
+            <h3>📷 Étape 0 : Contrôle de la prise de vue</h3>
+            <p style="font-size: 0.8rem; color: #ddd; margin-bottom: 10px;">Vérifiez l'orientation de la photo. Vous pouvez la pivoter ici.</p>
             <div class="image-tools-bar">
                 <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
                 <button class="btn-info" onclick="resetCanvasAndTempPos()">🎯 Recentrer l'image</button>
             </div>
-             <button class="btn" id="btn-validate-step0" onclick="askValidateStep()">Valider cette orientation</button>
+             <button class="btn" id="btn-validate-step0" onclick="validateStep()">Valider cette orientation</button>
         </div>
 
         <!-- Panneau des outils généraux (Échelle, Panoramique, Cible) pour les étapes 1 à 7 -->
-        <div class="image-tools-container" id="image-tools-container">
-            <div class="scale-control-box">
-                <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
-                <div class="scale-buttons-row">
-                    <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
-                    <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="adjust-panel" id="adjust-panel">
-            <div class="camera-pan-container">
-                <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
-                <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+        <div id="general-tools-container">
+            <div class="image-tools-container">
+                <div class="scale-control-box">
+                    <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
+                    <div class="scale-buttons-row">
+                        <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                        <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="gameboy-container">
-                <div class="dpad-container">
-                    <div class="dpad-grid">
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(0, -6),
+            <div class="adjust-panel" id="adjust-panel">
+                <div class="camera-pan-container">
+                    <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
+                    <div class="camera-pan-grid">
+                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️
