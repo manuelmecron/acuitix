@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.28 - Assistant CAO</title>
+    <title>Acuitix.29 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,8 +29,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Plus de contrainte d'aspect-ratio fixe géante, on laisse la taille réelle s'adapter */
-            max-height: 52vh;
+            max-height: 50vh;
         }
         canvas {
             max-width: 100%;
@@ -225,7 +224,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.28 - Assistant CAO</h1>
+    <h1>Acuitix.29 - Assistant CAO</h1>
 
     <div class="box">
         <p id="status-text" style="position: absolute; top: 6px; z-index: 10; background: rgba(0,0,0,0.7); padding: 3px 6px; border-radius: 4px; font-size: 0.78rem;">1. Prenez la photo du gabarit.</p>
@@ -256,10 +255,10 @@
             <div class="camera-pan-container">
                 <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
                 <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panCamera(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panCamera(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                 </div>
             </div>
 
@@ -280,8 +279,8 @@
 
                 <div class="controls-right" id="panel-tools">
                     <div class="control-row">
-                        <button onclick="adjustZoom(0.5)">🔍+ Zoom Vue</button>
-                        <button onclick="adjustZoom(-0.5)">🔍- Zoom Vue</button>
+                        <button onclick="adjustZoom(0.5)">🔍+ Zoom Élément</button>
+                        <button onclick="adjustZoom(-0.5)">🔍- Zoom Élément</button>
                     </div>
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -301,7 +300,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.28)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.29)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -417,7 +416,11 @@
             } 
         }
 
-        window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
+        window.moveTarget = function(dx, dy) { 
+            tempX += dx; 
+            tempY += dy; 
+            redrawCanvas(); 
+        }
         
         window.panCamera = function(dx, dy) { 
             manualPanX += dx; 
@@ -426,11 +429,7 @@
         }
         
         window.adjustZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
-            if (zoomLevel === 1.0) {
-                manualPanX = 0;
-                manualPanY = 0;
-            }
+            zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
             redrawCanvas();
         }
 
@@ -450,8 +449,11 @@
 
             let imgX, imgY;
             if (zoomLevel > 1.0) {
-                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + (canvas.width / 2 - manualPanX);
-                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + (canvas.height / 2 - manualPanY);
+                // Conversion inverse par rapport au centre de ciblage (tempX, tempY)
+                let centerX = canvas.width / 2 - tempX + manualPanX;
+                let centerY = canvas.height / 2 - tempY + manualPanY;
+                imgX = (clientClickX - canvas.width / 2) / zoomLevel - centerX + canvas.width / 2;
+                imgY = (clientClickY - canvas.height / 2) / zoomLevel - centerY + canvas.height / 2;
             } else {
                 imgX = clientClickX;
                 imgY = clientClickY;
@@ -493,10 +495,11 @@
 
             ctx.save();
 
+            // Gestion du zoom centré précisément sur l'élément actif (tempX, tempY)
             if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-canvas.width / 2 + manualPanX, -canvas.height / 2 + manualPanY);
+                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
 
             ctx.save();
@@ -577,7 +580,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v28.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v29.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -690,7 +693,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 imageToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.28) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.29) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
