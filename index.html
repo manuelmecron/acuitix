@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.53 - Assistant CAO</title>
+    <title>Acuitix V.54 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -70,49 +70,31 @@
         .camera-badge { font-size: 1.8rem; margin-bottom: 4px; }
         
         .pickguards-gallery {
-            display: flex;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 6px;
             margin: 8px 0;
         }
         .pickguard-thumb {
-            width: 70px;
-            height: 55px;
             background: #222;
             border: 1px solid #ffc107;
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.55rem;
+            font-size: 0.65rem;
             color: #ffc107;
             text-align: center;
-            padding: 2px;
-            gap: 2px;
+            padding: 4px;
+            gap: 4px;
         }
-        
-        /* Mini icônes vectorielles CSS pour les types de plaques */
-        .icon-strato {
-            width: 26px; height: 32px;
-            border: 1.5px solid #ffc107;
-            border-radius: 40% 60% 40% 50% / 50% 40% 60% 50%;
-            position: relative;
-        }
-        .icon-tele {
-            width: 22px; height: 34px;
-            border: 1.5px solid #ffc107;
-            border-radius: 30% 30% 40% 40%;
-        }
-        .icon-lespaul {
-            width: 28px; height: 28px;
-            border: 1.5px solid #ffc107;
-            border-radius: 50% 30% 60% 40%;
-        }
-        .icon-cavity {
-            width: 32px; height: 20px;
-            border: 1.5px solid #ffc107;
-            border-radius: 50%;
+        .pickguard-thumb img {
+            width: 100%;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: #111;
         }
 
         .btn {
@@ -294,7 +276,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.53</h1>
+    <h1>Acuitix V.54 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
@@ -330,7 +312,7 @@
             <button class="btn btn-danger" style="margin-top: 6px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- Étape 0.5 : Gestion des couleurs avec l'Échantillonneur (Sans opacité ni échelle) -->
+        <!-- Étape 0.5 : Gestion des couleurs avec l'Échantillonneur -->
         <div id="color-management-panel" class="adjust-panel">
             <h3>🎨 2. Gestion des couleurs (<span style="color:#ffc107;">🧪 Échantillonneur</span>)</h3>
             <p id="color-instruction" style="font-size: 0.8rem; color: #ddd; margin: 2px 0 6px 0;">
@@ -446,7 +428,7 @@
             </div>
         </div>
 
-        <!-- ACCUEIL (Sans opacité ni échelle, avec illustrations vectorielles des pickguards) -->
+        <!-- ACCUEIL avec vos 4 visuels officiels -->
         <div id="welcome-panel">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📷 📷</div>
@@ -457,23 +439,23 @@
                     <b>Toutes les extrémités et contours doivent être parfaitement visibles</b> sur la photo pour garantir une modélisation CAO exacte.
                 </p>
                 
-                <!-- Mini galerie visuelle de pickguards et plaques -->
+                <!-- Galerie des 4 modèles officiels -->
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb">
-                        <div class="icon-strato"></div>
-                        Stratocaster
+                        <img src="SYPICKGUARDTYPES.jpg" alt="Pickguard Strat">
+                        Pickguard Strat
                     </div>
                     <div class="pickguard-thumb">
-                        <div class="icon-tele"></div>
-                        Telecaster
+                        <img src="SYPICKGUARDACOUSTIC.jpg" alt="Pickguard Acoustique">
+                        Pickguard Acoustique
                     </div>
                     <div class="pickguard-thumb">
-                        <div class="icon-lespaul"></div>
-                        Les Paul
+                        <img src="SYCAVITEGIBSON.jpg" alt="Plaque cavité électronique">
+                        Plaque cavité électronique
                     </div>
                     <div class="pickguard-thumb">
-                        <div class="icon-cavity"></div>
-                        Cavité / Ressort
+                        <img src="SYPLAQUEARRIERE.jpg" alt="Plaque cavité de ressort">
+                        Plaque cavité de ressort
                     </div>
                 </div>
             </div>
@@ -827,7 +809,6 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Rendu de l'échantillonneur à l'étape 0.5
             if (step === 0.5 && !isForExport) {
                 ctx.save();
                 ctx.translate(tempX, tempY);
@@ -950,7 +931,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v53.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v54.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1100,7 +1081,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.53) !";
+                statusText.innerText = "✅ Calage expert terminé (v.54) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
