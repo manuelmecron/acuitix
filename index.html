@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.26 - Assistant CAO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acuitix.27 - Assistant CAO (Format 9/16)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +13,10 @@
             padding: 10px;
             text-align: center;
             user-select: none;
+            /* Verrouillage visuel orientation portrait 9/16 */
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
         }
         h1 { font-size: 1.05rem; margin-bottom: 8px; }
         .box {
@@ -21,16 +25,20 @@
             padding: 8px;
             border-radius: 8px;
             margin: 8px auto;
-            max-width: 600px;
             position: relative;
             overflow: hidden;
+            aspect-ratio: 9 / 16; /* Verrouillage format 9/16 strict de la zone de visualisation */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         canvas {
-            width: 100%;
-            height: auto;
+            max-width: 100%;
+            max-height: 100%;
             display: none;
             cursor: pointer;
             touch-action: manipulation;
+            object-fit: contain;
         }
         #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 6px; font-weight: bold; }
         .btn {
@@ -62,18 +70,30 @@
             padding: 10px;
             border-radius: 8px;
             margin-top: 8px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        .image-tools-bar {
+        /* Panneau d'outils généraux de l'image (Pivoter, Recentrer, Échelle) */
+        .image-tools-container {
             display: none;
+            background: #262626;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .tool-section-title {
+            font-size: 0.78rem;
+            color: #17a2b8;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        .image-tools-bar {
+            display: flex;
             gap: 6px;
-            margin-top: 6px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            margin-bottom: 6px;
         }
         .image-tools-bar button {
             flex: 1;
@@ -86,20 +106,37 @@
             touch-action: manipulation;
         }
 
+        .scale-control-box {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 6px;
+        }
+        .scale-buttons-row {
+            display: flex;
+            gap: 6px;
+        }
+        .scale-buttons-row button {
+            flex: 1;
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .scale-buttons-row button:active { background: #0056b3; }
+
         .camera-pan-container {
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
             padding: 8px;
             margin-bottom: 10px;
-        }
-        .camera-pan-title {
-            font-size: 0.78rem;
-            color: #17a2b8;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            letter-spacing: 0.5px;
         }
         .camera-pan-grid {
             display: grid;
@@ -179,7 +216,6 @@
             touch-action: manipulation;
         }
         .control-row button:active { background: #007bff; }
-        .btn-action-blue { background: #007bff !important; }
 
         .nav-buttons {
             display: flex;
@@ -190,10 +226,10 @@
 </head>
 <body>
 
-    <h1>Acuitix.26 - Assistant CAO</h1>
+    <h1>Acuitix.27 - Assistant CAO</h1>
 
     <div class="box">
-        <p id="status-text">1. Prenez la photo du gabarit.</p>
+        <p id="status-text" style="position: absolute; top: 10px; z-index: 10; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px;">1. Prenez la photo du gabarit.</p>
         <canvas id="canvas"></canvas>
     </div>
 
@@ -201,14 +237,26 @@
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <div class="image-tools-bar" id="image-tools-bar">
-            <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
-            <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+        <!-- Panneau outils image et échelle unifié au-dessus -->
+        <div class="image-tools-container" id="image-tools-container">
+            <div class="tool-section-title">📷 Paramètres de l'image</div>
+            <div class="image-tools-bar">
+                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
+                <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+            </div>
+
+            <div class="scale-control-box">
+                <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
+                <div class="scale-buttons-row">
+                    <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                    <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
+                </div>
+            </div>
         </div>
 
         <div class="adjust-panel" id="adjust-panel">
             <div class="camera-pan-container">
-                <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
+                <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
                 <div class="camera-pan-grid">
                     <button onmousedown="startAction(() => panCamera(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
                     <button onmousedown="startAction(() => panCamera(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
@@ -218,8 +266,8 @@
             </div>
 
             <div class="gameboy-container">
-                <!-- Croix directionnelle sans label "Cible" -->
-                <div class="dpad-container" title="Déplacer précisément">
+                <!-- Croix directionnelle sans label -->
+                <div class="dpad-container">
                     <div class="dpad-grid">
                         <div></div>
                         <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
@@ -235,13 +283,8 @@
 
                 <div class="controls-right" id="panel-tools">
                     <div class="control-row">
-                        <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                        <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
-                    </div>
-                    <div class="control-row">
-                        <!-- Échelle réactive et fluide sans confirmation lourde -->
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
-                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
+                        <button onclick="adjustZoom(0.5)">🔍+ Zoom Vue</button>
+                        <button onclick="adjustZoom(-0.5)">🔍- Zoom Vue</button>
                     </div>
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -261,7 +304,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.26)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.27)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -271,7 +314,7 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('status-text');
         const btnShoot = document.getElementById('btn-shoot');
-        const imageToolsBar = document.getElementById('image-tools-bar');
+        const imageToolsContainer = document.getElementById('image-tools-container');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
@@ -332,7 +375,7 @@
                     canvas.style.display = 'block';
                     adjustPanel.style.display = 'block';
                     btnShoot.style.display = 'none';
-                    imageToolsBar.style.display = 'flex';
+                    imageToolsContainer.style.display = 'block';
                     
                     updateUIState();
                     redrawCanvas();
@@ -379,12 +422,10 @@
 
         window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         
-        // Correction : synchronisation parfaite de la vue lors du panoramique (flèches de déplacement image)
+        // Panoramique strict (déplace uniquement la vue sans toucher à l'élément)
         window.panCamera = function(dx, dy) { 
             manualPanX += dx; 
             manualPanY += dy; 
-            tempX += dx; 
-            tempY += dy; 
             redrawCanvas(); 
         }
         
@@ -413,21 +454,14 @@
 
             let imgX, imgY;
             if (zoomLevel > 1.0) {
-                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
-                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
+                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + (canvas.width / 2 - manualPanX);
+                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + (canvas.height / 2 - manualPanY);
             } else {
                 imgX = clientClickX;
                 imgY = clientClickY;
             }
 
             if (step >= 1 && step <= 7) {
-                // Si on zoome, clic direct recentré sur le point touché tout en réalignant la vue
-                if (zoomLevel > 1.0) {
-                    let diffX = imgX - tempX;
-                    let diffY = imgY - tempY;
-                    manualPanX += diffX;
-                    manualPanY += diffY;
-                }
                 tempX = imgX;
                 tempY = imgY;
                 redrawCanvas();
@@ -466,7 +500,7 @@
             if (!isForExport && zoomLevel > 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
+                ctx.translate(-canvas.width / 2 + manualPanX, -canvas.height / 2 + manualPanY);
             }
 
             ctx.save();
@@ -547,7 +581,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v26.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v27.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -600,8 +634,6 @@
         window.resetCurrentPos = function() {
             manualPanX = 0;
             manualPanY = 0;
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
             zoomLevel = 1.0;
             redrawCanvas();
         }
@@ -661,8 +693,8 @@
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
-                imageToolsBar.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.26) ! Prêt pour AcuTx.";
+                imageToolsContainer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.27) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -729,7 +761,7 @@
             stopAction();
             canvas.style.display = 'none';
             adjustPanel.style.display = 'none';
-            imageToolsBar.style.display = 'none';
+            imageToolsContainer.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
             btnShoot.style.display = 'block';
