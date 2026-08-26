@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.32 - Assistant CAO (Protocole Strict)</title>
+    <title>Acuitix.33 - Assistant CAO (Protocole Strict)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,7 +41,6 @@
         }
         #status-text { font-size: 0.9rem; color: #ffc107; margin-bottom: 6px; font-weight: bold; padding: 4px; background: rgba(0,0,0,0.5); border-radius: 4px;}
         
-        /* Zone d'accueil avec icône de mimétisme */
         #welcome-panel {
             display: block;
             padding: 20px;
@@ -264,9 +263,8 @@
 </head>
 <body>
 
-    <h1>Acuitix.32</h1>
+    <h1>Acuitix.33</h1>
 
-    <!-- Zone d'accueil avec icône de mimétisme et label natif pour déclencher la photo -->
     <div id="welcome-panel">
         <svg id="mimic-icon" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="2" y="2" width="60" height="40" rx="4" stroke="#FFC107" stroke-width="4"/>
@@ -281,8 +279,6 @@
         </svg>
         <p style="color: #fff; font-weight: bold; font-size: 0.95rem;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
         <p style="color: #ddd; font-size: 0.85rem;">Orientez votre téléphone en mode **PAYSAGE (horizontal)**, comme l'icône ci-dessus, pour capturer l'intégralité de la plaque.</p>
-        
-        <!-- Le label pointe vers l'input file masqué pour garantir l'ouverture de l'appareil photo sur mobile -->
         <label for="file-input" class="btn">📸 Lancer l'appareil photo</label>
     </div>
 
@@ -330,7 +326,7 @@
 
                 <div class="gameboy-container">
                     <div class="dpad-container">
-                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Cible</div>
+                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement élément</div>
                         <div class="dpad-grid">
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
@@ -420,7 +416,6 @@
                     rotationAngle = 0;
                     updateCanvasDimensions();
 
-                    // ÉTAPE 0 : Contrôle de prise de vue
                     step = 0;
                     zoomLevel = 1.0;
                     manualPanX = 0;
@@ -439,7 +434,6 @@
                     tempAngle = 0;
                     tempSize = defaultSize;
 
-                    // Affichage des éléments de l'étape 0
                     welcomePanel.style.display = 'none';
                     canvas.style.display = 'block';
                     statusText.style.display = 'block';
@@ -472,11 +466,12 @@
         }
 
         window.resetCanvasAndTempPos = function() {
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
+            if (!currentImg) return;
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
             redrawCanvas();
         }
 
@@ -505,7 +500,7 @@
         window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
 
         canvas.addEventListener('click', function(e) {
-            if (step === 0) return; // Pas de clic interactif en étape 0
+            if (step === 0) return;
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -635,7 +630,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v32.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v33.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -697,7 +692,6 @@
             resetCanvasAndTempPos();
 
             if (step === 0) {
-                // Passage de l'étape 0 (contrôle) à l'étape 1 (Carré gauche) avec verrouillage de rotation
                 step = 1;
                 preCaptureTools.style.display = 'none';
                 generalToolsContainer.style.display = 'block';
@@ -745,7 +739,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.32) !";
+                statusText.innerText = "✅ Calage expert terminé (v.33) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
