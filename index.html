@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.39 - Assistant CAO</title>
+    <title>Acuitix.40 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.39</h1>
+    <h1>Acuitix.40</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -273,7 +273,6 @@
             <div class="camera-pan-container" style="margin-bottom: 4px;">
                 <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
-                    <!-- Correction complète Étape 0 : Haut (+30 Y), Gauche (+30 X), Droite (-30 X), Bas (-30 Y) -->
                     <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
                     <button onmousedown="startAction(() => panImage(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
                     <button onmousedown="startAction(() => panImage(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
@@ -540,6 +539,9 @@
             if (step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
+                // Correction appliquée : on reset le panoramique manuel pour éviter le décalage de zoom
+                manualPanX = 0;
+                manualPanY = 0;
                 redrawCanvas();
             }
         });
@@ -650,7 +652,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v39.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v40.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -775,7 +777,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.39) !";
+                statusText.innerText = "✅ Calage expert terminé (v.40) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
