@@ -2,258 +2,1040 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix - Assistant de Métrologie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acuitix V.43 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            background: #1e1e1e;
+            color: #fff;
             margin: 0;
-            padding: 20px;
+            padding: 6px;
             text-align: center;
+            user-select: none;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        h1 { color: #4CAF50; }
-        .card {
-            background: #2d2d2d;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-            margin: 20px auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+        h1 { font-size: 1.1rem; margin: 2px 0; text-transform: uppercase; color: #ffc107;}
+        #status-text { 
+            font-size: 0.85rem; 
+            color: #ffc107; 
+            margin: 4px 0; 
+            font-weight: bold; 
+            padding: 4px; 
+            background: rgba(0,0,0,0.6); 
             border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
+            display: none;
         }
-        button:hover { background-color: #45a049; }
-        button.secondary { background-color: #d9534f; }
-        button.secondary:hover { background-color: #c9302c; }
-        input[type="file"], select {
-            margin: 10px 0;
-            padding: 8px;
-            background: #3d3d3d;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+        .box {
+            background: #2a2a2a;
+            border: 2px solid #555;
+            padding: 2px;
+            border-radius: 6px;
+            margin: 4px auto;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-height: 40vh;
         }
         canvas {
             max-width: 100%;
+            max-height: 100%;
+            display: none;
+            cursor: pointer;
+            touch-action: manipulation;
+            object-fit: contain;
+        }
+        
+        #welcome-panel {
+            display: block;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        #mimic-icon {
+            width: 80px;
             height: auto;
-            border: 2px solid #555;
-            border-radius: 4px;
-            margin-top: 15px;
-            cursor: crosshair;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 5px rgba(255, 193, 7/0.5));
         }
-        .hidden { display: none !important; }
-        .controls-group {
-            margin: 15px 0;
+
+        .btn {
+            display: block;
+            width: 100%;
             padding: 10px;
-            background: #383838;
+            background: #28a745;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
             border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            box-sizing: border-box;
+            margin-top: 8px;
+            text-align: center;
         }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .btn:active { background: #1e7e34; }
+        .btn-secondary { background: #6c757d; }
+        .btn-danger { background: #dc3545; }
+        .btn-info { background: #17a2b8; }
+        .btn-warning { background: #ffc107; color: #000; }
+        
+        #file-input { display: none; }
+        
+        .adjust-panel {
+            display: none;
+            background: #333;
+            padding: 6px;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+
+        #pre-capture-tools {
+            display: none;
+            background: #3a3a3a;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 6px;
+            margin-bottom: 6px;
+        }
+        #pre-capture-tools h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 4px 0; text-transform: uppercase;}
+
+        #general-tools-container { display: none; }
+
+        .image-tools-container {
+            background: #262626;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 4px;
+            margin-bottom: 4px;
+        }
+        .tool-section-title {
+            font-size: 0.7rem;
+            color: #17a2b8;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            text-align: left;
+        }
+        .image-tools-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 3px;
+        }
+        .image-tools-bar button {
+            flex: 1;
+            padding: 8px 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .scale-control-box {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            padding: 4px;
+            border-radius: 4px;
+            margin-top: 3px;
+        }
+        .scale-buttons-row {
+            display: flex;
+            gap: 4px;
+        }
+        .scale-buttons-row button {
+            flex: 1;
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .camera-pan-container {
+            background: #262626;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 4px;
+            margin-bottom: 4px;
+        }
+        .camera-pan-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3px;
+        }
+        .camera-pan-grid button {
+            padding: 8px 2px;
+            background: #495057;
+            color: white;
+            border: 1px solid #6c757d;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .gameboy-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .dpad-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #222;
+            padding: 3px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            flex-shrink: 0;
+            margin: auto 0;
+        }
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 38px);
+            grid-template-rows: repeat(3, 38px);
+            gap: 2px;
+        }
+        .dpad-grid button {
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .dpad-grid button:active { background: #007bff; }
+
+        .controls-right {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex-grow: 1;
+        }
+        .control-row {
+            display: flex;
+            gap: 3px;
+        }
+        .control-row button {
+            flex: 1;
+            padding: 10px 2px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        /* Styles spécifiques pour l'analyse de fond et l'opacité */
+        .analysis-box {
+            background: #2a2a2a;
+            border: 2px solid #ffeb3b;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            text-align: center;
+            display: none;
+        }
+        .opacity-control-box {
+            background: #262626;
+            border: 1px solid #444;
+            padding: 6px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        .opacity-control-box label {
+            font-size: 0.75rem;
+            color: #4CAF50;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .opacity-control-box input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Acuitix - Module Intelligent</h1>
+    <h1>Acuitix V.43</h1>
+    <div id="status-text">1. Prenez la photo du gabarit.</div>
 
-    <!-- ÉTAPE 0 : CHARGEMENT ET ANALYSE DU FOND -->
-    <div id="step-0" class="card">
-        <h2>Étape 0 : Importation & Analyse du Fond</h2>
-        <p>Prenez ou chargez la photo de votre pièce.</p>
-        <input type="file" id="photo-input" accept="image/*"><br>
-        <div id="analysis-box" class="hidden controls-group">
-            <p id="analysis-text" style="font-size: 15px; color: #ffeb3b;"></p>
-            <button onclick="validerAnalyse(true)">Oui, parfait</button>
-            <button class="secondary" onclick="validerAnalyse(false)">Non, mode manuel</button>
-        </div>
-        
-        <!-- Mode Manuel si refus -->
-        <div id="manual-box" class="hidden controls-group">
-            <label>Couleur du fond estimée :</label>
-            <select id="manual-bg">
-                <option value="dark">Sombre / Noir / Noyer</option>
-                <option value="light">Clair / Érable / Blanc</option>
-                <option value="red">Rouge / Teinte Cherry</option>
-            </select>
-            <label>Couleur d'élément souhaitée :</label>
-            <select id="manual-element-color">
-                <option value="#00FFFF">Cyan Fluo</option>
-                <option value="#FFFF00">Jaune Fluo</option>
-                <option value="#FF00FF">Magenta</option>
-                <option value="#00FF00">Vert Fluo</option>
-            </select>
-            <button onclick="forcerModeManuel()">Appliquer ce choix</button>
-        </div>
-    </div>
-
-    <!-- ÉTAPE 1 : PLACEMENT DES COMPOSANTS & OPACITÉ -->
-    <div id="step-1" class="card hidden">
-        <h2>Étape 1 : Calage & Opacité (« À raz »)</h2>
-        <p>Ajustez l'opacité pour voir à travers et caler les éléments sur les bords extérieurs.</p>
-        
-        <div class="controls-group">
-            <label for="opacity-slider">Opacité des repères : <span id="opacity-val">80</span>%</label>
-            <input type="range" id="opacity-slider" min="10" max="100" value="80" oninput="changerOpacite(this.value)">
-        </div>
-
-        <p style="font-size: 13px; color: #aaa;">Les centres des carrés étalons, des 4 coins et des perçages sont matérialisés par une croix centrale de précision.</p>
-        
+    <div class="box">
         <canvas id="canvas"></canvas>
     </div>
 
-<script>
-    let img = new Image();
-    let canvas = document.getElementById('canvas');
-    let ctx = canvas.getContext('2d');
-    let elementColor = "#00FFFF"; // Couleur par défaut
-    let currentOpacity = 0.8;
+    <div>
+        <input type="file" id="file-input" accept="image/*" capture="environment">
 
-    // Simulation de données de position pour l'exemple (Étalon, 4 coins, Perçages)
-    let state = {
-        etalon: { x: 100, y: 100, size: 80 },
-        coins: [
-            { x: 50, y: 50 }, { x: 300, y: 50 },
-            { x: 50, y: 300 }, { x: 300, y: 300 }
-        ],
-        percages: [
-            { x: 150, y: 200 }, { x: 250, y: 200 }
-        ]
-    };
+        <!-- Panneau d'analyse automatique du fond (Étape 0 intelligente) -->
+        <div id="analysis-box" class="analysis-box">
+            <p id="analysis-text" style="font-size: 0.8rem; color: #ffeb3b; margin: 0 0 8px 0; line-height: 1.3;"></p>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn" style="margin-top:0; padding: 8px;" onclick="validerAnalyseFond(true)">Oui, parfait</button>
+                <button class="btn btn-danger" style="margin-top:0; padding: 8px;" onclick="validerAnalyseFond(false)">Non (Manuel)</button>
+            </div>
+        </div>
 
-    document.getElementById('photo-input').addEventListener('change', function(e) {
-        let file = e.target.files[0];
-        if (!file) return;
-        let reader = new FileReader();
-        reader.onload = function(event) {
-            img.onload = function() {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                // Lancer l'analyse automatique du fond sur le centre de l'image
-                analyserFondAutomatique();
+        <!-- Panneau de secours Mode Manuel -->
+        <div id="manual-color-box" class="analysis-box" style="border-color: #dc3545; display: none;">
+            <p style="font-size: 0.8rem; color: #fff; margin: 0 0 4px 0;">Sélectionnez manuellement la couleur de vos repères :</p>
+            <select id="manual-element-color" style="width: 100%; padding: 6px; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; margin-bottom: 6px;">
+                <option value="#00FFFF">Cyan Fluo (Universel)</option>
+                <option value="#FFFF00">Jaune Fluo (Fonds sombres)</option>
+                <option value="#FF00FF">Magenta (Fonds clairs)</option>
+                <option value="#00FF00">Vert Fluo</option>
+            </select>
+            <button class="btn" style="margin-top:0; padding: 8px;" onclick="forcerCouleurManuelle()">Appliquer cette couleur</button>
+        </div>
+
+        <!-- Panneau étape 0 (Déplacement de l'image & orientation initiale) -->
+        <div id="pre-capture-tools" class="adjust-panel">
+            <h3>📷 Étape 0 : Contrôle de la prise de vue</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.2;">Positionner l'image parfaitement (les 4 coins du gabarit doivent être visibles).</p>
+            
+            <div class="camera-pan-container" style="margin-bottom: 4px;">
+                <div class="tool-section-title">🖼️ Déplacement de l'image</div>
+                <div class="camera-pan-grid">
+                    <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panImage(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => panImage(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                </div>
+            </div>
+
+            <div class="image-tools-bar" style="margin-bottom: 4px;">
+                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
+                <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
+                <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Zoom</button>
+                <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
+            </div>
+            
+            <button class="btn" style="margin-top: 4px;" onclick="validateStep()">Valider cette orientation</button>
+        </div>
+
+        <!-- Panneau outils généraux (Étapes 1 à 7) -->
+        <div id="general-tools-container">
+            <!-- Curseur d'opacité pour travailler "à raz" -->
+            <div class="opacity-control-box">
+                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">80</span>% (Mode « À raz »)</label>
+                <input type="range" id="opacity-slider" min="10" max="100" value="80" oninput="changerOpacite(this.value)">
+            </div>
+
+            <div class="image-tools-container">
+                <div class="scale-control-box">
+                    <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
+                    <div class="scale-buttons-row">
+                        <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                        <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top: 4px; padding: 8px; font-size: 0.75rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+            </div>
+
+            <div class="adjust-panel" id="adjust-panel">
+                <div class="camera-pan-container">
+                    <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
+                    <div class="camera-pan-grid">
+                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                        <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                        <button onmousedown="startAction(() => panCamera(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                        <button onmousedown="startAction(() => panCamera(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    </div>
+                </div>
+
+                <div class="gameboy-container">
+                    <div class="dpad-container">
+                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement élément</div>
+                        <div class="dpad-grid">
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                            <div style="background:#2a2a2a; border-radius:4px;"></div>
+                            <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                            <div></div>
+                            <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="controls-right">
+                        <div class="control-row">
+                            <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
+                            <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
+                        </div>
+                        <div class="control-row">
+                            <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                            <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
+                    <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:4px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none;">⬅️ Retour</button>
+                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="welcome-panel">
+            <svg id="mimic-icon" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="60" height="40" rx="4" stroke="#FFC107" stroke-width="4"/>
+                <line x1="2" y1="10" x2="62" y2="10" stroke="#FFC107" stroke-width="2"/>
+                <circle cx="8" cy="6" r="2" fill="#FFC107"/>
+                <circle cx="16" cy="6" r="2" fill="#FFC107"/>
+                <rect x="52" y="30" width="8" height="4" rx="2" fill="#FFC107"/>
+                <rect x="52" y="22" width="8" height="4" rx="2" fill="#FFC107"/>
+                <path d="M32 19C35.3137 19 38 21.6863 38 25C38 28.3137 35.3137 31 32 31C28.6863 31 26 28.3137 26 25C26 21.6863 28.6863 19 32 19Z" stroke="#FFC107" stroke-width="2"/>
+                <path d="M32 21V29" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
+                <path d="M28 25H36" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <p style="color: #fff; font-weight: bold; font-size: 0.9rem; margin: 4px 0;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
+            <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">Orientez votre téléphone en mode **PAYSAGE (horizontal)** pour capturer l'intégralité de la plaque.</p>
+            <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
+        </div>
+        
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('status-text');
+        const welcomePanel = document.getElementById('welcome-panel');
+        const preCaptureTools = document.getElementById('pre-capture-tools');
+        const generalToolsContainer = document.getElementById('general-tools-container');
+        const btnDownload = document.getElementById('btn-download');
+        const btnRetry = document.getElementById('btn-retry');
+        const adjustPanel = document.getElementById('adjust-panel');
+        const holeActionPanel = document.getElementById('hole-action-panel');
+        
+        const analysisBox = document.getElementById('analysis-box');
+        const analysisText = document.getElementById('analysis-text');
+        const manualColorBox = document.getElementById('manual-color-box');
+
+        let currentImg = null;
+        let step = 0; 
+        let rotationAngle = 0; 
+
+        let imgOffsetX = 0;
+        let imgOffsetY = 0;
+
+        let box1 = { x: 0, y: 0, size: 0, angle: 0 };
+        let box2 = { x: 0, y: 0, size: 0, angle: 0 };
+        let corners = [
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }, 
+            { x: 0, y: 0, size: 0, angle: 0 }  
+        ];
+        let holes = []; 
+
+        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
+        let zoomLevel = 1.0;
+        let manualPanX = 0; 
+        let manualPanY = 0;
+        let actionInterval = null;
+
+        // Variables pour la couleur dynamique et l'opacité
+        let elementColor = "#00FFFF";
+        let currentOpacity = 0.8;
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImg = img;
+                    rotationAngle = 0;
+                    imgOffsetX = 0;
+                    imgOffsetY = 0;
+                    updateCanvasDimensions();
+
+                    step = 0;
+                    zoomLevel = 1.0;
+                    manualPanX = 0;
+                    manualPanY = 0;
+                    
+                    let w = canvas.width;
+                    let h = canvas.height;
+                    let defaultSize = w * 0.055; 
+
+                    box1.size = defaultSize;
+                    box2.size = defaultSize;
+                    for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
+
+                    tempX = w * 0.5;
+                    tempY = h * 0.5;
+                    tempAngle = 0;
+                    tempSize = defaultSize;
+
+                    welcomePanel.style.display = 'none';
+                    canvas.style.display = 'block';
+                    statusText.style.display = 'block';
+                    statusText.innerText = "Analyse de la photo en cours...";
+                    
+                    redrawCanvas();
+
+                    // Lancer l'analyse automatique du fond de la photo
+                    analyserFondAutomatique();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function analyserFondAutomatique() {
+            let centerX = Math.floor(canvas.width / 2);
+            let centerY = Math.floor(canvas.height / 2);
+            let pixelData = ctx.getImageData(centerX - 20, centerY - 20, 40, 40).data;
+            
+            let rSum = 0, gSum = 0, bSum = 0;
+            let totalPixels = pixelData.length / 4;
+            
+            for (let i = 0; i < pixelData.length; i += 4) {
+                rSum += pixelData[i];
+                gSum += pixelData[i+1];
+                bSum += pixelData[i+2];
             }
-            img.src = event.target.result;
-        }
-        reader.readAsDataURL(file);
-    });
+            
+            let avgR = rSum / totalPixels;
+            let avgG = gSum / totalPixels;
+            let avgB = bSum / totalPixels;
 
-    function analyserFondAutomatique() {
-        // Échantillonnage d'une zone centrale pour deviner la luminosité/teinte
-        let centerX = Math.floor(canvas.width / 2);
-        let centerY = Math.floor(canvas.height / 2);
-        let pixelData = ctx.getImageData(centerX - 10, centerY - 10, 20, 20).data;
-        
-        let rSum = 0, gSum = 0, bSum = 0;
-        let totalPixels = pixelData.length / 4;
-        
-        for (let i = 0; i < pixelData.length; i += 4) {
-            rSum += pixelData[i];
-            gSum += pixelData[i+1];
-            bSum += pixelData[i+2];
-        }
-        
-        let avgR = rSum / totalPixels;
-        let avgG = gSum / totalPixels;
-        let avgB = bSum / totalPixels;
+            let detectedType = "neutre";
+            if (avgR > 120 && avgG < 90 && avgB < 90) {
+                detectedType = "rouge / teinté";
+                elementColor = "#00FFFF"; // Cyan en opposition parfaite au rouge
+            } else if ((avgR + avgG + avgB) / 3 < 85) {
+                detectedType = "sombre (bois foncé)";
+                elementColor = "#FFFF00"; // Jaune fluo éclatant
+            } else {
+                detectedType = "clair";
+                elementColor = "#FF00FF"; // Magenta
+            }
 
-        let detectedType = "neutre";
-        if (avgR > 130 && avgG < 90 && avgB < 90) {
-            detectedType = "rouge (type Cherry Red)";
-            elementColor = "#00FFFF"; // Cyan en opposition au rouge
-        } else if ((avgR + avgG + avgB) / 3 < 80) {
-            detectedType = "sombre (bois foncé)";
-            elementColor = "#FFFF00"; // Jaune fluo
-        } else {
-            detectedType = "clair";
-            elementColor = "#FF00FF"; // Magenta
+            analysisText.innerText = `Notre application détecte un fond ${detectedType}. Nous vous proposons la couleur d'opposition idéale pour identifier parfaitement les éléments. Êtes-vous d'accord ?`;
+            analysisBox.style.display = 'block';
         }
 
-        // Affichage de la proposition
-        document.getElementById('analysis-text'].innerText = 
-            `Notre application détecte un fond ${detectedType}. Nous vous proposons la couleur d'opposition idéale (${elementColor === '#00FFFF' ? 'Cyan' : elementColor === '#FFFF00' ? 'Jaune' : 'Magenta'}) pour identifier parfaitement les éléments. Êtes-vous d'accord ?`;
-        
-        document.getElementById('analysis-box').classList.remove('hidden');
-    }
-
-    function validerAnalyse(estAccord) {
-        if (estAccord) {
-            passerAETape1();
-        } else {
-            document.getElementById('analysis-box').classList.add('hidden');
-            document.getElementById('manual-box').classList.remove('hidden');
+        window.validerAnalyseFond = function(estAccord) {
+            analysisBox.style.display = 'none';
+            if (estAccord) {
+                lancerEtapePreCapture();
+            } else {
+                manualColorBox.style.display = 'block';
+            }
         }
-    }
 
-    function forcerModeManuel() {
-        elementColor = document.getElementById('manual-element-color').value;
-        passerAETape1();
-    }
+        window.forcerCouleurManuelle = function() {
+            elementColor = document.getElementById('manual-element-color').value;
+            manualColorBox.style.display = 'none';
+            lancerEtapePreCapture();
+        }
 
-    function passerAETape1() {
-        document.getElementById('step-0').classList.add('hidden');
-        document.getElementById('step-1').classList.remove('hidden');
-        redessinerCanvas();
-    }
+        function lancerEtapePreCapture() {
+            statusText.innerText = "Étape 0 : Contrôle et orientation de la photo";
+            preCaptureTools.style.display = 'block';
+            redrawCanvas();
+        }
 
-    function changerOpacite(val) {
-        currentOpacity = val / 100;
-        document.getElementById('opacity-val').innerText = val;
-        redessinerCanvas();
-    }
+        window.changerOpacite = function(val) {
+            currentOpacity = val / 100;
+            document.getElementById('opacity-val').innerText = val;
+            redrawCanvas();
+        }
 
-    function redessinerCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+        function updateCanvasDimensions() {
+            if (!currentImg) return;
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                canvas.width = currentImg.naturalHeight;
+                canvas.height = currentImg.naturalWidth;
+            } else {
+                canvas.width = currentImg.naturalWidth;
+                canvas.height = currentImg.naturalHeight;
+            }
+        }
 
-        ctx.save();
-        ctx.globalAlpha = currentOpacity;
-        ctx.strokeStyle = elementColor;
-        ctx.fillStyle = elementColor;
-        ctx.lineWidth = 3;
+        window.rotateImage90 = function() {
+            if (!currentImg) return;
+            rotationAngle = (rotationAngle + 90) % 360;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
+            updateCanvasDimensions();
+            resetCanvasAndTempPos();
+        }
 
-        // 1. Dessiner l'étalon et son centre
-        ctx.strokeRect(state.etalon.x, state.etalon.y, state.etalon.size, state.etalon.size);
-        dessinerCroixCentre(state.etalon.x + state.etalon.size/2, state.etalon.y + state.etalon.size/2);
+        window.resetCanvasAndTempPos = function() {
+            if (!currentImg) return;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            if (step === 0) {
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            } else {
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            }
+            redrawCanvas();
+        }
 
-        // 2. Dessiner les 4 coins et leurs centres
-        state.coins.forEach(coin => {
-            ctx.beginPath();
-            ctx.arc(coin.x, coin.y, 8, 0, 2 * Math.PI);
-            ctx.stroke();
-            dessinerCroixCentre(coin.x, coin.y);
+        window.startAction = function(actionFn, speedMs) {
+            stopAction();
+            actionFn();
+            actionInterval = setInterval(actionFn, speedMs);
+        }
+        window.stopAction = function() { 
+            if (actionInterval) { 
+                clearInterval(actionInterval); 
+                actionInterval = null; 
+            } 
+        }
+
+        window.moveTarget = function(dx, dy) { 
+            tempX += dx; 
+            tempY += dy; 
+            redrawCanvas(); 
+        }
+
+        window.panCamera = function(dx, dy) { 
+            manualPanX += dx; 
+            manualPanY += dy; 
+            redrawCanvas(); 
+        }
+
+        window.panImage = function(dx, dy) { 
+            imgOffsetX += dx; 
+            imgOffsetY += dy; 
+            redrawCanvas(); 
+        }
+        
+        window.adjustZoom = function(delta) {
+            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
+            if (zoomLevel === 1.0) { 
+                manualPanX = 0; 
+                manualPanY = 0; 
+            } else {
+                manualPanX = 0;
+                manualPanY = 0;
+            }
+            redrawCanvas();
+        }
+
+        window.adjustAngle = function(deltaDeg) { if (step >= 1 && step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
+        window.adjustSize = function(deltaSize) { tempSize = Math.max(10, tempSize + deltaSize); redrawCanvas(); }
+
+        canvas.addEventListener('click', function(e) {
+            if (step === 0) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientClickX = (e.clientX - rect.left) * scaleX;
+            let clientClickY = (e.clientY - rect.top) * scaleY;
+
+            let imgX, imgY;
+            if (zoomLevel > 1.0) {
+                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
+                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
+            } else {
+                imgX = clientClickX;
+                imgY = clientClickY;
+            }
+
+            if (step >= 1 && step <= 7) {
+                tempX = imgX;
+                tempY = imgY;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
+            }
         });
 
-        // 3. Dessiner les perçages et leurs centres
-        state.percages.forEach(perc => {
+        window.askAddHole = function() {
+            if (step === 7) {
+                if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
+                    holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                    resetCanvasAndTempPos();
+                }
+            }
+        }
+
+        window.removeLastHole = function() {
+            if (step === 7 && holes.length > 0) {
+                if (confirm("Voulez-vous supprimer le dernier perçage ajouté ?")) {
+                    holes.pop();
+                    redrawCanvas();
+                }
+            }
+        }
+
+        function redrawCanvas(isForExport = false) {
+            if (!currentImg) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+
+            if (!isForExport && zoomLevel > 1.0) {
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(zoomLevel, zoomLevel);
+                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
+            }
+
+            ctx.save();
+            ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
+            ctx.rotate((rotationAngle * Math.PI) / 180);
+            if (rotationAngle === 90 || rotationAngle === 270) {
+                ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
+            } else {
+                ctx.drawImage(currentImg, -currentImg.naturalWidth / 2, -currentImg.naturalHeight / 2);
+            }
+            ctx.restore();
+
+            let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
+            ctx.lineWidth = Math.max(4, refW / 300);
+
+            // Application de l'opacité pour travailler "à raz"
+            ctx.save();
+            ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
+
+            if (step >= 1) {
+                let rx = step === 1 ? tempX : box1.x;
+                let ry = step === 1 ? tempY : box1.y;
+                let rsz = step === 1 ? tempSize : box1.size;
+                let rang = step === 1 ? tempAngle : box1.angle;
+                drawRotatedRect(rx, ry, rsz, rang, (step === 1 && !isForExport), elementColor);
+                dessinerCroixCentre(rx, ry);
+            }
+            if (step >= 2) {
+                let rx2 = step === 2 ? tempX : box2.x;
+                let ry2 = step === 2 ? tempY : box2.y;
+                let rsz2 = step === 2 ? tempSize : box2.size;
+                let rang2 = step === 2 ? tempAngle : box2.angle;
+                drawRotatedRect(rx2, ry2, rsz2, rang2, (step === 2 && !isForExport), elementColor);
+                dessinerCroixCentre(rx2, ry2);
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let isActive = (step === i + 3 && !isForExport);
+                let isPassed = (step > i + 3 || isForExport);
+                if (isPassed || isActive) {
+                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
+                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
+                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
+                    let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
+
+                    drawCornerMarker(cx, cy, csize, cangle, isActive, elementColor, i);
+                    dessinerCroixCentre(cx, cy);
+                }
+            }
+
+            if (step >= 7) {
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.lineWidth = Math.max(3, refW / 350);
+                ctx.beginPath();
+                ctx.moveTo(corners[0].x, corners[0].y);
+                ctx.lineTo(corners[2].x, corners[2].y);
+                ctx.moveTo(corners[1].x, corners[1].y);
+                ctx.lineTo(corners[3].x, corners[3].y);
+                ctx.stroke();
+                ctx.restore();
+
+                if (!isForExport && step === 7) {
+                    ctx.save();
+                    ctx.strokeStyle = elementColor;
+                    ctx.fillStyle = elementColor;
+                    ctx.globalAlpha = currentOpacity * 0.4;
+                    ctx.lineWidth = Math.max(3, refW / 400);
+                    ctx.beginPath();
+                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                    dessinerCroixCentre(tempX, tempY);
+                }
+            }
+
+            holes.forEach(h => {
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.fillStyle = elementColor;
+                ctx.globalAlpha = currentOpacity * 0.3;
+                ctx.lineWidth = Math.max(3, refW / 400);
+                ctx.beginPath();
+                ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+                dessinerCroixCentre(h.x, h.y);
+            });
+
+            ctx.restore(); // Restauration opacité
+
+            ctx.restore(); // Restauration zoom/pan
+
+            if (step === 8 && isForExport) {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    btnDownload.href = url;
+                    btnDownload.download = 'acuitix_etalon_expert_v43.jpg';
+                }, 'image/jpeg', 0.98);
+            }
+        }
+
+        function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = color;
+            ctx.setLineDash(isActive ? [canvas.width / 70, canvas.width / 90] : []);
+            ctx.strokeRect(-size / 2, -size / 2, size, size);
+            ctx.restore();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, isActive, color, cornerIdx) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.setLineDash(isActive ? [canvas.width / 80, canvas.width / 100] : []);
+            ctx.lineWidth = Math.max(4, canvas.width / 250);
+
+            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
+            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+
             ctx.beginPath();
-            ctx.arc(perc.x, perc.y, 12, 0, 2 * Math.PI);
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
             ctx.stroke();
-            dessinerCroixCentre(perc.x, perc.y);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function dessinerCroixCentre(cx, cy) {
+            ctx.save();
+            ctx.strokeStyle = elementColor;
+            ctx.lineWidth = Math.max(2, canvas.width / 400);
+            let tailleCroix = 6;
+            ctx.beginPath();
+            ctx.moveTo(cx - tailleCroix, cy);
+            ctx.lineTo(cx + tailleCroix, cy);
+            ctx.moveTo(cx, cy - tailleCroix);
+            ctx.lineTo(cx, cy + tailleCroix);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        window.resetCurrentPos = function() {
+            resetCanvasAndTempPos();
+        }
+
+        window.askValidateStep = function() {
+            stopAction();
+            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let label = stepNames[step] || "cette étape";
+            
+            if (step === 7 && holes.length === 0) {
+                if (!confirm("Aucun perçage n'a été ajouté. Voulez-vous vraiment terminer sans perçage ?")) return;
+            }
+
+            if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+                validateStep();
+            }
+        }
+
+        window.askPrevStep = function() {
+            stopAction();
+            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let prevLabel = stepNames[step - 1] || "l'étape précédente";
+            
+            if (confirm("⚠️ Voulez-vous vraiment revenir en arrière vers l'étape : " + prevLabel + " ? (Les modifications de l'étape en cours seront remises à plat)")) {
+                prevStep();
+            }
+        }
+
+        window.validateStep = function() {
+            stopAction();
+
+            if (step === 0) {
+                step = 1;
+                preCaptureTools.style.display = 'none';
+                generalToolsContainer.style.display = 'block';
+                adjustPanel.style.display = 'block';
+
+                resetCanvasAndTempPos();
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                tempAngle = 0;
+                tempSize = canvas.width * 0.055;
+            } else if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
+                step = 2;
+                tempX = box1.x + (canvas.width * 0.15); 
+                tempY = box1.y;
+                tempAngle = box1.angle;
+                tempSize = box1.size;
+                resetCanvasAndTempPos();
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                step = 3; 
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                tempAngle = 0;
+                tempSize = box1.size * 1.2;
+                resetCanvasAndTempPos();
+            } else if (step === 3) {
+                corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
+                step = 4;
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                resetCanvasAndTempPos();
+            } else if (step === 4) {
+                corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
+                step = 5;
+                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+                resetCanvasAndTempPos();
+            } else if (step === 5) {
+                corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
+                step = 6;
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+                resetCanvasAndTempPos();
+            } else if (step === 6) {
+                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
+                step = 7; 
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                resetCanvasAndTempPos();
+            } else if (step === 7) {
+                step = 8; 
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.43) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function prevStep() {
+            resetCanvasAndTempPos();
+            if (step > 1) {
+                step--;
+                if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
+                else if (step === 2) { tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size; }
+                else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+                } else if (step === 7) {
+                    tempX = corners[3].x; tempY = corners[3].y; tempAngle = corners[3].angle; tempSize = corners[3].size;
+                }
+                updateUIState();
+                redrawCanvas();
+            }
+        }
+
+        function updateUIState() {
+            let btnVal = document.getElementById('btn-validate-step');
+            let btnPrev = document.getElementById('btn-prev-step');
+            
+            btnPrev.style.display = (step > 1) ? 'block' : 'none';
+
+            if (step === 7) {
+                holeActionPanel.style.display = 'block';
+                btnVal.innerText = "Terminer et Générer";
+            } else {
+                holeActionPanel.style.display = 'none';
+                btnVal.innerText = "Valider l'étape";
+            }
+
+            const descriptions = [
+                "",
+                "Étape 1 / 6 : Carré GAUCHE",
+                "Étape 2 / 6 : Carré DROIT",
+                "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)",
+                "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)",
+                "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
+                "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)",
+                "Étape 7 : Ajout des perçages"
+            ];
+            statusText.innerText = descriptions[step] || "";
+        }
+
+        btnRetry.addEventListener('click', function() {
+            stopAction();
+            canvas.style.display = 'none';
+            preCaptureTools.style.display = 'none';
+            generalToolsContainer.style.display = 'none';
+            adjustPanel.style.display = 'none';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            analysisBox.style.display = 'none';
+            manualColorBox.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'none';
+            fileInput.value = '';
+            currentImg = null;
+            holes = [];
+            step = 0;
+            rotationAngle = 0;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
         });
-
-        ctx.restore();
-    }
-
-    function dessinerCroixCentre(cx, cy) {
-        let tailleCroix = 6;
-        ctx.beginPath();
-        ctx.moveTo(cx - tailleCroix, cy);
-        ctx.lineTo(cx + tailleCroix, cy);
-        ctx.moveTo(cx, cy - tailleCroix);
-        ctx.lineTo(cx, cy + tailleCroix);
-        ctx.stroke();
-    }
-</script>
-
+    </script>
 </body>
 </html>
