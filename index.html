@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.45 - Assistant CAO</title>
+    <title>Acuitix V.46 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -285,7 +285,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.45</h1>
+    <h1>Acuitix V.46</h1>
     <div id="status-text">Gestion des couleurs</div>
 
     <div class="box">
@@ -295,15 +295,32 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Étape 0.A : Gestion des couleurs (Pipette / Échantillonneur + Zoom) -->
-        <div id="color-management-panel" class="adjust-panel" style="display: block;">
+        <!-- Étape 0.A : Gestion des couleurs (Pipette / Échantillonneur + Zoom + Flèches de précision) -->
+        <div id="color-management-panel" class="adjust-panel">
             <h3>🎨 Gestion des couleurs</h3>
             <p id="color-instruction" style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
-                <b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis pour définir la couleur de fond.
+                Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.
             </p>
 
+            <!-- Bouton d'activation de la Pipette -->
+            <button id="btn-toggle-pipette" class="btn btn-warning" style="margin-top:0; margin-bottom: 6px; padding: 8px;" onclick="togglePipetteActiveState()">
+                🧪 Mode Pipette : ACTIF
+            </button>
+
+            <!-- Outils de déplacement du curseur pipette par flèches -->
             <div class="camera-pan-container" style="margin-bottom: 6px;">
-                <div class="tool-section-title">🔍 Zoom & Déplacement Pipette</div>
+                <div class="tool-section-title">🎯 Ajustement fin du curseur (Pipette)</div>
+                <div class="camera-pan-grid" style="margin-bottom: 4px;">
+                    <button onmousedown="startAction(() => movePipetteTarget(0, -2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, -2), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(-2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(-2, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(2, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => movePipetteTarget(0, 2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteTarget(0, 2), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                </div>
+                <button class="btn" style="background: #28a745; margin-top:0; padding: 6px; font-size: 0.75rem;" onclick="sampleCurrentPipettePosition()">📥 Échantillonner ce pixel ciblé</button>
+            </div>
+
+            <div class="camera-pan-container" style="margin-bottom: 6px;">
+                <div class="tool-section-title">🔍 Zoom & Déplacement Vue</div>
                 <div class="image-tools-bar" style="margin-bottom: 3px;">
                     <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
                     <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Zoom</button>
@@ -467,6 +484,7 @@
         const colorActions = document.getElementById('color-actions');
         const swatchBg = document.getElementById('swatch-bg');
         const swatchTrace = document.getElementById('swatch-trace');
+        const btnTogglePipette = document.getElementById('btn-toggle-pipette');
 
         let currentImg = null;
         let step = 0; // 0 = Gestion des couleurs, 0.5 = Pré-capture/orientation, 1..7 = Calage
@@ -493,8 +511,8 @@
 
         let elementColor = "#00FFFF";
         let sampledBgColor = "#000000";
-        let currentOpacity = 0.8;
         let colorSelected = false;
+        let pipetteActive = true; // Mode pipette actif par défaut à l'étape 0
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -512,6 +530,7 @@
 
                     step = 0; // Mode Gestion des couleurs
                     colorSelected = false;
+                    pipetteActive = true;
                     zoomLevel = 1.0;
                     manualPanX = 0;
                     manualPanY = 0;
@@ -529,13 +548,17 @@
                     tempAngle = 0;
                     tempSize = defaultSize;
 
+                    // Masquer l'accueil et afficher le canvas et l'étape couleur
                     welcomePanel.style.display = 'none';
                     canvas.style.display = 'block';
                     statusText.style.display = 'block';
                     statusText.innerText = "Étape 0 : Définition de la couleur du fond";
                     
                     colorManagementPanel.style.display = 'block';
-                    colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis pour définir la couleur de fond.";
+                    colorInstruction.innerHTML = "Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.";
+                    btnTogglePipette.innerText = "🧪 Mode Pipette : ACTIF";
+                    btnTogglePipette.style.background = "#ffc107";
+                    btnTogglePipette.style.color = "#000";
                     colorPreviewContainer.style.display = 'none';
                     colorActions.style.display = 'none';
 
@@ -546,7 +569,21 @@
             reader.readAsDataURL(file);
         });
 
-        // Gestion du clic de l'échantillonneur et des étapes
+        window.togglePipetteActiveState = function() {
+            pipetteActive = !pipetteActive;
+            if (pipetteActive) {
+                btnTogglePipette.innerText = "🧪 Mode Pipette : ACTIF";
+                btnTogglePipette.style.background = "#ffc107";
+                btnTogglePipette.style.color = "#000";
+            } else {
+                btnTogglePipette.innerText = "🧪 Mode Pipette : INACTIF";
+                btnTogglePipette.style.background = "#6c757d";
+                btnTogglePipette.style.color = "#fff";
+            }
+            redrawCanvas();
+        }
+
+        // Gestion du clic sur le canvas
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -564,10 +601,37 @@
                 imgY = clientClickY;
             }
 
-            // Si on est à l'étape 0 (Échantillonneur couleur)
+            // Si on est à l'étape 0 et que le mode Pipette est actif, un toucher sélectionne directement le pixel
             if (step === 0) {
-                let pX = Math.floor(imgX);
-                let pY = Math.floor(imgY);
+                if (pipetteActive) {
+                    tempX = imgX;
+                    tempY = imgY;
+                    sampleCurrentPipettePosition();
+                }
+                return;
+            }
+
+            if (step >= 1 && step <= 7) {
+                tempX = imgX;
+                tempY = imgY;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
+            }
+        });
+
+        window.movePipetteTarget = function(dx, dy) {
+            if (step === 0) {
+                tempX += dx;
+                tempY += dy;
+                redrawCanvas();
+            }
+        }
+
+        window.sampleCurrentPipettePosition = function() {
+            if (step === 0) {
+                let pX = Math.floor(tempX);
+                let pY = Math.floor(tempY);
                 if (pX >= 0 && pX < canvas.width && pY >= 0 && pY < canvas.height) {
                     let pData = ctx.getImageData(pX, pY, 1, 1).data;
                     let r = pData[0], g = pData[1], b = pData[2];
@@ -594,17 +658,8 @@
                     colorActions.style.display = 'flex';
                     redrawCanvas();
                 }
-                return;
             }
-
-            if (step >= 1 && step <= 7) {
-                tempX = imgX;
-                tempY = imgY;
-                manualPanX = 0;
-                manualPanY = 0;
-                redrawCanvas();
-            }
-        });
+        }
 
         window.validerCouleurFond = function() {
             colorManagementPanel.style.display = 'none';
@@ -619,7 +674,7 @@
             colorSelected = false;
             colorPreviewContainer.style.display = 'none';
             colorActions.style.display = 'none';
-            colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis.";
+            colorInstruction.innerHTML = "Active la <b>Pipette</b> puis touche l'écran ou utilise les flèches pour cibler un pixel précis.";
             redrawCanvas();
         }
 
@@ -728,6 +783,22 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
+            // Affichage du réticule de la pipette à l'étape 0 si actif
+            if (step === 0 && !isForExport) {
+                ctx.save();
+                ctx.strokeStyle = '#ffc107';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(tempX, tempY, 15, 0, Math.PI * 2);
+                ctx.stroke();
+                // Petite croix au centre du réticule
+                ctx.beginPath();
+                ctx.moveTo(tempX - 6, tempY); ctx.lineTo(tempX + 6, tempY);
+                ctx.moveTo(tempX, tempY - 6); ctx.lineTo(tempX, tempY + 6);
+                ctx.stroke();
+                ctx.restore();
+            }
+
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
@@ -810,7 +881,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v45.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v46.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -953,7 +1024,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.45) !";
+                statusText.innerText = "✅ Calage expert terminé (v.46) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
