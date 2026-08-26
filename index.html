@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.29 - Assistant CAO</title>
+    <title>Acuitix.30 - Assistant CAO (Protocole Strict)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,6 +30,7 @@
             align-items: center;
             justify-content: center;
             max-height: 50vh;
+            /* On laisse le canvas s'adapter naturellement à la largeur, la hauteur est limitée par max-height */
         }
         canvas {
             max-width: 100%;
@@ -40,6 +41,21 @@
             object-fit: contain;
         }
         #status-text { font-size: 0.85rem; color: #ffc107; margin-bottom: 4px; font-weight: bold; }
+        
+        /* Image guide pour la prise de photo (affichée avant la photo) */
+        #guide-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        #guide-img {
+            max-width: 80%;
+            height: auto;
+            border: 4px solid #ffc107;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
         .btn {
             display: block;
             width: 100%;
@@ -71,8 +87,20 @@
             margin-top: 6px;
         }
 
-        .image-tools-container {
+        /* Panneau d'outils image (Pivoter, Recentrer) UNIQUEMENT à l'étape 0 */
+        .pre-capture-tools {
             display: none;
+            background: #444;
+            border: 1px solid #666;
+            border-radius: 6px;
+            padding: 6px;
+            margin-bottom: 10px;
+        }
+        .pre-capture-tools h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 5px 0; }
+
+        /* Panneau d'outils généraux de l'image (Pivoter, Recentrer, Échelle) */
+        .image-tools-container {
+            display: none; /* Caché par défaut, géré par updateUIState */
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
@@ -91,7 +119,7 @@
         .image-tools-bar {
             display: flex;
             gap: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         .image-tools-bar button {
             flex: 1;
@@ -224,7 +252,14 @@
 </head>
 <body>
 
-    <h1>Acuitix.29 - Assistant CAO</h1>
+    <h1>Acuitix.30 - Assistant CAO</h1>
+
+    <!-- Image guide pour forcer le mode paysage (16/9) -->
+    <div id="guide-container">
+        <img id="guide-img" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23333'/%3E%3Cpath d='M14 2h-3.5L9.33.33C9.15.14 8.89 0 8.61 0H7.39c-.28 0-.54.14-.72.33L5.5 2H2c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 5H2V4h3.5l1.17-1.67C6.84 2.14 6.99 2 7.14 2h1.72c.15 0 .3.14.31.33L10.5 4H14v3z' fill='%23fff'/%3E%3Ccircle cx='8' cy='5.5' r='1.5' fill='%23fff'/%3E%3C/svg%3E" alt="Guide photo paysage">
+        <p style="color: #fff; font-weight: bold;">ATTENTION : Orientez votre téléphone en mode PAYSAGE (16/9) pour prendre la photo.</p>
+        <button class="btn" onclick="startCameraCapture()">J'ai compris, prendre la photo</button>
+    </div>
 
     <div class="box">
         <p id="status-text" style="position: absolute; top: 6px; z-index: 10; background: rgba(0,0,0,0.7); padding: 3px 6px; border-radius: 4px; font-size: 0.78rem;">1. Prenez la photo du gabarit.</p>
@@ -232,16 +267,22 @@
     </div>
 
     <div>
-        <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
+        <label class="btn" id="btn-shoot" onclick="showCaptureGuide()">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <div class="image-tools-container" id="image-tools-container">
-            <div class="tool-section-title">📷 Paramètres de l'image</div>
+        <!-- Panneau de contrôle UNIQUEMENT pour l'étape 0 (Contrôle de prise de vue) -->
+        <div class="pre-capture-tools" id="pre-capture-tools">
+            <h3>Étape 0 : Contrôle de la prise de vue</h3>
+            <p style="font-size: 0.8rem; color: #ddd; margin-bottom: 5px;">Vérifiez l'orientation de la photo. Vous pouvez la pivoter ici.</p>
             <div class="image-tools-bar">
                 <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
-                <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+                <button class="btn-info" onclick="resetCanvasAndTempPos()">🎯 Recentrer l'image</button>
             </div>
+             <button class="btn" id="btn-validate-step0" onclick="askValidateStep()">Valider cette orientation</button>
+        </div>
 
+        <!-- Panneau des outils généraux (Échelle, Panoramique, Cible) pour les étapes 1 à 7 -->
+        <div class="image-tools-container" id="image-tools-container">
             <div class="scale-control-box">
                 <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
                 <div class="scale-buttons-row">
@@ -266,515 +307,4 @@
                 <div class="dpad-container">
                     <div class="dpad-grid">
                         <div></div>
-                        <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <div style="background:#2a2a2a; border-radius:4px;"></div>
-                        <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
-                        <div></div>
-                    </div>
-                </div>
-
-                <div class="controls-right" id="panel-tools">
-                    <div class="control-row">
-                        <button onclick="adjustZoom(0.5)">🔍+ Zoom Élément</button>
-                        <button onclick="adjustZoom(-0.5)">🔍- Zoom Élément</button>
-                    </div>
-                    <div class="control-row">
-                        <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
-                        <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="hole-action-panel" style="display:none; margin-bottom: 6px;">
-                <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
-                <button class="btn btn-danger" style="margin-top:5px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
-            </div>
-
-            <div class="nav-buttons">
-                <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0;">⬅️ Retour</button>
-                <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
-            </div>
-        </div>
-        
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.29)</a>
-        <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
-    </div>
-
-    <script>
-        const fileInput = document.getElementById('file-input');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const statusText = document.getElementById('status-text');
-        const btnShoot = document.getElementById('btn-shoot');
-        const imageToolsContainer = document.getElementById('image-tools-container');
-        const btnDownload = document.getElementById('btn-download');
-        const btnRetry = document.getElementById('btn-retry');
-        const adjustPanel = document.getElementById('adjust-panel');
-        const holeActionPanel = document.getElementById('hole-action-panel');
-
-        let currentImg = null;
-        let step = 0; 
-        let rotationAngle = 0; 
-
-        let box1 = { x: 0, y: 0, size: 0, angle: 0 };
-        let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        let corners = [
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }  
-        ];
-        let holes = []; 
-
-        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
-        let zoomLevel = 1.0;
-        let manualPanX = 0; 
-        let manualPanY = 0;
-        let actionInterval = null;
-
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    currentImg = img;
-                    rotationAngle = 0;
-                    updateCanvasDimensions();
-
-                    step = 1;
-                    zoomLevel = 1.0;
-                    manualPanX = 0;
-                    manualPanY = 0;
-                    let w = canvas.width;
-                    let h = canvas.height;
-                    
-                    let defaultSize = w * 0.055; 
-                    box1.size = defaultSize;
-                    box2.size = defaultSize;
-
-                    for(let i=0; i<4; i++) {
-                        corners[i].size = w * 0.06;
-                    }
-
-                    tempX = w * 0.5;
-                    tempY = h * 0.5;
-                    tempAngle = 0;
-                    tempSize = defaultSize;
-
-                    canvas.style.display = 'block';
-                    adjustPanel.style.display = 'block';
-                    btnShoot.style.display = 'none';
-                    imageToolsContainer.style.display = 'block';
-                    
-                    updateUIState();
-                    redrawCanvas();
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-
-        function updateCanvasDimensions() {
-            if (!currentImg) return;
-            if (rotationAngle === 90 || rotationAngle === 270) {
-                canvas.width = currentImg.naturalHeight;
-                canvas.height = currentImg.naturalWidth;
-            } else {
-                canvas.width = currentImg.naturalWidth;
-                canvas.height = currentImg.naturalHeight;
-            }
-        }
-
-        window.rotateImage90 = function() {
-            if (!currentImg) return;
-            rotationAngle = (rotationAngle + 90) % 360;
-            updateCanvasDimensions();
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            redrawCanvas();
-        }
-
-        window.startAction = function(actionFn, speedMs) {
-            stopAction();
-            actionFn();
-            actionInterval = setInterval(actionFn, speedMs);
-        }
-        window.stopAction = function() { 
-            if (actionInterval) { 
-                clearInterval(actionInterval); 
-                actionInterval = null; 
-            } 
-        }
-
-        window.moveTarget = function(dx, dy) { 
-            tempX += dx; 
-            tempY += dy; 
-            redrawCanvas(); 
-        }
-        
-        window.panCamera = function(dx, dy) { 
-            manualPanX += dx; 
-            manualPanY += dy; 
-            redrawCanvas(); 
-        }
-        
-        window.adjustZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
-            redrawCanvas();
-        }
-
-        window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
-        window.adjustSize = function(deltaSize) { 
-            tempSize = Math.max(10, tempSize + deltaSize); 
-            redrawCanvas(); 
-        }
-
-        canvas.addEventListener('click', function(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            let clientClickX = (e.clientX - rect.left) * scaleX;
-            let clientClickY = (e.clientY - rect.top) * scaleY;
-
-            let imgX, imgY;
-            if (zoomLevel > 1.0) {
-                // Conversion inverse par rapport au centre de ciblage (tempX, tempY)
-                let centerX = canvas.width / 2 - tempX + manualPanX;
-                let centerY = canvas.height / 2 - tempY + manualPanY;
-                imgX = (clientClickX - canvas.width / 2) / zoomLevel - centerX + canvas.width / 2;
-                imgY = (clientClickY - canvas.height / 2) / zoomLevel - centerY + canvas.height / 2;
-            } else {
-                imgX = clientClickX;
-                imgY = clientClickY;
-            }
-
-            if (step >= 1 && step <= 7) {
-                tempX = imgX;
-                tempY = imgY;
-                redrawCanvas();
-            }
-        });
-
-        window.askAddHole = function() {
-            if (step === 7) {
-                if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
-                    holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                    manualPanX = 0;
-                    manualPanY = 0;
-                    zoomLevel = 1.0;
-                    redrawCanvas();
-                }
-            }
-        }
-
-        window.removeLastHole = function() {
-            if (step === 7 && holes.length > 0) {
-                if (confirm("Voulez-vous supprimer le dernier perçage ajouté ?")) {
-                    holes.pop();
-                    redrawCanvas();
-                }
-            }
-        }
-
-        function redrawCanvas(isForExport = false) {
-            if (!currentImg) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-
-            // Gestion du zoom centré précisément sur l'élément actif (tempX, tempY)
-            if (!isForExport && zoomLevel > 1.0) {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
-            }
-
-            ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate((rotationAngle * Math.PI) / 180);
-            if (rotationAngle === 90 || rotationAngle === 270) {
-                ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
-            } else {
-                ctx.drawImage(currentImg, -currentImg.naturalWidth / 2, -currentImg.naturalHeight / 2);
-            }
-            ctx.restore();
-
-            let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
-            ctx.lineWidth = Math.max(4, refW / 300);
-
-            if (step >= 2 || step === 1) {
-                drawRotatedRect(step === 1 ? tempX : box1.x, step === 1 ? tempY : box1.y, step === 1 ? tempSize : box1.size, step === 1 ? tempAngle : box1.angle, (step === 1 && !isForExport), "#00FF00");
-            }
-            if (step >= 3 || step === 2) {
-                drawRotatedRect(step === 2 ? tempX : box2.x, step === 2 ? tempY : box2.y, step === 2 ? tempSize : box2.size, step === 2 ? tempAngle : box2.angle, (step === 2 && !isForExport), "#00FF00");
-            }
-
-            for (let i = 0; i < 4; i++) {
-                let isActive = (step === i + 3 && !isForExport);
-                let isPassed = (step > i + 3 || isForExport);
-                if (isPassed || isActive) {
-                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
-                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
-                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
-                    let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
-
-                    drawCornerMarker(cx, cy, csize, cangle, isActive, "#007BFF", i);
-                }
-            }
-
-            if (step >= 7) {
-                ctx.save();
-                ctx.strokeStyle = "#007BFF";
-                ctx.lineWidth = Math.max(3, refW / 350);
-                ctx.setLineDash([]);
-
-                ctx.beginPath();
-                ctx.moveTo(corners[0].x, corners[0].y);
-                ctx.lineTo(corners[2].x, corners[2].y);
-                ctx.moveTo(corners[1].x, corners[1].y);
-                ctx.lineTo(corners[3].x, corners[3].y);
-                ctx.stroke();
-                ctx.restore();
-
-                if (!isForExport && step === 7) {
-                    ctx.save();
-                    ctx.strokeStyle = "#00FFFF";
-                    ctx.fillStyle = "rgba(0, 255, 255, 0.35)";
-                    ctx.lineWidth = Math.max(3, refW / 400);
-                    ctx.beginPath();
-                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-
-            holes.forEach(h => {
-                ctx.save();
-                ctx.strokeStyle = isForExport ? "#00FF00" : "#00FFFF";
-                ctx.fillStyle = isForExport ? "rgba(0, 255, 0, 0.3)" : "rgba(0, 255, 255, 0.3)";
-                ctx.lineWidth = Math.max(3, refW / 400);
-                ctx.beginPath();
-                ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.restore();
-            });
-
-            ctx.restore();
-
-            if (step === 8 && isForExport) {
-                canvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v29.jpg';
-                }, 'image/jpeg', 0.98);
-            }
-        }
-
-        function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
-            ctx.strokeStyle = color;
-            if (isActive) {
-                ctx.setLineDash([canvas.width / 70, canvas.width / 90]);
-            } else {
-                ctx.setLineDash([]);
-            }
-            ctx.strokeRect(-size / 2, -size / 2, size, size);
-            ctx.restore();
-        }
-
-        function drawCornerMarker(x, y, size, angleDeg, isActive, color, cornerIdx) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            
-            if (isActive) {
-                ctx.setLineDash([canvas.width / 80, canvas.width / 100]);
-            } else {
-                ctx.setLineDash([]);
-            }
-
-            ctx.lineWidth = Math.max(4, canvas.width / 250);
-
-            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
-            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
-
-            ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        window.resetCurrentPos = function() {
-            manualPanX = 0;
-            manualPanY = 0;
-            zoomLevel = 1.0;
-            redrawCanvas();
-        }
-
-        window.askValidateStep = function() {
-            stopAction();
-            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
-            let label = stepNames[step] || "cette étape";
-            
-            if (step === 7 && holes.length === 0) {
-                if (!confirm("Aucun perçage n'a été ajouté. Voulez-vous vraiment terminer sans perçage ?")) return;
-            }
-
-            if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
-                validateStep();
-            }
-        }
-
-        function validateStep() {
-            manualPanX = 0;
-            manualPanY = 0;
-
-            if (step === 1) {
-                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
-                step = 2;
-                tempX = box1.x + (canvas.width * 0.15); 
-                tempY = box1.y;
-                tempAngle = box1.angle;
-                tempSize = box1.size;
-            } else if (step === 2) {
-                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
-                step = 3; 
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-                tempAngle = 0;
-                tempSize = box1.size * 1.2;
-            } else if (step === 3) {
-                corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
-                step = 4;
-                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-            } else if (step === 4) {
-                corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
-                step = 5;
-                tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
-                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-            } else if (step === 5) {
-                corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
-                step = 6;
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
-                tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-            } else if (step === 6) {
-                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
-                step = 7; 
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-            } else if (step === 7) {
-                step = 8; 
-                adjustPanel.style.display = 'none';
-                imageToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.29) ! Prêt pour AcuTx.";
-                btnDownload.style.display = 'block';
-                btnRetry.style.display = 'block';
-                zoomLevel = 1.0;
-                redrawCanvas(true);
-                return;
-            }
-            zoomLevel = 1.0;
-            updateUIState();
-            redrawCanvas();
-        }
-
-        window.prevStep = function() {
-            stopAction();
-            manualPanX = 0;
-            manualPanY = 0;
-            if (step > 1) {
-                step--;
-                if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
-                else if (step === 2) { tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size; }
-                else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
-                } else if (step === 7) {
-                    tempX = corners[3].x; tempY = corners[3].y; tempAngle = corners[3].angle; tempSize = corners[3].size;
-                }
-                zoomLevel = 1.0;
-                updateUIState();
-                redrawCanvas();
-            }
-        }
-
-        function updateUIState() {
-            let btnVal = document.getElementById('btn-validate-step');
-            let btnPrev = document.getElementById('btn-prev-step');
-            
-            btnPrev.style.display = (step > 1) ? 'block' : 'none';
-
-            if (step === 7) {
-                holeActionPanel.style.display = 'block';
-                btnVal.innerText = "Terminer et Générer";
-            } else {
-                holeActionPanel.style.display = 'none';
-                btnVal.innerText = "Valider l'étape";
-            }
-
-            if (step === 1) {
-                statusText.innerText = "Étape 1 / 6 : Carré GAUCHE (Vert)";
-            } else if (step === 2) {
-                statusText.innerText = "Étape 2 / 6 : Carré DROIT (Vert)";
-            } else if (step === 3) {
-                statusText.innerText = "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)";
-            } else if (step === 4) {
-                statusText.innerText = "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)";
-            } else if (step === 5) {
-                statusText.innerText = "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)";
-            } else if (step === 6) {
-                statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
-            } else if (step === 7) {
-                statusText.innerText = "Étape 7 / 7 : Placement des perçages";
-            }
-        }
-
-        btnRetry.addEventListener('click', function() {
-            stopAction();
-            canvas.style.display = 'none';
-            adjustPanel.style.display = 'none';
-            imageToolsContainer.style.display = 'none';
-            btnDownload.style.display = 'none';
-            btnRetry.style.display = 'none';
-            btnShoot.style.display = 'block';
-            holeActionPanel.style.display = 'none';
-            fileInput.value = '';
-            currentImg = null;
-            holes = [];
-            step = 0;
-            rotationAngle = 0;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            statusText.innerText = "1. Prenez la photo du gabarit.";
-        });
-    </script>
-</body>
-</html>
+                        <button onmousedown="startAction(() => moveTarget(0, -6),
