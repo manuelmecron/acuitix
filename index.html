@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.44 - Assistant CAO</title>
+    <title>Acuitix V.45 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -285,7 +285,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.44</h1>
+    <h1>Acuitix V.45</h1>
     <div id="status-text">Gestion des couleurs</div>
 
     <div class="box">
@@ -295,12 +295,28 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Étape 0.A : Gestion des couleurs (Pipette / Échantillonneur) -->
+        <!-- Étape 0.A : Gestion des couleurs (Pipette / Échantillonneur + Zoom) -->
         <div id="color-management-panel" class="adjust-panel" style="display: block;">
             <h3>🎨 Gestion des couleurs</h3>
             <p id="color-instruction" style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
-                <b>1. Échantillonneur :</b> Touche un endroit représentatif de ta guitare sur l'image pour définir la couleur du fond.
+                <b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis pour définir la couleur de fond.
             </p>
+
+            <div class="camera-pan-container" style="margin-bottom: 6px;">
+                <div class="tool-section-title">🔍 Zoom & Déplacement Pipette</div>
+                <div class="image-tools-bar" style="margin-bottom: 3px;">
+                    <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
+                    <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Zoom</button>
+                    <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
+                </div>
+                <div class="camera-pan-grid">
+                    <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                </div>
+            </div>
+
             <div id="color-preview-container" style="display: none; margin-bottom: 6px; align-items: center; justify-content: center; gap: 8px;">
                 <span style="font-size: 0.75rem;">Fond détecté :</span>
                 <div id="swatch-bg" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
@@ -420,7 +436,11 @@
                 <path d="M28 25H36" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
             </svg>
             <p style="color: #fff; font-weight: bold; font-size: 0.9rem; margin: 4px 0;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
-            <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">Orientez votre téléphone en mode **PAYSAGE (horizontal)** pour capturer l'intégralité de la plaque.</p>
+            <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">
+                Prendre la photo de l'élément à modéliser en CAO.<br>
+                Nous vous conseillons le <b>mode paysage</b> pour plus de précisions.<br>
+                <span style="color: #ffc107;">ATTENTION</span> à bien vérifier de prendre l'ensemble <b>ENTIER</b> de l'élément à modéliser.
+            </p>
             <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
         </div>
         
@@ -515,7 +535,7 @@
                     statusText.innerText = "Étape 0 : Définition de la couleur du fond";
                     
                     colorManagementPanel.style.display = 'block';
-                    colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Touche un endroit représentatif de ta guitare sur l'image pour définir la couleur du fond.";
+                    colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis pour définir la couleur de fond.";
                     colorPreviewContainer.style.display = 'none';
                     colorActions.style.display = 'none';
 
@@ -591,6 +611,7 @@
             step = 0.5; // Passage à l'orientation / cadrage
             statusText.innerText = "Étape 0 : Contrôle et orientation de la photo";
             preCaptureTools.style.display = 'block';
+            resetCanvasAndTempPos();
             redrawCanvas();
         }
 
@@ -598,7 +619,7 @@
             colorSelected = false;
             colorPreviewContainer.style.display = 'none';
             colorActions.style.display = 'none';
-            colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Touche un autre endroit représentatif de ta guitare sur l'image.";
+            colorInstruction.innerHTML = "<b>1. Échantillonneur :</b> Zoome et déplace l'image si besoin, puis touche un pixel précis.";
             redrawCanvas();
         }
 
@@ -688,7 +709,7 @@
 
             ctx.save();
 
-            if (!isForExport && zoomLevel > 1.0) {
+            if (!isForExport && (zoomLevel > 1.0 || step === 0)) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
@@ -789,7 +810,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v44.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v45.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -932,7 +953,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.44) !";
+                statusText.innerText = "✅ Calage expert terminé (v.45) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
