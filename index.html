@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.61 - Assistant CAO Compact</title>
+    <title>Acuitix V.62 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -310,7 +310,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.61 - Assistant CAO</h1>
+    <h1>Acuitix V.62 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <!-- Zone Canvas + Menu Latéral de couleur intégrés côte à côte -->
@@ -809,7 +809,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v61.jpg';
+                    btnDownload.download = 'acuitix_etalon_v62.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -976,7 +976,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 colorSidebar.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.61) !";
+                statusText.innerText = "✅ Calage expert terminé (v.62) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
