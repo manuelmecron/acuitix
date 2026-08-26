@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.34 - Assistant CAO</title>
+    <title>Acuitix.35 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.34</h1>
+    <h1>Acuitix.35</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -265,7 +265,7 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Panneau étape 0 (Contrôle & Panoramique initial) -->
+        <!-- Panneau étape 0 (Contrôle & Panoramique initial complet) -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 Étape 0 : Contrôle de la prise de vue</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.2;">Positionner l'image parfaitement (les 4 coins du gabarit doivent être visibles).</p>
@@ -300,6 +300,8 @@
                         <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                     </div>
                 </div>
+                <!-- Bouton Recentrer l'élément placé ici, sous l'échelle -->
+                <button class="btn btn-secondary" style="margin-top: 4px; padding: 8px; font-size: 0.75rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
             <div class="adjust-panel" id="adjust-panel">
@@ -337,9 +339,6 @@
                         <div class="control-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                             <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                        </div>
-                        <div class="control-row">
-                            <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer</button>
                         </div>
                     </div>
                 </div>
@@ -636,7 +635,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v34.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v35.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -745,7 +744,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.34) !";
+                statusText.innerText = "✅ Calage expert terminé (v.35) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
