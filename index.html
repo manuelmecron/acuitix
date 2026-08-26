@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.35 - Assistant CAO</title>
+    <title>Acuitix.36 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.35</h1>
+    <h1>Acuitix.36</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -265,18 +265,18 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Panneau étape 0 (Contrôle & Panoramique initial complet) -->
+        <!-- Panneau étape 0 (Déplacement de l'image & orientation initiale) -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 Étape 0 : Contrôle de la prise de vue</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.2;">Positionner l'image parfaitement (les 4 coins du gabarit doivent être visibles).</p>
             
             <div class="camera-pan-container" style="margin-bottom: 4px;">
-                <div class="tool-section-title">🔍 Déplacement de l'image</div>
+                <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panCamera(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panCamera(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panImage(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => panImage(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                    <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                 </div>
             </div>
 
@@ -300,7 +300,6 @@
                         <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                     </div>
                 </div>
-                <!-- Bouton Recentrer l'élément placé ici, sous l'échelle -->
                 <button class="btn btn-secondary" style="margin-top: 4px; padding: 8px; font-size: 0.75rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
@@ -393,6 +392,9 @@
         let step = 0; 
         let rotationAngle = 0; 
 
+        let imgOffsetX = 0;
+        let imgOffsetY = 0;
+
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
         let corners = [
@@ -419,6 +421,8 @@
                 img.onload = function() {
                     currentImg = img;
                     rotationAngle = 0;
+                    imgOffsetX = 0;
+                    imgOffsetY = 0;
                     updateCanvasDimensions();
 
                     step = 0;
@@ -466,6 +470,8 @@
         window.rotateImage90 = function() {
             if (!currentImg) return;
             rotationAngle = (rotationAngle + 90) % 360;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
             updateCanvasDimensions();
             resetCanvasAndTempPos();
         }
@@ -475,8 +481,15 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
+            if (step === 0) {
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            } else {
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            }
             redrawCanvas();
         }
 
@@ -494,6 +507,7 @@
 
         window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
+        window.panImage = function(dx, dy) { imgOffsetX += dx; imgOffsetY += dy; redrawCanvas(); }
         
         window.adjustZoom = function(delta) {
             zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
@@ -560,7 +574,7 @@
             }
 
             ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
             ctx.rotate((rotationAngle * Math.PI) / 180);
             if (rotationAngle === 90 || rotationAngle === 270) {
                 ctx.drawImage(currentImg, -currentImg.naturalHeight / 2, -currentImg.naturalWidth / 2);
@@ -635,7 +649,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v35.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v36.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -694,7 +708,6 @@
 
         window.validateStep = function() {
             stopAction();
-            resetCanvasAndTempPos();
 
             if (step === 0) {
                 step = 1;
@@ -702,6 +715,7 @@
                 generalToolsContainer.style.display = 'block';
                 adjustPanel.style.display = 'block';
 
+                resetCanvasAndTempPos();
                 tempX = canvas.width * 0.5;
                 tempY = canvas.height * 0.5;
                 tempAngle = 0;
@@ -713,6 +727,7 @@
                 tempY = box1.y;
                 tempAngle = box1.angle;
                 tempSize = box1.size;
+                resetCanvasAndTempPos();
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
@@ -720,31 +735,36 @@
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
                 tempAngle = 0;
                 tempSize = box1.size * 1.2;
+                resetCanvasAndTempPos();
             } else if (step === 3) {
                 corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
                 step = 4;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                resetCanvasAndTempPos();
             } else if (step === 4) {
                 corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
                 step = 5;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+                resetCanvasAndTempPos();
             } else if (step === 5) {
                 corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
                 step = 6;
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
+                resetCanvasAndTempPos();
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
                 tempX = canvas.width * 0.5;
                 tempY = canvas.height * 0.5;
+                resetCanvasAndTempPos();
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.35) !";
+                statusText.innerText = "✅ Calage expert terminé (v.36) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -814,6 +834,8 @@
             holes = [];
             step = 0;
             rotationAngle = 0;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
