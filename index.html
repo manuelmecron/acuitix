@@ -3,43 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.60 - Assistant CAO Simple</title>
+    <title>Acuitix V.61 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #1e1e1e;
             color: #fff;
             margin: 0;
-            padding: 6px;
+            padding: 4px;
             text-align: center;
             user-select: none;
             max-width: 450px;
             margin-left: auto;
             margin-right: auto;
         }
-        h1 { font-size: 1.1rem; margin: 2px 0; text-transform: uppercase; color: #ffc107;}
+        h1 { font-size: 1rem; margin: 2px 0; text-transform: uppercase; color: #ffc107;}
         #status-text { 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
             color: #ffc107; 
-            margin: 4px 0; 
+            margin: 2px 0; 
             font-weight: bold; 
-            padding: 4px; 
+            padding: 3px; 
             background: rgba(0,0,0,0.6); 
             border-radius: 4px;
             display: none;
         }
+        
+        /* Conteneur principal avec menu latéral intégré */
+        .workspace-layout {
+            display: flex;
+            gap: 4px;
+            align-items: flex-start;
+            justify-content: center;
+            margin: 2px auto;
+        }
+
         .box {
             background: #2a2a2a;
             border: 2px solid #555;
             padding: 2px;
             border-radius: 6px;
-            margin: 4px auto;
             position: relative;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            max-height: 40vh;
+            flex-grow: 1;
+            max-height: 36vh;
         }
         canvas {
             max-width: 100%;
@@ -49,31 +59,54 @@
             touch-action: manipulation;
             object-fit: contain;
         }
+
+        /* Menu latéral compact pour les couleurs */
+        #color-sidebar {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: #262626;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+        .color-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
+        }
+        .color-dot:active { transform: scale(0.9); }
+        .color-dot.active-color { border-color: #ffc107; transform: scale(1.15); }
         
         #welcome-panel {
             display: block;
-            padding: 12px;
+            padding: 10px;
             background: #2a2a2a;
             border-radius: 8px;
-            margin-top: 6px;
+            margin-top: 4px;
             text-align: left;
         }
         
         .photo-guide-frame {
-            border: 3px dashed #ffc107;
-            border-radius: 8px;
-            padding: 10px;
+            border: 2px dashed #ffc107;
+            border-radius: 6px;
+            padding: 8px;
             background: rgba(0,0,0,0.3);
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
-        .camera-badge { font-size: 1.8rem; margin-bottom: 4px; }
+        .camera-badge { font-size: 1.5rem; margin-bottom: 2px; }
         
         .pickguards-gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin: 8px 0;
+            gap: 4px;
+            margin: 6px 0;
         }
         .pickguard-thumb {
             background: #1a1a1a;
@@ -83,15 +116,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #ffc107;
             text-align: center;
-            padding: 6px;
-            gap: 4px;
+            padding: 4px;
+            gap: 2px;
         }
         .pickguard-thumb svg {
-            width: 55px;
-            height: 55px;
+            width: 45px;
+            height: 45px;
             stroke: #ffc107;
             fill: none;
             stroke-width: 2.2;
@@ -102,17 +135,17 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #28a745;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
             box-sizing: border-box;
-            margin-top: 8px;
+            margin-top: 6px;
             text-align: center;
         }
         .btn:active { background: #1e7e34; }
@@ -126,7 +159,7 @@
         .adjust-panel {
             display: none;
             background: #333;
-            padding: 8px;
+            padding: 6px;
             border-radius: 6px;
             margin-top: 4px;
         }
@@ -137,27 +170,27 @@
             border: 2px solid #17a2b8;
             border-radius: 6px;
             padding: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .tool-section-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #17a2b8;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             text-align: left;
         }
         
         .safe-button-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin-bottom: 6px;
+            gap: 4px;
+            margin-bottom: 4px;
         }
         .safe-button-grid button {
-            padding: 12px 8px;
-            font-size: 0.85rem;
+            padding: 10px 6px;
+            font-size: 0.8rem;
             font-weight: bold;
             border-radius: 6px;
             border: none;
@@ -169,22 +202,22 @@
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
-            padding: 6px;
-            margin-bottom: 6px;
+            padding: 4px;
+            margin-bottom: 4px;
         }
         .camera-pan-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
+            gap: 4px;
         }
         .camera-pan-grid button {
-            padding: 12px 4px;
+            padding: 10px 4px;
             background: #495057;
             color: white;
             border: 1px solid #6c757d;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             touch-action: manipulation;
         }
@@ -193,8 +226,8 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            gap: 6px;
-            margin-bottom: 6px;
+            gap: 4px;
+            margin-bottom: 4px;
         }
 
         .dpad-container {
@@ -202,7 +235,7 @@
             flex-direction: column;
             align-items: center;
             background: #222;
-            padding: 4px;
+            padding: 3px;
             border-radius: 6px;
             border: 1px solid #444;
             flex-shrink: 0;
@@ -210,16 +243,16 @@
         }
         .dpad-grid {
             display: grid;
-            grid-template-columns: repeat(3, 42px);
-            grid-template-rows: repeat(3, 42px);
-            gap: 3px;
+            grid-template-columns: repeat(3, 36px);
+            grid-template-rows: repeat(3, 36px);
+            gap: 2px;
         }
         .dpad-grid button {
             background: #444;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
+            border-radius: 4px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             touch-action: manipulation;
@@ -229,45 +262,45 @@
         .controls-right {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             flex-grow: 1;
         }
         .control-row {
             display: flex;
-            gap: 6px;
+            gap: 4px;
         }
         .control-row button {
             flex: 1;
-            padding: 12px 4px;
+            padding: 10px 4px;
             background: #555;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
             touch-action: manipulation;
         }
         .nav-buttons {
             display: flex;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 4px;
+            margin-top: 4px;
         }
 
         .opacity-control-box {
             background: #262626;
             border: 1px solid #444;
-            padding: 8px;
+            padding: 6px;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-align: center;
         }
         .opacity-control-box label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #4CAF50;
             font-weight: bold;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .opacity-control-box input[type="range"] {
             width: 100%;
@@ -277,11 +310,21 @@
 </head>
 <body>
 
-    <h1>Acuitix V.60 - Assistant CAO</h1>
+    <h1>Acuitix V.61 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
-    <div class="box">
-        <canvas id="canvas"></canvas>
+    <!-- Zone Canvas + Menu Latéral de couleur intégrés côte à côte -->
+    <div class="workspace-layout">
+        <div class="box" style="flex-grow: 1;">
+            <canvas id="canvas"></canvas>
+        </div>
+        <!-- Menu latéral compact des couleurs -->
+        <div id="color-sidebar">
+            <div title="Cyan" class="color-dot active-color" style="background:#00FFFF;" onclick="setTraceColor('#00FFFF', this)"></div>
+            <div title="Jaune" class="color-dot" style="background:#FFFF00;" onclick="setTraceColor('#FFFF00', this)"></div>
+            <div title="Magenta" class="color-dot" style="background:#FF00FF;" onclick="setTraceColor('#FF00FF', this)"></div>
+            <div title="Blanc" class="color-dot" style="background:#FFFFFF;" onclick="setTraceColor('#FFFFFF', this)"></div>
+        </div>
     </div>
 
     <div>
@@ -290,9 +333,9 @@
         <!-- Étape 0 : Orientation et Cadrage -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
-            <p style="font-size: 0.8rem; color: #ddd; margin: 2px 0 6px 0;">Positionne l'image (toutes les extrémités visibles).</p>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionne l'image (extrémités visibles).</p>
             
-            <div class="camera-pan-container" style="margin-bottom: 6px;">
+            <div class="camera-pan-container" style="margin-bottom: 4px;">
                 <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
                     <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
@@ -302,42 +345,31 @@
                 </div>
             </div>
 
-            <div class="safe-button-grid" style="margin-bottom: 6px;">
+            <div class="safe-button-grid" style="margin-bottom: 4px;">
                 <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
                 <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
                 <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 6px;" onclick="validatePreCaptureStep()">Commencer le calage</button>
-            <button class="btn btn-danger" style="margin-top: 6px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+            <button class="btn" style="margin-top: 4px;" onclick="validatePreCaptureStep()">Commencer le calage</button>
+            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
         <!-- Panneau outils généraux -->
         <div id="general-tools-container" style="display: none;">
-            <!-- Choix direct de la couleur de traçage super lisible -->
-            <div style="background: #262626; border: 1px solid #ffc107; border-radius: 6px; padding: 6px; margin-bottom: 6px; text-align: center;">
-                <div class="tool-section-title" style="color: #ffc107; margin-bottom: 4px;">🎨 Couleur de traçage</div>
-                <div style="display: flex; gap: 4px; justify-content: center;">
-                    <button onclick="setTraceColor('#00FFFF')" style="background:#00FFFF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Cyan</button>
-                    <button onclick="setTraceColor('#FFFF00')" style="background:#FFFF00; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Jaune</button>
-                    <button onclick="setTraceColor('#FF00FF')" style="background:#FF00FF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#fff; cursor:pointer; font-size:0.8rem;">Magenta</button>
-                    <button onclick="setTraceColor('#FFFFFF')" style="background:#FFFFFF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Blanc</button>
-                </div>
-            </div>
-
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">90</span>%</label>
+                <label for="opacity-slider">Opacité repères : <span id="opacity-val">90</span>%</label>
                 <input type="range" id="opacity-slider" min="20" max="100" value="90" oninput="changerOpacite(this.value)">
             </div>
 
-            <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 6px; margin-bottom: 6px;">
+            <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 4px; margin-bottom: 4px;">
                 <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
                 <div class="safe-button-grid">
                     <button class="btn-info" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
                     <button class="btn-info" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                 </div>
-                <button class="btn btn-secondary" style="margin-top: 4px; padding: 10px; font-size: 0.8rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
             <div class="adjust-panel" id="adjust-panel">
@@ -353,7 +385,7 @@
 
                 <div class="gameboy-container">
                     <div class="dpad-container">
-                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement élément</div>
+                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement</div>
                         <div class="dpad-grid">
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
@@ -379,14 +411,14 @@
                     </div>
                 </div>
 
-                <div id="hole-action-panel" style="display:none; margin-bottom: 6px;">
-                    <button class="btn" style="background: #28a745; margin-top:0; padding: 12px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
-                    <button class="btn btn-danger" style="margin-top:6px; padding: 10px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
+                <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
+                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Supprimer dernier perçage</button>
                 </div>
 
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none; padding: 12px;">⬅️ Retour</button>
-                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 12px;" onclick="askValidateStep()">Valider l'étape</button>
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none; padding: 10px;">⬅️ Retour</button>
+                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape</button>
                 </div>
             </div>
         </div>
@@ -395,11 +427,11 @@
         <div id="welcome-panel">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📷 📷</div>
-                <p style="color: #ffc107; font-weight: bold; font-size: 0.95rem; margin: 4px 0; text-transform: uppercase;">
+                <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin: 2px 0; text-transform: uppercase;">
                     Attention : Prenez l'objet ENTIER !
                 </p>
-                <p style="color: #fff; font-size: 0.8rem; margin: 4px 0;">
-                    <b>Toutes les extrémités et contours doivent être parfaitement visibles</b> sur la photo pour garantir une modélisation CAO exacte.
+                <p style="color: #fff; font-size: 0.75rem; margin: 2px 0;">
+                    <b>Toutes les extrémités doivent être visibles</b> sur la photo pour une modélisation exacte.
                 </p>
                 
                 <div class="pickguards-gallery">
@@ -426,26 +458,26 @@
                         <svg viewBox="0 0 100 100">
                             <rect x="25" y="20" width="50" height="60" rx="10" />
                         </svg>
-                        Plaque cavité électronique
+                        Plaque électronique
                     </div>
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 100 100">
                             <rect x="30" y="20" width="40" height="60" rx="6" />
                         </svg>
-                        Plaque cavité de ressort
+                        Plaque ressorts
                     </div>
                 </div>
             </div>
 
-            <p style="color: #fff; font-weight: bold; font-size: 0.9rem; margin: 4px 0;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
-            <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">
-                Photographiez votre pickguard ou élément à plat en mode paysage de préférence.
+            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 1 : PRENDRE LA PHOTO</p>
+            <p style="color: #ddd; font-size: 0.75rem; margin: 2px 0 6px 0;">
+                Photographiez votre élément à plat en mode paysage de préférence.
             </p>
             <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 14px;">💾 Télécharger l'image définitive</a>
-        <button id="btn-retry" class="btn btn-danger" style="display: none; padding: 12px;">🔄 Recommencer</button>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none; padding: 10px;">🔄 Recommencer</button>
     </div>
 
     <script>
@@ -456,13 +488,14 @@
         const welcomePanel = document.getElementById('welcome-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
         const generalToolsContainer = document.getElementById('general-tools-container');
+        const colorSidebar = document.getElementById('color-sidebar');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
         const holeActionPanel = document.getElementById('hole-action-panel');
 
         let currentImg = null;
-        let step = 1; // On démarre directement à l'étape 1 après recadrage
+        let step = 1; 
         let rotationAngle = 0; 
         let imgOffsetX = 0;
         let imgOffsetY = 0;
@@ -483,7 +516,7 @@
         let manualPanY = 0;
         let actionInterval = null;
 
-        let elementColor = "#00FFFF"; // Cyan par défaut (super visible)
+        let elementColor = "#00FFFF"; // Cyan par défaut
         let currentOpacity = 0.9;
 
         fileInput.addEventListener('change', function(e) {
@@ -500,7 +533,7 @@
                     imgOffsetY = 0;
                     updateCanvasDimensions();
 
-                    step = 0; // Phase de pré-cadrage
+                    step = 0; 
                     zoomLevel = 1.0;
                     manualPanX = 0;
                     manualPanY = 0;
@@ -524,6 +557,7 @@
                     statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
                     preCaptureTools.style.display = 'block';
+                    colorSidebar.style.display = 'none';
 
                     redrawCanvas();
                 };
@@ -558,8 +592,12 @@
             }
         });
 
-        window.setTraceColor = function(colorHex) {
+        window.setTraceColor = function(colorHex, element) {
             elementColor = colorHex;
+            document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active-color'));
+            if (element) {
+                element.classList.add('active-color');
+            }
             redrawCanvas();
         }
 
@@ -568,6 +606,7 @@
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
             generalToolsContainer.style.display = 'none';
+            colorSidebar.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
@@ -770,7 +809,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v60.jpg';
+                    btnDownload.download = 'acuitix_etalon_v61.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -780,7 +819,6 @@
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
             
-            // Effet d'ombre/contour noir sous le trait pour garantir la lisibilité sur fond sombre ou clair
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = Math.max(6, canvas.width / 200);
             ctx.strokeRect(-size / 2, -size / 2, size, size);
@@ -799,7 +837,6 @@
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
-            // Contour noir de sécurité
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = Math.max(7, canvas.width / 220);
             ctx.beginPath();
@@ -808,7 +845,6 @@
             ctx.lineTo(0, dirY * size);
             ctx.stroke();
 
-            // Trait principal de couleur
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
             ctx.lineWidth = Math.max(4, canvas.width / 280);
@@ -857,6 +893,7 @@
             step = 1; 
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
             generalToolsContainer.style.display = 'block';
+            colorSidebar.style.display = 'flex'; // Affichage du menu latéral de couleurs
             adjustPanel.style.display = 'block';
             resetCanvasAndTempPos();
             tempX = canvas.width * 0.5;
@@ -938,7 +975,8 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.60) !";
+                colorSidebar.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.61) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
