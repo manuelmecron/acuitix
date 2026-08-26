@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.40 - Assistant CAO</title>
+    <title>Acuitix.41 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.40</h1>
+    <h1>Acuitix.41</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -307,10 +307,11 @@
                 <div class="camera-pan-container">
                     <div class="tool-section-title">🔍 Panoramique de l'image (Déplacement vue)</div>
                     <div class="camera-pan-grid">
-                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                        <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                        <button onmousedown="startAction(() => panCamera(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                        <button onmousedown="startAction(() => panCamera(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                        <!-- Correction du bug de perte de focus : les boutons de panoramique déplacent aussi le point actif tempX/tempY -->
+                        <button onmousedown="startAction(() => panCameraAndFocus(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCameraAndFocus(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                        <button onmousedown="startAction(() => panCameraAndFocus(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCameraAndFocus(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                        <button onmousedown="startAction(() => panCameraAndFocus(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCameraAndFocus(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
+                        <button onmousedown="startAction(() => panCameraAndFocus(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCameraAndFocus(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                     </div>
                 </div>
 
@@ -507,6 +508,17 @@
 
         window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
+        
+        // Nouvelle fonction : déplace la vue ET déplace le focus (tempX/tempY) dans le même sens 
+        // pour que marteler les boutons de navigation en dé zoomé ne désaxe jamais le focus du zoom.
+        window.panCameraAndFocus = function(dx, dy) {
+            manualPanX += dx;
+            manualPanY += dy;
+            tempX -= dx; // On déplace le point d'intérêt pour qu'il reste centré sur l'écran
+            tempY -= dy;
+            redrawCanvas();
+        }
+
         window.panImage = function(dx, dy) { imgOffsetX += dx; imgOffsetY += dy; redrawCanvas(); }
         
         window.adjustZoom = function(delta) {
@@ -539,7 +551,6 @@
             if (step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
-                // Correction appliquée : on reset le panoramique manuel pour éviter le décalage de zoom
                 manualPanX = 0;
                 manualPanY = 0;
                 redrawCanvas();
@@ -652,7 +663,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v40.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v41.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -777,7 +788,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.40) !";
+                statusText.innerText = "✅ Calage expert terminé (v.41) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
