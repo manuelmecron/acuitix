@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix.36 - Assistant CAO</title>
+    <title>Acuitix.37 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.36</h1>
+    <h1>Acuitix.37</h1>
     <div id="status-text">1. Prenez la photo du gabarit.</div>
 
     <div class="box">
@@ -348,7 +348,7 @@
                 </div>
 
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="prevStep()" style="margin-top:0; display:none;">⬅️ Retour</button>
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none;">⬅️ Retour</button>
                     <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
                 </div>
             </div>
@@ -649,7 +649,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v36.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v37.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -703,6 +703,17 @@
 
             if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
                 validateStep();
+            }
+        }
+
+        // Nouvelle fonction de double action pour sécuriser le retour
+        window.askPrevStep = function() {
+            stopAction();
+            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let prevLabel = stepNames[step - 1] || "l'étape précédente";
+            
+            if (confirm("⚠️ Voulez-vous vraiment revenir en arrière vers l'étape : " + prevLabel + " ? (Les modifications de l'étape en cours seront remises à plat)")) {
+                prevStep();
             }
         }
 
@@ -764,7 +775,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.36) !";
+                statusText.innerText = "✅ Calage expert terminé (v.37) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -774,8 +785,7 @@
             redrawCanvas();
         }
 
-        window.prevStep = function() {
-            stopAction();
+        function prevStep() {
             resetCanvasAndTempPos();
             if (step > 1) {
                 step--;
