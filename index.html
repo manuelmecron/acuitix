@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.59 - Assistant CAO</title>
+    <title>Acuitix V.60 - Assistant CAO Simple</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -131,7 +131,7 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools, #color-management-panel {
+        #pre-capture-tools {
             display: none;
             background: #3a3a3a;
             border: 2px solid #17a2b8;
@@ -139,7 +139,6 @@
             padding: 6px;
             margin-bottom: 6px;
         }
-        #color-management-panel { border-color: #ffc107; }
 
         .tool-section-title {
             font-size: 0.75rem;
@@ -278,7 +277,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.59 - Assistant CAO</h1>
+    <h1>Acuitix V.60 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
@@ -310,76 +309,26 @@
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 6px;" onclick="validatePreCaptureStep()">Valider l'orientation</button>
+            <button class="btn" style="margin-top: 6px;" onclick="validatePreCaptureStep()">Commencer le calage</button>
             <button class="btn btn-danger" style="margin-top: 6px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
-        </div>
-
-        <!-- Étape 0.5 : Gestion des couleurs -->
-        <div id="color-management-panel" class="adjust-panel">
-            <h3>🎨 2. Gestion des couleurs (<span style="color:#ffc107;">🧪 Échantillonneur</span>)</h3>
-            <p id="color-instruction" style="font-size: 0.8rem; color: #ddd; margin: 2px 0 6px 0;">
-                Utilisez la croix pour positionner l'échantillonneur et la vue simultanément.
-            </p>
-
-            <div class="gameboy-container">
-                <div class="dpad-container">
-                    <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">🧪 Échantillonneur</div>
-                    <div class="dpad-grid">
-                        <div></div>
-                        <button onmousedown="startAction(() => movePipetteAndPan(0, -10), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteAndPan(0, -10), 40)" ontouchend="stopAction()">⬆️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => movePipetteAndPan(-10, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteAndPan(-10, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <div style="background:#2a2a2a; border-radius:4px;"></div>
-                        <button onmousedown="startAction(() => movePipetteAndPan(10, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteAndPan(10, 0), 40)" ontouchend="stopAction()">➡️</button>
-                        <div></div>
-                        <button onmousedown="startAction(() => movePipetteAndPan(0, 10), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteAndPan(0, 10), 40)" ontouchend="stopAction()">⬇️</button>
-                        <div></div>
-                    </div>
-                </div>
-
-                <div class="controls-right">
-                    <div class="control-row">
-                        <button onclick="adjustPipetteZoom(0.3)">🔍+ Zoom</button>
-                        <button onclick="adjustPipetteZoom(-0.3)">🔍- Zoom</button>
-                    </div>
-                    <button class="btn-secondary" style="padding:12px; font-size:0.8rem; border-radius:6px; border:none; color:#fff; font-weight:bold; cursor:pointer;" onclick="resetPipetteView()">🎯 Recentrer Vue</button>
-                </div>
-            </div>
-
-            <button class="btn" style="background: #28a745; margin-top:4px; padding: 12px;" onclick="sampleCurrentPipettePosition()">🧪 Échantillonner ce pixel exact</button>
-
-            <div id="color-preview-container" style="display: none; margin-top: 6px; align-items: center; justify-content: center; gap: 8px;">
-                <span style="font-size: 0.8rem;">Fond détecté :</span>
-                <div id="swatch-bg" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
-                <span style="font-size: 0.8rem;">Traçage :</span>
-                <div id="swatch-trace" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
-            </div>
-
-            <!-- Choix manuel direct de la couleur de traçage si l'auto ne convient pas -->
-            <div id="color-manual-override" style="display: none; margin-top: 6px;">
-                <p style="font-size: 0.75rem; color: #ffc107; margin: 2px 0;">Forcer la couleur de traçage :</p>
-                <div style="display: flex; gap: 4px; justify-content: center;">
-                    <button onclick="overrideTraceColor('#00FFFF')" style="background:#00FFFF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Cyan</button>
-                    <button onclick="overrideTraceColor('#FFFF00')" style="background:#FFFF00; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Jaune</button>
-                    <button onclick="overrideTraceColor('#FF00FF')" style="background:#FF00FF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#fff; cursor:pointer; font-size:0.75rem;">Magenta</button>
-                    <button onclick="overrideTraceColor('#00FF00')" style="background:#00FF00; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Vert</button>
-                    <button onclick="overrideTraceColor('#FFFFFF')" style="background:#FFFFFF; border:none; border-radius:4px; padding:6px 10px; font-weight:bold; color:#000; cursor:pointer; font-size:0.75rem;">Blanc</button>
-                </div>
-            </div>
-            
-            <div id="color-actions" style="display: none; gap: 6px; flex-direction: column; margin-top: 6px;">
-                <button class="btn" style="margin-top:0; padding: 12px;" onclick="validerCouleurFond()">Valider cette couleur</button>
-            </div>
-
-            <button class="btn btn-danger" style="margin-top: 6px; padding: 10px;" onclick="recommencerPipette()">❌ Recommencer</button>
-            <button class="btn btn-secondary" style="margin-top: 6px; padding: 10px;" onclick="backToPreCapture()">⬅️ Retour orientation</button>
         </div>
 
         <!-- Panneau outils généraux -->
         <div id="general-tools-container" style="display: none;">
+            <!-- Choix direct de la couleur de traçage super lisible -->
+            <div style="background: #262626; border: 1px solid #ffc107; border-radius: 6px; padding: 6px; margin-bottom: 6px; text-align: center;">
+                <div class="tool-section-title" style="color: #ffc107; margin-bottom: 4px;">🎨 Couleur de traçage</div>
+                <div style="display: flex; gap: 4px; justify-content: center;">
+                    <button onclick="setTraceColor('#00FFFF')" style="background:#00FFFF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Cyan</button>
+                    <button onclick="setTraceColor('#FFFF00')" style="background:#FFFF00; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Jaune</button>
+                    <button onclick="setTraceColor('#FF00FF')" style="background:#FF00FF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#fff; cursor:pointer; font-size:0.8rem;">Magenta</button>
+                    <button onclick="setTraceColor('#FFFFFF')" style="background:#FFFFFF; border:2px solid #fff; border-radius:4px; padding:8px 12px; font-weight:bold; color:#000; cursor:pointer; font-size:0.8rem;">Blanc</button>
+                </div>
+            </div>
+
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">80</span>%</label>
-                <input type="range" id="opacity-slider" min="10" max="100" value="80" oninput="changerOpacite(this.value)">
+                <label for="opacity-slider">Opacité des repères : <span id="opacity-val">90</span>%</label>
+                <input type="range" id="opacity-slider" min="20" max="100" value="90" oninput="changerOpacite(this.value)">
             </div>
 
             <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 6px; margin-bottom: 6px;">
@@ -442,7 +391,7 @@
             </div>
         </div>
 
-        <!-- ACCUEIL avec symboles détaillés -->
+        <!-- ACCUEIL -->
         <div id="welcome-panel">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📷 📷</div>
@@ -506,22 +455,14 @@
         const statusText = document.getElementById('status-text');
         const welcomePanel = document.getElementById('welcome-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
-        const colorManagementPanel = document.getElementById('color-management-panel');
         const generalToolsContainer = document.getElementById('general-tools-container');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
         const holeActionPanel = document.getElementById('hole-action-panel');
-        
-        const colorInstruction = document.getElementById('color-instruction');
-        const colorPreviewContainer = document.getElementById('color-preview-container');
-        const colorManualOverride = document.getElementById('color-manual-override');
-        const colorActions = document.getElementById('color-actions');
-        const swatchBg = document.getElementById('swatch-bg');
-        const swatchTrace = document.getElementById('swatch-trace');
 
         let currentImg = null;
-        let step = 0; 
+        let step = 1; // On démarre directement à l'étape 1 après recadrage
         let rotationAngle = 0; 
         let imgOffsetX = 0;
         let imgOffsetY = 0;
@@ -542,10 +483,8 @@
         let manualPanY = 0;
         let actionInterval = null;
 
-        let elementColor = "#00FFFF";
-        let sampledBgColor = "#000000";
-        let colorSelected = false;
-        let currentOpacity = 0.8;
+        let elementColor = "#00FFFF"; // Cyan par défaut (super visible)
+        let currentOpacity = 0.9;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -561,7 +500,7 @@
                     imgOffsetY = 0;
                     updateCanvasDimensions();
 
-                    step = 0; 
+                    step = 0; // Phase de pré-cadrage
                     zoomLevel = 1.0;
                     manualPanX = 0;
                     manualPanY = 0;
@@ -585,7 +524,6 @@
                     statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
                     preCaptureTools.style.display = 'block';
-                    colorManagementPanel.style.display = 'none';
 
                     redrawCanvas();
                 };
@@ -611,11 +549,7 @@
                 imgY = clientClickY;
             }
 
-            if (step === 0.5) {
-                tempX = imgX;
-                tempY = imgY;
-                redrawCanvas();
-            } else if (step >= 1 && step <= 7) {
+            if (step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
                 manualPanX = 0;
@@ -624,97 +558,8 @@
             }
         });
 
-        window.movePipetteAndPan = function(dx, dy) {
-            if (step === 0.5) {
-                tempX += dx;
-                tempY += dy;
-                tempX = Math.max(0, Math.min(canvas.width, tempX));
-                tempY = Math.max(0, Math.min(canvas.height, tempY));
-                redrawCanvas();
-            }
-        }
-
-        window.adjustPipetteZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
-            redrawCanvas();
-        }
-
-        window.resetPipetteView = function() {
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            redrawCanvas();
-        }
-
-        window.sampleCurrentPipettePosition = function() {
-            if (step === 0.5) {
-                let pX = Math.floor(tempX);
-                let pY = Math.floor(tempY);
-                if (pX >= 0 && pX < canvas.width && pY >= 0 && pY < canvas.height) {
-                    let pData = ctx.getImageData(pX, pY, 1, 1).data;
-                    let r = pData[0], g = pData[1], b = pData[2];
-                    
-                    sampledBgColor = `rgb(${r},${g},${b})`;
-                    swatchBg.style.backgroundColor = sampledBgColor;
-
-                    // Logique de contraste améliorée pour le traçage
-                    let brightness = (r * 299 + g * 587 + b * 114) / 1000;
-                    if (brightness < 100) {
-                        elementColor = "#00FFFF"; // Cyan vif sur fond sombre
-                    } else if (brightness > 170) {
-                        elementColor = "#FF00FF"; // Magenta vif sur fond clair
-                    } else {
-                        elementColor = "#FFFF00"; // Jaune vif par défaut
-                    }
-                    swatchTrace.style.backgroundColor = elementColor;
-
-                    colorSelected = true;
-                    colorInstruction.innerHTML = "<b>Couleur détectée :</b> Ajustez ou validez.";
-                    colorPreviewContainer.style.display = 'flex';
-                    colorManualOverride.style.display = 'block';
-                    colorActions.style.display = 'flex';
-                    redrawCanvas();
-                }
-            }
-        }
-
-        window.overrideTraceColor = function(colorHex) {
+        window.setTraceColor = function(colorHex) {
             elementColor = colorHex;
-            swatchTrace.style.backgroundColor = elementColor;
-            redrawCanvas();
-        }
-
-        window.validerCouleurFond = function() {
-            colorManagementPanel.style.display = 'none';
-            step = 1; 
-            generalToolsContainer.style.display = 'block';
-            adjustPanel.style.display = 'block';
-            resetCanvasAndTempPos();
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            tempAngle = 0;
-            tempSize = canvas.width * 0.055;
-            updateUIState();
-            redrawCanvas();
-        }
-
-        window.recommencerPipette = function() {
-            colorSelected = false;
-            colorPreviewContainer.style.display = 'none';
-            colorManualOverride.style.display = 'none';
-            colorActions.style.display = 'none';
-            colorInstruction.innerHTML = "Utilisez la croix pour positionner l'échantillonneur et la vue simultanément.";
-            redrawCanvas();
-        }
-
-        window.backToPreCapture = function() {
-            colorManagementPanel.style.display = 'none';
-            step = 0;
-            preCaptureTools.style.display = 'block';
-            resetCanvasAndTempPos();
-            statusText.innerText = "Étape 0 : Orientation et Cadrage";
             redrawCanvas();
         }
 
@@ -722,7 +567,6 @@
             stopAction();
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
-            colorManagementPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
@@ -739,7 +583,6 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
-            colorSelected = false;
         }
 
         window.changerOpacite = function(val) {
@@ -845,46 +688,6 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            if (step === 0.5 && !isForExport) {
-                ctx.save();
-                ctx.translate(tempX, tempY);
-
-                ctx.strokeStyle = '#ffc107';
-                ctx.lineWidth = Math.max(3, refW / 350);
-                ctx.beginPath();
-                ctx.arc(0, 0, 24, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ctx.rotate(-Math.PI / 4);
-
-                ctx.fillStyle = '#17a2b8';
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
-                ctx.fillRect(-6, -24, 12, 32);
-                ctx.strokeRect(-6, -24, 12, 32);
-
-                ctx.fillStyle = '#ffc107';
-                ctx.fillRect(-9, -32, 18, 10);
-                ctx.strokeRect(-9, -32, 18, 10);
-
-                ctx.beginPath();
-                ctx.moveTo(-6, 8);
-                ctx.lineTo(6, 8);
-                ctx.lineTo(0, 22);
-                ctx.closePath();
-                ctx.fillStyle = '#17a2b8';
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = '#00ffff';
-                ctx.beginPath();
-                ctx.arc(0, 28, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.restore();
-            }
-
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
@@ -893,7 +696,7 @@
                 let ry = step === 1 ? tempY : box1.y;
                 let rsz = step === 1 ? tempSize : box1.size;
                 let rang = step === 1 ? tempAngle : box1.angle;
-                drawRotatedRect(rx, ry, rsz, rang, (step === 1 && !isForExport), elementColor);
+                drawRotatedRect(rx, ry, rsz, rang, elementColor);
                 dessinerCroixCentre(rx, ry);
             }
             if (step >= 2) {
@@ -901,7 +704,7 @@
                 let ry2 = step === 2 ? tempY : box2.y;
                 let rsz2 = step === 2 ? tempSize : box2.size;
                 let rang2 = step === 2 ? tempAngle : box2.angle;
-                drawRotatedRect(rx2, ry2, rsz2, rang2, (step === 2 && !isForExport), elementColor);
+                drawRotatedRect(rx2, ry2, rsz2, rang2, elementColor);
                 dessinerCroixCentre(rx2, ry2);
             }
 
@@ -914,7 +717,7 @@
                     let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
                     let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
 
-                    drawCornerMarker(cx, cy, csize, cangle, isActive, elementColor, i);
+                    drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
                     dessinerCroixCentre(cx, cy);
                 }
             }
@@ -967,32 +770,48 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v59.jpg';
+                    btnDownload.download = 'acuitix_etalon_v60.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
 
-        function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
+        function drawRotatedRect(x, y, size, angleDeg, color) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
+            
+            // Effet d'ombre/contour noir sous le trait pour garantir la lisibilité sur fond sombre ou clair
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(6, canvas.width / 200);
+            ctx.strokeRect(-size / 2, -size / 2, size, size);
+
             ctx.strokeStyle = color;
-            ctx.setLineDash([]); 
+            ctx.lineWidth = Math.max(3, canvas.width / 300);
             ctx.strokeRect(-size / 2, -size / 2, size, size);
             ctx.restore();
         }
 
-        function drawCornerMarker(x, y, size, angleDeg, isActive, color, cornerIdx) {
+        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.setLineDash([]);
-            ctx.lineWidth = Math.max(4, canvas.width / 250);
 
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+
+            // Contour noir de sécurité
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(7, canvas.width / 220);
+            ctx.beginPath();
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
+            ctx.stroke();
+
+            // Trait principal de couleur
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = Math.max(4, canvas.width / 280);
 
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
@@ -1008,9 +827,18 @@
 
         function dessinerCroixCentre(cx, cy) {
             ctx.save();
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(4, canvas.width / 350);
+            let tailleCroix = 7;
+            ctx.beginPath();
+            ctx.moveTo(cx - tailleCroix, cy);
+            ctx.lineTo(cx + tailleCroix, cy);
+            ctx.moveTo(cx, cy - tailleCroix);
+            ctx.lineTo(cx, cy + tailleCroix);
+            ctx.stroke();
+
             ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(2, canvas.width / 400);
-            let tailleCroix = 6;
+            ctx.lineWidth = Math.max(2, canvas.width / 450);
             ctx.beginPath();
             ctx.moveTo(cx - tailleCroix, cy);
             ctx.lineTo(cx + tailleCroix, cy);
@@ -1026,13 +854,16 @@
 
         window.validatePreCaptureStep = function() {
             preCaptureTools.style.display = 'none';
-            step = 0.5; 
-            statusText.innerText = "Étape 0.5 : Gestion des couleurs (Échantillonneur)";
-            colorManagementPanel.style.display = 'block';
+            step = 1; 
+            statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
+            generalToolsContainer.style.display = 'block';
+            adjustPanel.style.display = 'block';
             resetCanvasAndTempPos();
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
-            zoomLevel = 1.0; 
+            tempAngle = 0;
+            tempSize = canvas.width * 0.055;
+            updateUIState();
             redrawCanvas();
         }
 
@@ -1052,16 +883,6 @@
 
         window.askPrevStep = function() {
             stopAction();
-            if (step === 1) {
-                generalToolsContainer.style.display = 'none';
-                adjustPanel.style.display = 'none';
-                step = 0.5;
-                statusText.innerText = "Étape 0.5 : Gestion des couleurs (Échantillonneur)";
-                colorManagementPanel.style.display = 'block';
-                zoomLevel = 1.0;
-                redrawCanvas();
-                return;
-            }
             let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let prevLabel = stepNames[step - 1] || "l'étape précédente";
             
@@ -1117,7 +938,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.59) !";
+                statusText.innerText = "✅ Calage expert terminé (v.60) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
