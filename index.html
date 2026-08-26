@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.57 - Assistant CAO</title>
+    <title>Acuitix V.58 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -278,7 +278,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.57 - Assistant CAO</h1>
+    <h1>Acuitix V.58 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
@@ -443,18 +443,14 @@
                 
                 <!-- Galerie de silhouettes corrigées -->
                 <div class="pickguards-gallery">
-                    <!-- 1. Stratocaster (Silhouette profil Strat réaliste avec cornes et découpe corps) -->
+                    <!-- 1. Stratocaster -->
                     <div class="pickguard-thumb">
                         <svg viewBox="0 0 200 320">
-                            <!-- Contour Pickguard Strat fidèle (Corne supérieure pointue, découpe manche, corne/pan coupé inférieur) -->
                             <path d="M70,25 C85,20 115,30 135,45 C150,60 162,85 158,110 C152,140 138,155 125,175 C110,195 90,215 75,230 C62,242 55,230 52,210 C48,185 55,160 52,135 C48,105 38,90 38,70 C38,50 48,32 70,25 Z" />
-                            <!-- Emplacements micros (rectangles arrondis) -->
                             <rect x="62" y="65" width="42" height="16" rx="4" />
                             <rect x="62" y="105" width="42" height="16" rx="4" />
                             <rect x="58" y="148" width="48" height="18" rx="4" />
-                            <!-- Sélecteur de micros -->
                             <line x1="112" y1="125" x2="132" y2="105" />
-                            <!-- Trous de vis caractéristiques -->
                             <circle cx="68" cy="38" r="3" />
                             <circle cx="110" cy="42" r="3" />
                             <circle cx="132" cy="70" r="3" />
@@ -963,17 +959,18 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v57.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v58.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
 
+        // Ligne continue (setLineDash([]) vide)
         function drawRotatedRect(x, y, size, angleDeg, isActive, color) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
             ctx.strokeStyle = color;
-            ctx.setLineDash(isActive ? [canvas.width / 70, canvas.width / 90] : []);
+            ctx.setLineDash([]); 
             ctx.strokeRect(-size / 2, -size / 2, size, size);
             ctx.restore();
         }
@@ -984,7 +981,7 @@
             ctx.rotate((angleDeg * Math.PI) / 180);
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
-            ctx.setLineDash(isActive ? [canvas.width / 80, canvas.width / 100] : []);
+            ctx.setLineDash([]);
             ctx.lineWidth = Math.max(4, canvas.width / 250);
 
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
@@ -1113,7 +1110,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.57) !";
+                statusText.innerText = "✅ Calage expert terminé (v.58) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
