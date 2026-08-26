@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.43 - Assistant CAO</title>
+    <title>Acuitix V.44 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -285,7 +285,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.43</h1>
+    <h1>Acuitix V.44</h1>
     <div id="status-text">Gestion des couleurs</div>
 
     <div class="box">
@@ -546,21 +546,17 @@
 
             // Si on est à l'étape 0 (Échantillonneur couleur)
             if (step === 0) {
-                // Extraire la couleur du pixel cliqué sur l'image brute
                 let pX = Math.floor(imgX);
                 let pY = Math.floor(imgY);
                 if (pX >= 0 && pX < canvas.width && pY >= 0 && pY < canvas.height) {
-                    // Sauvegarder l'état actuel et lire le pixel
                     let pData = ctx.getImageData(pX, pY, 1, 1).data;
                     let r = pData[0], g = pData[1], b = pData[2];
                     
                     sampledBgColor = `rgb(${r},${g},${b})`;
                     swatchBg.style.backgroundColor = sampledBgColor;
 
-                    // Calcul de la luminosité perçue
                     let brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
-                    // Détermination de la couleur opposée pour les traçages
                     if (brightness < 90) {
                         elementColor = "#FFFF00"; // Jaune fluo pour fond sombre
                     } else if (r > 150 && g < 100 && b < 100) {
@@ -581,7 +577,6 @@
                 return;
             }
 
-            // Comportement normal pour les étapes de calage (1 à 7)
             if (step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
@@ -712,7 +707,6 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Application de l'opacité pour travailler "à raz"
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
@@ -788,14 +782,14 @@
                 dessinerCroixCentre(h.x, h.y);
             });
 
-            ctx.restore(); // Restauration opacité
-            ctx.restore(); // Restauration zoom/pan
+            ctx.restore();
+            ctx.restore();
 
             if (step === 8 && isForExport) {
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v43.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v44.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -938,7 +932,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.43) !";
+                statusText.innerText = "✅ Calage expert terminé (v.44) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
