@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.49 - Assistant CAO</title>
+    <title>Acuitix V.50 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,25 +52,55 @@
         
         #welcome-panel {
             display: block;
-            padding: 15px;
+            padding: 12px;
             background: #2a2a2a;
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 6px;
+            text-align: left;
         }
-        #mimic-icon {
-            width: 80px;
-            height: auto;
+        
+        /* Cadre visuel explicite pour l'accueil */
+        .photo-guide-frame {
+            border: 3px dashed #ffc107;
+            border-radius: 8px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            text-align: center;
             margin-bottom: 10px;
-            filter: drop-shadow(0 0 5px rgba(255, 193, 7/0.5));
+            position: relative;
+        }
+        .camera-badge {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+        .pickguards-gallery {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .pickguard-thumb {
+            width: 55px;
+            height: 45px;
+            background: #333;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: #ffc107;
+            text-align: center;
+            padding: 2px;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #28a745;
             color: white;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: bold;
             border: none;
             border-radius: 6px;
@@ -91,7 +121,7 @@
         .adjust-panel {
             display: none;
             background: #333;
-            padding: 6px;
+            padding: 8px;
             border-radius: 6px;
             margin-top: 4px;
         }
@@ -111,10 +141,10 @@
             background: #3a3a3a;
             border: 2px solid #ffc107;
             border-radius: 6px;
-            padding: 6px;
+            padding: 8px;
             margin-bottom: 6px;
         }
-        #color-management-panel h3 { font-size: 0.9rem; color: #ffc107; margin: 0 0 4px 0; text-transform: uppercase;}
+        #color-management-panel h3 { font-size: 0.95rem; color: #ffc107; margin: 0 0 4px 0; text-transform: uppercase;}
 
         #general-tools-container { display: none; }
 
@@ -122,53 +152,31 @@
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
-            padding: 4px;
-            margin-bottom: 4px;
+            padding: 6px;
+            margin-bottom: 6px;
         }
         .tool-section-title {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #17a2b8;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             text-align: left;
         }
-        .image-tools-bar {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 3px;
+        
+        /* Boutons grossis et espacés pour éviter les erreurs de manipulation */
+        .safe-button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 6px;
         }
-        .image-tools-bar button {
-            flex: 1;
-            padding: 8px 4px;
-            font-size: 0.75rem;
+        .safe-button-grid button {
+            padding: 12px 8px;
+            font-size: 0.85rem;
             font-weight: bold;
-            border-radius: 4px;
+            border-radius: 6px;
             border: none;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .scale-control-box {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            padding: 4px;
-            border-radius: 4px;
-            margin-top: 3px;
-        }
-        .scale-buttons-row {
-            display: flex;
-            gap: 4px;
-        }
-        .scale-buttons-row button {
-            flex: 1;
-            padding: 8px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.75rem;
             cursor: pointer;
             touch-action: manipulation;
         }
@@ -177,22 +185,22 @@
             background: #262626;
             border: 1px solid #444;
             border-radius: 6px;
-            padding: 4px;
-            margin-bottom: 4px;
+            padding: 6px;
+            margin-bottom: 6px;
         }
         .camera-pan-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 3px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
         }
         .camera-pan-grid button {
-            padding: 8px 2px;
+            padding: 12px 4px;
             background: #495057;
             color: white;
             border: 1px solid #6c757d;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             cursor: pointer;
             touch-action: manipulation;
         }
@@ -202,7 +210,7 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .dpad-container {
@@ -210,7 +218,7 @@
             flex-direction: column;
             align-items: center;
             background: #222;
-            padding: 3px;
+            padding: 4px;
             border-radius: 6px;
             border: 1px solid #444;
             flex-shrink: 0;
@@ -218,16 +226,16 @@
         }
         .dpad-grid {
             display: grid;
-            grid-template-columns: repeat(3, 38px);
-            grid-template-rows: repeat(3, 38px);
-            gap: 2px;
+            grid-template-columns: repeat(3, 42px);
+            grid-template-rows: repeat(3, 42px);
+            gap: 3px;
         }
         .dpad-grid button {
             background: #444;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 1rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             touch-action: manipulation;
@@ -237,45 +245,45 @@
         .controls-right {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 6px;
             flex-grow: 1;
         }
         .control-row {
             display: flex;
-            gap: 3px;
+            gap: 6px;
         }
         .control-row button {
             flex: 1;
-            padding: 10px 2px;
+            padding: 12px 4px;
             background: #555;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             cursor: pointer;
             touch-action: manipulation;
         }
         .nav-buttons {
             display: flex;
-            gap: 4px;
-            margin-top: 4px;
+            gap: 6px;
+            margin-top: 6px;
         }
 
         .opacity-control-box {
             background: #262626;
             border: 1px solid #444;
-            padding: 6px;
+            padding: 8px;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             text-align: center;
         }
         .opacity-control-box label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: #4CAF50;
             font-weight: bold;
             display: block;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
         .opacity-control-box input[type="range"] {
             width: 100%;
@@ -285,7 +293,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.49</h1>
+    <h1>Acuitix V.50</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div class="box">
@@ -298,63 +306,66 @@
         <!-- Étape 0 : Orientation et Cadrage initial -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.2;">Positionne l'image (les 4 coins du gabarit doivent être visibles).</p>
+            <p style="font-size: 0.8rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">Positionne l'image (toutes les extrémités visibles).</p>
             
-            <div class="camera-pan-container" style="margin-bottom: 4px;">
+            <div class="camera-pan-container" style="margin-bottom: 6px;">
                 <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
                     <button onmousedown="startAction(() => panImage(0, 30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 30), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                     <button onmousedown="startAction(() => panImage(30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(30, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
                     <button onmousedown="startAction(() => panImage(-30, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-30, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => panImage(0, -30), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -30), 50)" ontouchend="stopAction()">⬇️ Bas</button>
                 </div>
             </div>
 
-            <div class="image-tools-bar" style="margin-bottom: 4px;">
+            <div class="safe-button-grid" style="margin-bottom: 6px;">
                 <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
-                <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                 <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
+                <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="validatePreCaptureStep()">Valider l'orientation</button>
-            <button class="btn btn-danger" style="margin-top: 4px; padding: 6px; font-size: 0.75rem;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+            <button class="btn" style="margin-top: 6px;" onclick="validatePreCaptureStep()">Valider l'orientation</button>
+            <button class="btn btn-danger" style="margin-top: 6px; padding: 10px; font-size: 0.85rem;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- Étape 0.5 : Gestion des couleurs avec Pipette visuelle et dézoom complet -->
+        <!-- Étape 0.5 : Gestion des couleurs avec Pipette visuelle sécurisée -->
         <div id="color-management-panel" class="adjust-panel">
             <h3>🎨 2. Gestion des couleurs (<span style="color:#ffc107;">💧 Pipette</span>)</h3>
-            <p id="color-instruction" style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
-                Utilise les flèches pour déplacer la <b>pipette</b> précisément sur l'image, ajuste le zoom (dézoom autorisé) et échantillonne.
+            <p id="color-instruction" style="font-size: 0.8rem; color: #ddd; margin: 2px 0 6px 0; line-height: 1.3;">
+                Utilise les flèches pour placer la <b>pipette</b> sur l'arrière-plan, puis échantillonne.
             </p>
 
             <div class="camera-pan-container" style="margin-bottom: 6px;">
                 <div class="tool-section-title">💧 Déplacement précis du curseur Pipette</div>
-                <div class="camera-pan-grid" style="margin-bottom: 4px;">
-                    <button onmousedown="startAction(() => movePipetteLinear(0, -2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(0, -2), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => movePipetteLinear(-2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(-2, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => movePipetteLinear(2, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(2, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                    <button onmousedown="startAction(() => movePipetteLinear(0, 2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(0, 2), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                <div class="camera-pan-grid" style="margin-bottom: 6px;">
+                    <button onmousedown="startAction(() => movePipetteLinear(0, -3), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(0, -3), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button onmousedown="startAction(() => movePipetteLinear(0, 3), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(0, 3), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                    <button onmousedown="startAction(() => movePipetteLinear(-3, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(-3, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button onmousedown="startAction(() => movePipetteLinear(3, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => movePipetteLinear(3, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
                 </div>
-                <div class="image-tools-bar" style="margin-bottom: 4px;">
-                    <button class="btn-info" onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                    <button class="btn-info" onclick="adjustZoom(-0.5)">🔍- Dézoom</button>
-                    <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Centrer Pipette</button>
+                
+                <div class="safe-button-grid" style="margin-bottom: 6px;">
+                    <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                    <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Centrer Viseur</button>
                 </div>
-                <button class="btn" style="background: #28a745; margin-top:2px; padding: 8px; font-size: 0.8rem;" onclick="sampleCurrentPipettePosition()">🧪 Échantillonner ce pixel exact</button>
+                
+                <button class="btn" style="background: #28a745; margin-top:4px; padding: 12px; font-size: 0.9rem;" onclick="sampleCurrentPipettePosition()">🧪 Échantillonner ce pixel exact</button>
             </div>
 
             <div id="color-preview-container" style="display: none; margin-bottom: 6px; align-items: center; justify-content: center; gap: 8px;">
-                <span style="font-size: 0.75rem;">Fond détecté :</span>
-                <div id="swatch-bg" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
-                <span style="font-size: 0.75rem;">Traçage conseillé :</span>
-                <div id="swatch-trace" style="width: 24px; height: 24px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
+                <span style="font-size: 0.8rem;">Fond détecté :</span>
+                <div id="swatch-bg" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
+                <span style="font-size: 0.8rem;">Traçage conseillé :</span>
+                <div id="swatch-trace" style="width: 28px; height: 28px; border: 2px solid #fff; border-radius: 4px; display: inline-block;"></div>
             </div>
-            <div id="color-actions" style="display: none; gap: 4px;">
-                <button class="btn" style="margin-top:0; padding: 8px;" onclick="validerCouleurFond()">Valider cette couleur</button>
-                <button class="btn btn-danger" style="margin-top:0; padding: 8px;" onclick="recommencerPipette()">Recommencer</button>
+            
+            <div id="color-actions" style="display: none; gap: 6px; flex-direction: column;">
+                <button class="btn" style="margin-top:0; padding: 12px;" onclick="validerCouleurFond()">Valider cette couleur</button>
+                <button class="btn btn-danger" style="margin-top:0; padding: 10px;" onclick="recommencerPipette()">Recommencer</button>
             </div>
-            <button class="btn btn-secondary" style="margin-top: 6px; padding: 6px; font-size: 0.75rem;" onclick="backToPreCapture()">⬅️ Retour orientation</button>
+            
+            <button class="btn btn-secondary" style="margin-top: 6px; padding: 10px; font-size: 0.8rem;" onclick="backToPreCapture()">⬅️ Retour orientation</button>
         </div>
 
         <!-- Panneau outils généraux (Étapes 1 à 7) -->
@@ -365,24 +376,22 @@
             </div>
 
             <div class="image-tools-container">
-                <div class="scale-control-box">
-                    <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
-                    <div class="scale-buttons-row">
-                        <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
-                        <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
-                    </div>
+                <div class="tool-section-title" style="color: #ffc107;">Échelle de l'élément</div>
+                <div class="safe-button-grid">
+                    <button class="btn-info" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                    <button class="btn-info" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                 </div>
-                <button class="btn btn-secondary" style="margin-top: 4px; padding: 8px; font-size: 0.75rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
+                <button class="btn btn-secondary" style="margin-top: 4px; padding: 10px; font-size: 0.8rem;" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
             <div class="adjust-panel" id="adjust-panel">
                 <div class="camera-pan-container">
                     <div class="tool-section-title">🔍 Panoramique de la vue</div>
                     <div class="camera-pan-grid">
-                        <button onmousedown="startAction(() => panCamera(0, 50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 50), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                        <button onmousedown="startAction(() => panCamera(50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(50, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                        <button onmousedown="startAction(() => panCamera(-50, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-50, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
-                        <button onmousedown="startAction(() => panCamera(0, -50), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -50), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                        <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut</button>
+                        <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas</button>
+                        <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
+                        <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
                     </div>
                 </div>
 
@@ -391,21 +400,21 @@
                         <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement élément</div>
                         <div class="dpad-grid">
                             <div></div>
-                            <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
+                            <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
                             <div></div>
-                            <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                            <button onmousedown="startAction(() => moveTarget(-5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-5, 0), 40)" ontouchend="stopAction()">⬅️</button>
                             <div style="background:#2a2a2a; border-radius:4px;"></div>
-                            <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
+                            <button onmousedown="startAction(() => moveTarget(5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(5, 0), 40)" ontouchend="stopAction()">➡️</button>
                             <div></div>
-                            <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
+                            <button onmousedown="startAction(() => moveTarget(0, 5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 5), 40)" ontouchend="stopAction()">⬇️</button>
                             <div></div>
                         </div>
                     </div>
 
                     <div class="controls-right">
                         <div class="control-row">
-                            <button onclick="adjustZoom(0.5)">🔍+ Zoom</button>
-                            <button onclick="adjustZoom(-0.5)">🔍- Dézoom</button>
+                            <button onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                            <button onclick="adjustZoom(-0.3)">🔍- Zoom</button>
                         </div>
                         <div class="control-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -414,41 +423,45 @@
                     </div>
                 </div>
 
-                <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
-                    <button class="btn" style="background: #28a745; margin-top:0;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
-                    <button class="btn btn-danger" style="margin-top:4px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
+                <div id="hole-action-panel" style="display:none; margin-bottom: 6px;">
+                    <button class="btn" style="background: #28a745; margin-top:0; padding: 12px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:6px; padding: 10px;" onclick="removeLastHole()">⌫ Supprimer le dernier perçage</button>
                 </div>
 
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none;">⬅️ Retour</button>
-                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0;" onclick="askValidateStep()">Valider l'étape</button>
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none; padding: 12px;">⬅️ Retour</button>
+                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 12px;" onclick="askValidateStep()">Valider l'étape</button>
                 </div>
             </div>
         </div>
 
+        <!-- ÉCRAN D'ACCUEIL CLAIR AVEC EXEMPLES DE PICKGUARDS ET CADRE APPAREIL PHOTO -->
         <div id="welcome-panel">
-            <svg id="mimic-icon" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="2" width="60" height="40" rx="4" stroke="#FFC107" stroke-width="4"/>
-                <line x1="2" y1="10" x2="62" y2="10" stroke="#FFC107" stroke-width="2"/>
-                <circle cx="8" cy="6" r="2" fill="#FFC107"/>
-                <circle cx="16" cy="6" r="2" fill="#FFC107"/>
-                <rect x="52" y="30" width="8" height="4" rx="2" fill="#FFC107"/>
-                <rect x="52" y="22" width="8" height="4" rx="2" fill="#FFC107"/>
-                <path d="M32 19C35.3137 19 38 21.6863 38 25C38 28.3137 35.3137 31 32 31C28.6863 31 26 28.3137 26 25C26 21.6863 28.6863 19 32 19Z" stroke="#FFC107" stroke-width="2"/>
-                <path d="M32 21V29" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
-                <path d="M28 25H36" stroke="#FFC107" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+            <div class="photo-guide-frame">
+                <div class="camera-badge">📸 📷 📷</div>
+                <p style="color: #ffc107; font-weight: bold; font-size: 0.95rem; margin: 4px 0; text-transform: uppercase;">
+                    Attention : Prenez l'objet ENTIER !
+                </p>
+                <p style="color: #fff; font-size: 0.8rem; margin: 4px 0;">
+                    <b>Toutes les extrémités et contours doivent être parfaitement visibles</b> sur la photo pour garantir une modélisation CAO exacte.
+                </p>
+                <div class="pickguards-gallery">
+                    <div class="pickguard-thumb">Stratocaster</div>
+                    <div class="pickguard-thumb">Telecaster</div>
+                    <div class="pickguard-thumb">Les Paul</div>
+                    <div class="pickguard-thumb">Bass / Autre</div>
+                </div>
+            </div>
+
             <p style="color: #fff; font-weight: bold; font-size: 0.9rem; margin: 4px 0;">📷 ÉTAPE 1 : PRENDRE LA PHOTO</p>
             <p style="color: #ddd; font-size: 0.8rem; margin: 4px 0 10px 0;">
-                Prendre la photo de l'élément à modéliser en CAO.<br>
-                Nous vous conseillons le <b>mode paysage</b>.<br>
-                <span style="color: #ffc107;">ATTENTION</span> à bien prendre l'ensemble <b>ENTIER</b>.
+                Photographiez votre pickguard ou élément à plat en mode paysage de préférence.
             </p>
             <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive</a>
-        <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 14px;">💾 Télécharger l'image définitive</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none; padding: 12px;">🔄 Recommencer</button>
     </div>
 
     <script>
@@ -575,7 +588,6 @@
             }
         });
 
-        // Déplacement linéaire strict du viseur pipette (ne bouge pas la caméra globale)
         window.movePipetteLinear = function(dx, dy) {
             if (step === 0.5) {
                 tempX += dx;
@@ -637,7 +649,7 @@
             colorSelected = false;
             colorPreviewContainer.style.display = 'none';
             colorActions.style.display = 'none';
-            colorInstruction.innerHTML = "Utilise les flèches pour déplacer la <b>pipette</b> précisément sur l'image, ajuste le zoom (dézoom autorisé) et échantillonne.";
+            colorInstruction.innerHTML = "Utilise les flèches pour placer la <b>pipette</b> sur l'arrière-plan, puis échantillonne.";
             redrawCanvas();
         }
 
@@ -702,7 +714,7 @@
 
         window.resetCanvasAndTempPos = function() {
             if (!currentImg) return;
-            zoomLevel = 1.0; 
+            zoomLevel = 1.0; // Sécurité stricte pour ne jamais perdre l'image de vue
             manualPanX = 0;
             manualPanY = 0;
             tempX = canvas.width * 0.5;
@@ -727,8 +739,8 @@
         window.panImage = function(dx, dy) { imgOffsetX += dx; imgOffsetY += dy; redrawCanvas(); }
         
         window.adjustZoom = function(delta) {
-            // Dézoom autorisé jusqu'à 0.5x, zoom max 6.0x
-            zoomLevel = Math.max(0.5, Math.min(6.0, zoomLevel + delta));
+            // Empêche le dézoom excessif en bloquant le niveau à 1.0 minimum
+            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
             redrawCanvas();
         }
 
@@ -759,7 +771,6 @@
 
             ctx.save();
 
-            // Gestion du Zoom / Panoramique centré sur tempX, tempY
             if (!isForExport && zoomLevel !== 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
@@ -779,23 +790,19 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Affichage de l'icône Pipette visuelle à l'étape 0.5
             if (step === 0.5 && !isForExport) {
                 ctx.save();
-                // Cercle de sélection de la pipette
                 ctx.strokeStyle = '#ffc107';
                 ctx.lineWidth = Math.max(3, refW / 350);
                 ctx.beginPath();
                 ctx.arc(tempX, tempY, 18, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Dessin d'une icône Pipette stylisée au centre du curseur
                 ctx.fillStyle = '#ffc107';
                 ctx.beginPath();
                 ctx.arc(tempX, tempY, 4, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Pointe fine rouge pointant exactement le pixel cible
                 ctx.strokeStyle = '#ff0000';
                 ctx.lineWidth = Math.max(2, refW / 450);
                 ctx.beginPath();
@@ -887,7 +894,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v49.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v50.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -952,7 +959,7 @@
             resetCanvasAndTempPos();
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
-            zoomLevel = 1.0; // Zoom neutre de base (autorise le dézoom si besoin)
+            zoomLevel = 1.0; 
             redrawCanvas();
         }
 
@@ -1037,7 +1044,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.49) !";
+                statusText.innerText = "✅ Calage expert terminé (v.50) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
