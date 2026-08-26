@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acuitix.25 - Assistant CAO</title>
+    <title>Acuitix.26 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,9 +66,7 @@
             margin-left: auto;
             margin-right: auto;
         }
-        .sub-info { font-size: 0.8rem; color: #bbb; margin-bottom: 8px; }
 
-        /* Barre supérieure image : Rotation + Recentrage */
         .image-tools-bar {
             display: none;
             gap: 6px;
@@ -140,13 +138,6 @@
             flex-shrink: 0;
             margin: auto 0;
         }
-        .dpad-label {
-            font-size: 0.72rem;
-            color: #00FF00;
-            font-weight: bold;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
         .dpad-grid {
             display: grid;
             grid-template-columns: repeat(3, 42px);
@@ -199,7 +190,7 @@
 </head>
 <body>
 
-    <h1>Acuitix.25 - Assistant CAO</h1>
+    <h1>Acuitix.26 - Assistant CAO</h1>
 
     <div class="box">
         <p id="status-text">1. Prenez la photo du gabarit.</p>
@@ -210,15 +201,12 @@
         <label for="file-input" class="btn" id="btn-shoot">📸 Prendre la photo</label>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- Barre regroupant rotation et recentrage de l'élément -->
         <div class="image-tools-bar" id="image-tools-bar">
             <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
             <button class="btn-info" onclick="resetCurrentPos()">🎯 Recentrer l'élément</button>
         </div>
 
         <div class="adjust-panel" id="adjust-panel">
-            <p id="step-instruction" class="sub-info">Touchez pour poser, flèches pour la cible, commandes ci-dessous pour l'image.</p>
-            
             <div class="camera-pan-container">
                 <div class="camera-pan-title">📷 Déplacement de l'image (Panoramique)</div>
                 <div class="camera-pan-grid">
@@ -230,14 +218,14 @@
             </div>
 
             <div class="gameboy-container">
-                <div class="dpad-container" title="Déplacer la cible précisément">
-                    <div class="dpad-label">Cible</div>
+                <!-- Croix directionnelle sans label "Cible" -->
+                <div class="dpad-container" title="Déplacer précisément">
                     <div class="dpad-grid">
                         <div></div>
                         <button onmousedown="startAction(() => moveTarget(0, -6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -6), 40)" ontouchend="stopAction()">⬆️</button>
                         <div></div>
                         <button onmousedown="startAction(() => moveTarget(-6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-6, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <div style="background:#2a2a2a; border-radius:4px;" title="Centre"></div>
+                        <div style="background:#2a2a2a; border-radius:4px;"></div>
                         <button onmousedown="startAction(() => moveTarget(6, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(6, 0), 40)" ontouchend="stopAction()">➡️</button>
                         <div></div>
                         <button onmousedown="startAction(() => moveTarget(0, 6), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 6), 40)" ontouchend="stopAction()">⬇️</button>
@@ -251,8 +239,9 @@
                         <button onclick="adjustZoom(-0.5)">🔍- Zoom</button>
                     </div>
                     <div class="control-row">
-                        <button class="btn-action-blue" onclick="promptAdjustSize(2)">➕ Échelle</button>
-                        <button class="btn-action-blue" onclick="promptAdjustSize(-2)">➖ Échelle</button>
+                        <!-- Échelle réactive et fluide sans confirmation lourde -->
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle</button>
+                        <button class="btn-action-blue" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle</button>
                     </div>
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -272,7 +261,7 @@
             </div>
         </div>
         
-        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.25)</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none;">💾 Télécharger l'image définitive (Acuitix.26)</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none;">🔄 Recommencer</button>
     </div>
 
@@ -286,7 +275,6 @@
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
-        const stepInstruction = document.getElementById('step-instruction');
         const holeActionPanel = document.getElementById('hole-action-panel');
 
         let currentImg = null;
@@ -390,7 +378,15 @@
         }
 
         window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
-        window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
+        
+        // Correction : synchronisation parfaite de la vue lors du panoramique (flèches de déplacement image)
+        window.panCamera = function(dx, dy) { 
+            manualPanX += dx; 
+            manualPanY += dy; 
+            tempX += dx; 
+            tempY += dy; 
+            redrawCanvas(); 
+        }
         
         window.adjustZoom = function(delta) {
             zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
@@ -402,13 +398,9 @@
         }
 
         window.adjustAngle = function(deltaDeg) { if (step <= 6) { tempAngle += deltaDeg; redrawCanvas(); } }
-        
-        // Demande de confirmation obligatoire pour modifier l'échelle
-        window.promptAdjustSize = function(deltaSize) {
-            if (confirm("Voulez-vous modifier la taille / l'échelle de l'élément ?")) {
-                tempSize = Math.max(10, tempSize + deltaSize);
-                redrawCanvas();
-            }
+        window.adjustSize = function(deltaSize) { 
+            tempSize = Math.max(10, tempSize + deltaSize); 
+            redrawCanvas(); 
         }
 
         canvas.addEventListener('click', function(e) {
@@ -429,6 +421,13 @@
             }
 
             if (step >= 1 && step <= 7) {
+                // Si on zoome, clic direct recentré sur le point touché tout en réalignant la vue
+                if (zoomLevel > 1.0) {
+                    let diffX = imgX - tempX;
+                    let diffY = imgY - tempY;
+                    manualPanX += diffX;
+                    manualPanY += diffY;
+                }
                 tempX = imgX;
                 tempY = imgY;
                 redrawCanvas();
@@ -548,7 +547,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_expert_v25.jpg';
+                    btnDownload.download = 'acuitix_etalon_expert_v26.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -663,7 +662,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 imageToolsBar.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.25) ! Prêt pour AcuTx.";
+                statusText.innerText = "✅ Calage expert terminé (v.26) ! Prêt pour AcuTx.";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 zoomLevel = 1.0;
@@ -704,7 +703,6 @@
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
                 btnVal.innerText = "Terminer et Générer";
-                stepInstruction.innerText = "Touchez pour placer un perçage, ou utilisez les flèches.";
             } else {
                 holeActionPanel.style.display = 'none';
                 btnVal.innerText = "Valider l'étape";
@@ -722,6 +720,8 @@
                 statusText.innerText = "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)";
             } else if (step === 6) {
                 statusText.innerText = "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)";
+            } else if (step === 7) {
+                statusText.innerText = "Étape 7 / 7 : Placement des perçages";
             }
         }
 
