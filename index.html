@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.84 - Assistant CAO Compact</title>
+    <title>Acuitix V.85 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.84 - Assistant CAO</h1>
+    <h1>Acuitix V.85 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -420,50 +420,50 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.84) -->
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.85) -->
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consignes de Positionnement</h3>
-            <p style="font-size: 0.70rem; color: #fff; margin: 2px 0 4px 0;">
-                Astuce : <b>Jouez avec l'opacité</b> pour ajuster au mieux. Le carré vert (tracé) doit épouser le carré rouge (fond).
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne de positionnement des éléments</h3>
+            <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
+                Astuce clé : <b>Jouez avec l'opacité</b> via la barre de réglage dédiée pour superposer au mieux vos éléments et aligner les bords extérieurs avec le carré rouge de fond !
             </p>
             
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.6rem;">✅ Zoom Parfait</div>
-                    <svg viewBox="0 0 100 70">
-                        <rect x="25" y="18" width="50" height="34" fill="red" />
-                        <rect x="25" y="18" width="50" height="34" fill="none" stroke="#28a745" stroke-width="3" />
+                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Parfait (Bords ext.)</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.55rem;">Bord ext. / Carré rouge</span>
+                    <span style="font-size:0.5rem;">Bord ext. en contact avec le carré rouge</span>
                 </div>
                 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.6rem;">❌ Zoom Intérieur</div>
-                    <svg viewBox="0 0 100 70">
-                        <rect x="25" y="18" width="50" height="34" fill="red" />
-                        <rect x="35" y="24" width="30" height="22" fill="none" stroke="#dc3545" stroke-width="3" />
+                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Zoom Intérieur</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <rect x="30" y="22" width="60" height="36" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.55rem;">Bord int. / Erreur</span>
+                    <span style="font-size:0.5rem;">Bord int. en contact / Erreur</span>
                 </div>
 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.6rem;">❌ Décalage</div>
-                    <svg viewBox="0 0 100 70">
-                        <rect x="25" y="18" width="50" height="34" fill="red" />
-                        <rect x="38" y="12" width="50" height="34" fill="none" stroke="#dc3545" stroke-width="3" />
+                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Décalage</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <rect x="32" y="8" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.55rem;">Non aligné</span>
+                    <span style="font-size:0.5rem;">Carré vert non aligné au fond</span>
                 </div>
 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.6rem;">❌ Rotation (45°)</div>
-                    <svg viewBox="0 0 100 70">
-                        <rect x="25" y="18" width="50" height="34" fill="red" />
-                        <g transform="rotate(45, 50, 35)">
-                            <rect x="25" y="18" width="50" height="34" fill="none" stroke="#dc3545" stroke-width="3" />
+                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Rotation (45°)</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <g transform="rotate(45, 60, 40)">
+                            <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                         </g>
                     </svg>
-                    <span style="font-size:0.55rem;">Rotation erronée</span>
+                    <span style="font-size:0.5rem;">Carré vert de biais vs rouge droit</span>
                 </div>
             </div>
 
@@ -740,7 +740,7 @@
         window.goToTutorialStep = function() {
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'block';
-            statusText.innerText = "Consignes de Positionnement";
+            statusText.innerText = "Consigne de positionnement des éléments";
             isSelectingColorState = false; 
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
@@ -998,7 +998,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v84.jpg';
+                    btnDownload.download = 'acuitix_etalon_v85.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1097,7 +1097,7 @@
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 tutorialPanel.style.display = 'block';
-                statusText.innerText = "Consignes de Positionnement";
+                statusText.innerText = "Consigne de positionnement des éléments";
                 sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
                 redrawCanvas();
@@ -1160,7 +1160,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.84) !";
+                statusText.innerText = "✅ Calage expert terminé (v.85) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
