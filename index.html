@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.81 - Assistant CAO Compact</title>
+    <title>Acuitix V.82 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.81 - Assistant CAO</h1>
+    <h1>Acuitix V.82 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -363,7 +363,8 @@
     </div>
 
     <div>
-        <input type="file" id="file-input" accept="image/*" capture="environment">
+        <!-- RESTAURATION DE LA V80 : input file natif propre sans attributs bloquants -->
+        <input type="file" id="file-input" accept="image/*">
 
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
@@ -420,7 +421,6 @@
             </div>
         </div>
 
-        <!-- 4 ÉTAPES DE TUTORIEL -->
         <div id="tutorial-panel">
             <h3 id="tut-title" style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne 1/4 : Orientation</h3>
             
@@ -591,7 +591,6 @@
         let isSelectingColorState = false;
         let tutorialSubStep = 1; 
 
-        // Schémas explicatifs modifiés selon vos demandes précises
         function drawSchema(c, type) {
             let sc = c.getContext('2d');
             let w = c.width;
@@ -622,24 +621,22 @@
                 sc.lineWidth = 2;
                 sc.strokeRect(w * 0.35, h * 0.25, w * 0.5, h * 0.5);
             } else if (type === 'bordinterieur') {
-                // Consigne 3/4 : Zoom identique au coin, fond rouge, tracé vert collé bord intérieur (à raz)
                 sc.save();
                 sc.translate(w * 0.7, h * 0.7);
                 sc.scale(2.2, 2.2);
-                sc.fillStyle = '#FF0000'; // Fond rouge
+                sc.fillStyle = '#FF0000';
                 sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#00FF00'; // Ligne verte à raz du bord intérieur
+                sc.strokeStyle = '#00FF00';
                 sc.lineWidth = 2;
-                sc.strokeRect(-w * 0.25, -h * 0.25, w * 0.4, h * 0.4);
+                sc.strokeRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
                 sc.restore();
             } else if (type === 'zoomcoin') {
-                // Consigne 4/4 : Zoom sur le coin, fond rouge, ligne verte très légèrement décalée pour montrer la précision du bord extérieur
                 sc.save();
                 sc.translate(w * 0.7, h * 0.7);
                 sc.scale(2.2, 2.2);
-                sc.fillStyle = '#FF0000'; // Fond rouge
+                sc.fillStyle = '#FF0000';
                 sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#00FF00'; // Ligne verte très légèrement décalée (précision bord extérieur)
+                sc.strokeStyle = '#00FF00';
                 sc.lineWidth = 2;
                 sc.strokeRect(-w * 0.33, -h * 0.33, w * 0.56, h * 0.56);
                 sc.restore();
@@ -1096,7 +1093,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v81.jpg';
+                    btnDownload.download = 'acuitix_etalon_v82.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1195,7 +1192,7 @@
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 tutorialPanel.style.display = 'block';
-                tutorialSubStep = 4; // Retour sur la dernière vue du tuto
+                tutorialSubStep = 4;
                 updateTutorialContent();
                 statusText.innerText = "Consigne de Positionnement";
                 sideColorDrawer.style.display = 'none';
@@ -1261,7 +1258,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.81) !";
+                statusText.innerText = "✅ Calage expert terminé (v.82) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
