@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.72 - Assistant CAO Compact</title>
+    <title>Acuitix V.73 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -348,7 +348,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.72 - Assistant CAO</h1>
+    <h1>Acuitix V.73 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -590,9 +590,10 @@
                 img.onload = function() {
                     currentImg = img;
                     
-                    // Auto-détection de l'orientation portrait (9/16) pour mise en paysage automatique
+                    // Correction de l'orientation inversée à l'importation : 
+                    // Si l'image brute est en portrait, on applique 270° (ou -90°) au lieu de 90° pour éviter le sens inverse.
                     if (img.naturalHeight > img.naturalWidth) {
-                        rotationAngle = 90;
+                        rotationAngle = 270;
                     } else {
                         rotationAngle = 0;
                     }
@@ -941,7 +942,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v72.jpg';
+                    btnDownload.download = 'acuitix_etalon_v73.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1104,7 +1105,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.72) !";
+                statusText.innerText = "✅ Calage expert terminé (v.73) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
