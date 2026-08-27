@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.82 - Assistant CAO</title>
+    <title>Acuitix V.83 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -99,14 +99,14 @@
             font-weight: bold;
             margin-bottom: 2px;
         }
-        .pickguard-thumb canvas {
-            display: block !important;
-            width: 90px;
-            height: 50px;
-            object-fit: contain;
-            background: #000;
-            border-radius: 4px;
-            margin-bottom: 2px;
+        .pickguard-thumb svg {
+            width: 75px;
+            height: 48px;
+            stroke: #ffc107;
+            fill: rgba(255,193,7,0.1);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .btn {
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.82 - Assistant CAO</h1>
+    <h1>Acuitix V.83 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -350,10 +350,10 @@
         <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
         <p style="font-size: 0.7rem; color: #ccc;">Modifiez le tracé instantanément :</p>
         <div class="color-palette">
-            <button class="color-choice-btn" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
-            <button class="color-choice-btn" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
-            <button class="color-choice-btn" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
-            <button class="color-choice-btn" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
+            <button class="color-choice-btn drawer-btn-cyan" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
+            <button class="color-choice-btn drawer-btn-yellow" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
+            <button class="color-choice-btn drawer-btn-magenta" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
+            <button class="color-choice-btn drawer-btn-white" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
         </div>
         <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖</button>
     </div>
@@ -363,8 +363,7 @@
     </div>
 
     <div>
-        <!-- RESTAURATION DE LA V80 : input file natif propre sans attributs bloquants -->
-        <input type="file" id="file-input" accept="image/*">
+        <input type="file" id="file-input" accept="image/*" capture="environment">
 
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
@@ -373,13 +372,13 @@
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                    <canvas class="schema-canvas" data-type="valide" width="120" height="70"></canvas>
+                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" /></svg>
                     Bien cadrée
                 </div>
                 <div class="pickguard-thumb invalid">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                    <canvas class="schema-canvas" data-type="orientation" width="120" height="70"></canvas>
-                    Coupée / De biais
+                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" /></svg>
+                    Coupée / Désaxée
                 </div>
             </div>
 
@@ -417,33 +416,48 @@
 
             <div class="nav-buttons" style="margin-top: 8px;">
                 <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
-                <button class="btn" onclick="goToTutorialStep(1)" style="margin-top:0;">Continuer ➡️</button>
+                <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
             </div>
         </div>
 
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.83) -->
         <div id="tutorial-panel">
-            <h3 id="tut-title" style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne 1/4 : Orientation</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne de Positionnement</h3>
+            <p style="font-size: 0.75rem; color: #fff; margin: 2px 0 6px 0;">
+                Placez et superposez le carré <b>de bord à bord</b> précisément par rapport à la photo de votre élément.
+            </p>
             
-            <div class="pickguards-gallery" style="margin-bottom: 4px;">
-                <div class="pickguard-thumb invalid">
-                    <div class="thumb-status-icon" style="color: #dc3545;" id="tut-bad-icon">❌ Erreur</div>
-                    <canvas id="tut-schema-bad" class="schema-canvas" width="120" height="70"></canvas>
-                    <span id="tut-bad-text">De biais</span>
-                </div>
+            <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                    <canvas id="tut-schema-good" class="schema-canvas" width="120" height="70"></canvas>
-                    <span id="tut-good-text">Superposé (Extérieur)</span>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct (Bord à bord)</div>
+                    <svg viewBox="0 0 160 90">
+                        <rect x="10" y="25" width="36" height="36" fill="none" stroke="#28a745" stroke-width="3" />
+                        <path d="M52 43 L72 43 M66 37 L72 43 L66 49" fill="none" stroke="#FF0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <rect x="80" y="15" width="70" height="60" rx="4" fill="#333" stroke="#555" stroke-width="2" />
+                        <rect x="80" y="15" width="22" height="60" fill="red" fill-opacity="0.8" stroke="#28a745" stroke-width="3" />
+                    </svg>
+                    Superposition parfaite
+                </div>
+                
+                <div class="pickguard-thumb invalid">
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur (Intérieur/Décalé)</div>
+                    <svg viewBox="0 0 160 90">
+                        <rect x="10" y="25" width="36" height="36" fill="none" stroke="#28a745" stroke-width="3" />
+                        <path d="M52 43 L72 43 M66 37 L72 43 L66 49" fill="none" stroke="#FF0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        <rect x="80" y="15" width="70" height="60" rx="4" fill="#333" stroke="#555" stroke-width="2" />
+                        <rect x="92" y="25" width="22" height="40" fill="red" fill-opacity="0.8" stroke="#dc3545" stroke-width="3" />
+                    </svg>
+                    Mal aligné / Décalé
                 </div>
             </div>
 
-            <p id="tut-desc" style="font-size: 0.7rem; color: #ccc; margin: 4px 0;">
-                Vérifiez bien l'orientation de votre élément pour éviter tout décalage angulaire.
+            <p style="font-size: 0.7rem; color: #ccc; margin: 4px 0;">
+                Le carré doit épouser parfaitement l'arrête extérieure de la pièce sur l'image.
             </p>
 
-            <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="prevTutorialStep()" style="margin-top:0;">⬅️ Retour</button>
-                <button class="btn" onclick="nextTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
+            <div class="nav-buttons" style="margin-top: 8px;">
+                <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn" onclick="validateTutorialStep()" style="margin-top:0;">OK, j'ai compris ➡️</button>
             </div>
         </div>
 
@@ -526,12 +540,14 @@
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
                         <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                        <canvas class="schema-canvas" data-type="valide" width="120" height="70"></canvas>
+                        <svg viewBox="0 0 140 92"><rect x="15" y="16" width="110" height="60" rx="8" /></svg>
                         Plaque droite
                     </div>
                     <div class="pickguard-thumb invalid">
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                        <canvas class="schema-canvas" data-type="orientation" width="120" height="70"></canvas>
+                        <svg viewBox="0 0 140 92">
+                            <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" /></g>
+                        </svg>
                         Plaque de biais
                     </div>
                 </div>
@@ -589,67 +605,6 @@
         let elementColor = "#00FFFF";
         let currentOpacity = 0.9;
         let isSelectingColorState = false;
-        let tutorialSubStep = 1; 
-
-        function drawSchema(c, type) {
-            let sc = c.getContext('2d');
-            let w = c.width;
-            let h = c.height;
-            sc.fillStyle = '#000000';
-            sc.fillRect(0, 0, w, h);
-
-            if (type === 'valide') {
-                sc.fillStyle = '#333';
-                sc.fillRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#28a745';
-                sc.lineWidth = 2;
-                sc.strokeRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);
-            } else if (type === 'orientation') {
-                sc.save();
-                sc.translate(w * 0.5, h * 0.5);
-                sc.rotate(15 * Math.PI / 180);
-                sc.fillStyle = '#333';
-                sc.fillRect(-w * 0.25, -h * 0.25, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#dc3545';
-                sc.lineWidth = 2;
-                sc.strokeRect(-w * 0.25, -h * 0.25, w * 0.5, h * 0.5);
-                sc.restore();
-            } else if (type === 'decalage') {
-                sc.fillStyle = '#333';
-                sc.fillRect(w * 0.15, h * 0.25, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#dc3545';
-                sc.lineWidth = 2;
-                sc.strokeRect(w * 0.35, h * 0.25, w * 0.5, h * 0.5);
-            } else if (type === 'bordinterieur') {
-                sc.save();
-                sc.translate(w * 0.7, h * 0.7);
-                sc.scale(2.2, 2.2);
-                sc.fillStyle = '#FF0000';
-                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#00FF00';
-                sc.lineWidth = 2;
-                sc.strokeRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.restore();
-            } else if (type === 'zoomcoin') {
-                sc.save();
-                sc.translate(w * 0.7, h * 0.7);
-                sc.scale(2.2, 2.2);
-                sc.fillStyle = '#FF0000';
-                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#00FF00';
-                sc.lineWidth = 2;
-                sc.strokeRect(-w * 0.33, -h * 0.33, w * 0.56, h * 0.56);
-                sc.restore();
-            }
-        }
-
-        function renderAllSchemas() {
-            document.querySelectorAll('.schema-canvas').forEach(c => {
-                let type = c.getAttribute('data-type');
-                if (type) drawSchema(c, type);
-            });
-        }
-        window.addEventListener('DOMContentLoaded', renderAllSchemas);
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -700,7 +655,6 @@
                     sideColorDrawer.style.display = 'none';
                     sideColorDrawer.classList.remove('open');
 
-                    renderAllSchemas();
                     redrawCanvas();
                 };
                 img.src = event.target.result;
@@ -771,100 +725,39 @@
             redrawCanvas();
         }
 
-        window.goToTutorialStep = function(subStepNum) {
+        window.goToTutorialStep = function() {
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'block';
-            tutorialSubStep = subStepNum;
-            updateTutorialContent();
             statusText.innerText = "Consigne de Positionnement";
             isSelectingColorState = false; 
             sideColorDrawer.style.display = 'none';
-            renderAllSchemas();
             redrawCanvas();
         }
 
-        window.prevTutorialStep = function() {
-            if (tutorialSubStep > 1) {
-                tutorialSubStep--;
-                updateTutorialContent();
-                renderAllSchemas();
-            } else {
-                tutorialPanel.style.display = 'none';
-                colorChoicePanel.style.display = 'block';
-                statusText.innerText = "Sélection de la couleur";
-                isSelectingColorState = true;
-            }
+        window.backToColorSelection = function() {
+            tutorialPanel.style.display = 'none';
+            colorChoicePanel.style.display = 'block';
+            statusText.innerText = "Sélection de la couleur";
+            isSelectingColorState = true;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
         }
 
-        window.nextTutorialStep = function() {
-            if (tutorialSubStep < 4) {
-                tutorialSubStep++;
-                updateTutorialContent();
-                renderAllSchemas();
-            } else {
-                tutorialPanel.style.display = 'none';
-                isSelectingColorState = false; 
-                step = 1; 
-                statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
-                generalToolsContainer.style.display = 'block';
-                adjustPanel.style.display = 'block';
-                sideColorDrawer.style.display = 'block';
-                resetCanvasAndTempPos();
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                tempAngle = 0;
-                tempSize = canvas.width * 0.055;
-                updateUIState();
-                redrawCanvas();
-            }
-        }
-
-        function updateTutorialContent() {
-            let titleEl = document.getElementById('tut-title');
-            let badCanvas = document.getElementById('tut-schema-bad');
-            let goodCanvas = document.getElementById('tut-schema-good');
-            let badText = document.getElementById('tut-bad-text');
-            let goodText = document.getElementById('tut-good-text');
-            let badIcon = document.getElementById('tut-bad-icon');
-            let descEl = document.getElementById('tut-desc');
-
-            if (tutorialSubStep === 1) {
-                titleEl.innerText = "📐 Consigne 1/4 : Orientation";
-                badCanvas.setAttribute('data-type', 'orientation');
-                goodCanvas.setAttribute('data-type', 'valide');
-                badText.innerText = "De biais";
-                goodText.innerText = "Superposé (Extérieur)";
-                badIcon.innerText = "❌ Erreur";
-                badIcon.style.color = "#dc3545";
-                descEl.innerHTML = "Évitez toute inclinaison incorrecte : le tracé doit épouser parfaitement l'angle de l'objet en <b>bord extérieur</b> sans rotation de travers.";
-            } else if (tutorialSubStep === 2) {
-                titleEl.innerText = "📐 Consigne 2/4 : Décalage";
-                badCanvas.setAttribute('data-type', 'decalage');
-                goodCanvas.setAttribute('data-type', 'valide');
-                badText.innerText = "Décalé";
-                goodText.innerText = "Superposé (Extérieur)";
-                badIcon.innerText = "❌ Erreur";
-                badIcon.style.color = "#dc3545";
-                descEl.innerHTML = "Le repère doit être superposé exactement sur l'arête en <b>bord extérieur</b>, sans aucun décalage latéral ni vertical.";
-            } else if (tutorialSubStep === 3) {
-                titleEl.innerText = "📐 Consigne 3/4 : Bord Extérieur vs Intérieur";
-                badCanvas.setAttribute('data-type', 'bordinterieur');
-                goodCanvas.setAttribute('data-type', 'valide');
-                badText.innerText = "Bord Intérieur (Faux)";
-                goodText.innerText = "Bord Extérieur (Correct)";
-                badIcon.innerText = "⚠️ Erreur";
-                badIcon.style.color = "#ffc107";
-                descEl.innerHTML = "Attention : ne travaillez jamais en <b>bord intérieur</b> (tracé vert à raz à l'intérieur sur fond rouge). Ajustez l'échelle pour superposer parfaitement les arêtes sur le contour externe.";
-            } else if (tutorialSubStep === 4) {
-                titleEl.innerText = "🔍 Consigne 4/4 : Gestion de l'opacité & Zoom Coin";
-                badCanvas.setAttribute('data-type', 'orientation');
-                goodCanvas.setAttribute('data-type', 'zoomcoin');
-                badText.innerText = "Opacité 100%";
-                goodText.innerText = "Zoom Coin (Précision Extérieur)";
-                badIcon.innerText = "ℹ️ Astuce";
-                badIcon.style.color = "#17a2b8";
-                descEl.innerHTML = "Ajustez l'opacité et vérifiez la superposition exacte sur le coin de l'élément (ligne verte légèrement décalée sur fond rouge pour prouver la précision extérieure).";
-            }
+        window.validateTutorialStep = function() {
+            tutorialPanel.style.display = 'none';
+            isSelectingColorState = false; 
+            step = 1; 
+            statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
+            generalToolsContainer.style.display = 'block';
+            adjustPanel.style.display = 'block';
+            sideColorDrawer.style.display = 'block';
+            resetCanvasAndTempPos();
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            tempAngle = 0;
+            tempSize = canvas.width * 0.055;
+            updateUIState();
+            redrawCanvas();
         }
 
         window.resetToWelcome = function() {
@@ -1093,7 +986,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v82.jpg';
+                    btnDownload.download = 'acuitix_etalon_v83.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1192,12 +1085,9 @@
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 tutorialPanel.style.display = 'block';
-                tutorialSubStep = 4;
-                updateTutorialContent();
                 statusText.innerText = "Consigne de Positionnement";
                 sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
-                renderAllSchemas();
                 redrawCanvas();
                 return;
             }
@@ -1258,7 +1148,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.82) !";
+                statusText.innerText = "✅ Calage expert terminé (v.83) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
