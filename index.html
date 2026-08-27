@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.75 - Assistant CAO Compact</title>
+    <title>Acuitix V.76 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.75 - Assistant CAO</h1>
+    <h1>Acuitix V.76 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -420,45 +420,25 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.75 - Inspiration visuelle flux de placement bord à bord) -->
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.76 - Intégration des consignes de superposition et d'erreurs) -->
         <div id="tutorial-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne de Positionnement</h3>
-            <p style="font-size: 0.75rem; color: #fff; margin: 2px 0 6px 0;">
-                Placez et superposez le carré <b>de bord à bord</b> précisément par rapport à la photo de votre élément.
-            </p>
             
-            <div class="pickguards-gallery">
-                <div class="pickguard-thumb valid">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct (Bord à bord)</div>
-                    <svg viewBox="0 0 160 90">
-                        <!-- Carré source vert -->
-                        <rect x="10" y="25" width="36" height="36" fill="none" stroke="#28a745" stroke-width="3" />
-                        <!-- Flèche jaune de transition -->
-                        <path d="M52 43 L72 43 M66 37 L72 43 L66 49" fill="none" stroke="#FF0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Cible / Objet avec carré superposé de bord à bord (Rouge/Rempli avec contour validé) -->
-                        <rect x="80" y="15" width="70" height="60" rx="4" fill="#333" stroke="#555" stroke-width="2" />
-                        <rect x="80" y="15" width="22" height="60" fill="red" fill-opacity="0.8" stroke="#28a745" stroke-width="3" />
-                    </svg>
-                    Superposition parfaite
-                </div>
-                
+            <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb invalid">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur (Intérieur/Décalé)</div>
-                    <svg viewBox="0 0 160 90">
-                        <!-- Carré source vert -->
-                        <rect x="10" y="25" width="36" height="36" fill="none" stroke="#28a745" stroke-width="3" />
-                        <!-- Flèche jaune de transition -->
-                        <path d="M52 43 L72 43 M66 37 L72 43 L66 49" fill="none" stroke="#FF0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Cible / Objet avec carré mal placé (décalé à l'intérieur) -->
-                        <rect x="80" y="15" width="70" height="60" rx="4" fill="#333" stroke="#555" stroke-width="2" />
-                        <rect x="92" y="25" width="22" height="40" fill="red" fill-opacity="0.8" stroke="#dc3545" stroke-width="3" />
-                    </svg>
-                    Mal aligné / Décalé
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreurs à éviter</div>
+                    <svg viewBox="0 0 140 92"><rect x="15" y="16" width="90" height="60" rx="8" transform="rotate(10, 60, 46)" /></svg>
+                    Orientation, décalage, bord intérieur
+                </div>
+                <div class="pickguard-thumb valid">
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Ce que nous voulons</div>
+                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" /></svg>
+                    Superposition et opacité parfaites
                 </div>
             </div>
 
             <p style="font-size: 0.7rem; color: #ccc; margin: 4px 0;">
-                Le carré doit épouser parfaitement l'arrête extérieure de la pièce sur l'image.
+                N'hésitez pas à <strong>jouer avec l'opacité</strong> de vos calques pour bien superposer et aligner les bords avec précision. Le carré vert encadre parfaitement le carré rouge, avec un alignement et des proportions parfaits.
             </p>
 
             <div class="nav-buttons" style="margin-top: 8px;">
@@ -992,7 +972,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v75.jpg';
+                    btnDownload.download = 'acuitix_etalon_v76.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1154,7 +1134,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.75) !";
+                statusText.innerText = "✅ Calage expert terminé (v.76) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
