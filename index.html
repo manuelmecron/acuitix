@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.64 - Assistant CAO Compact</title>
+    <title>Acuitix V.65 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -294,28 +294,28 @@
         }
         .color-choice-btn.selected { border-color: #fff; box-shadow: 0 0 8px #ffc107; }
 
-        /* Tiroir latéral coulissant pour la couleur */
+        /* Tiroir latéral coulissant à GAUCHE (évite les conflits de gestes natifs) */
         #side-color-drawer {
             position: fixed;
             top: 0;
-            right: -240px;
+            left: -240px;
             width: 220px;
             height: 100%;
             background: #252525;
-            border-left: 2px solid #ffc107;
-            box-shadow: -4px 0 15px rgba(0,0,0,0.7);
+            border-right: 2px solid #ffc107;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.7);
             z-index: 1000;
-            transition: right 0.3s ease;
+            transition: left 0.3s ease;
             padding: 10px;
             box-sizing: border-box;
             text-align: left;
         }
         #side-color-drawer.open {
-            right: 0;
+            left: 0;
         }
         .drawer-handle {
             position: absolute;
-            left: -40px;
+            right: -40px;
             top: 120px;
             width: 40px;
             height: 70px;
@@ -328,19 +328,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-top-left-radius: 6px;
-            border-bottom-left-radius: 6px;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
             cursor: pointer;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.4);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.4);
         }
     </style>
 </head>
 <body>
 
-    <h1>Acuitix V.64 - Assistant CAO</h1>
+    <h1>Acuitix V.65 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
-    <!-- Tiroir latéral coulissant pour changer la couleur à tout moment -->
+    <!-- Tiroir latéral coulissant à gauche pour changer la couleur à tout moment -->
     <div id="side-color-drawer">
         <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
         <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
@@ -568,7 +568,7 @@
 
         let elementColor = "#00FFFF"; // Cyan par défaut
         let currentOpacity = 0.9;
-        let isSelectingColorState = false; // Indique si on est dans l'étape d'affichage du carré témoin
+        let isSelectingColorState = false;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -656,7 +656,6 @@
                     btn.classList.add('selected');
                 }
             });
-            // Met à jour la sélection visuelle spécifique du groupe actuel
             if(element) {
                 element.classList.add('selected');
             }
@@ -672,7 +671,6 @@
         }
 
         function hexToRgbString(hex) {
-            // Helper simple pour s'aligner sur les boutons si besoin
             return hex;
         }
 
@@ -681,7 +679,7 @@
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Sélection de la couleur";
             isSelectingColorState = true;
-            redrawCanvas(); // Affiche le carré témoin central
+            redrawCanvas();
         }
 
         window.backToPreCapture = function() {
@@ -689,12 +687,12 @@
             preCaptureTools.style.display = 'block';
             statusText.innerText = "Étape 0 : Orientation et Cadrage";
             isSelectingColorState = false;
-            redrawCanvas(); // Retire le carré témoin
+            redrawCanvas();
         }
 
         window.validateColorStep = function() {
             colorChoicePanel.style.display = 'none';
-            isSelectingColorState = false; // Le carré témoin disparaît complètement
+            isSelectingColorState = false; 
             step = 1; 
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
             generalToolsContainer.style.display = 'block';
@@ -836,7 +834,6 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            // Si on est dans l'étape de choix de couleur, on affiche un carré témoin au centre pour voir la couleur
             if (isSelectingColorState && !isForExport) {
                 ctx.save();
                 let sampleSize = canvas.width * 0.15;
@@ -929,7 +926,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v64.jpg';
+                    btnDownload.download = 'acuitix_etalon_v65.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1025,7 +1022,6 @@
         window.askPrevStep = function() {
             stopAction();
             if (step === 1) {
-                // Retour vers l'écran de choix de couleur
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 colorChoicePanel.style.display = 'block';
@@ -1092,7 +1088,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
-                statusText.innerText = "✅ Calage expert terminé (v.64) !";
+                statusText.innerText = "✅ Calage expert terminé (v.65) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1126,7 +1122,7 @@
             btnPrev.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step >= 1) {
-                sideColorDrawer.classList.remove('open'); // On garde le tiroir fermé par défaut mais accessible
+                sideColorDrawer.classList.remove('open');
             }
 
             if (step === 7) {
