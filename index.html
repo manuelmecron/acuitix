@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.91 - Assistant CAO Compact</title>
+    <title>Acuitix V.92 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.91 - Assistant CAO</h1>
+    <h1>Acuitix V.92 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -865,11 +865,16 @@
             generalToolsContainer.style.display = 'block';
             adjustPanel.style.display = 'block';
             sideColorDrawer.style.display = 'block';
-            resetCanvasAndTempPos();
+            
+            // Correction clé : Ne PAS écraser imgOffsetX et imgOffsetY ici pour conserver le cadrage de l'étape 0 !
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             tempAngle = 0;
             tempSize = canvas.width * 0.055;
+
             updateUIState();
             redrawCanvas();
         }
@@ -1102,7 +1107,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v91.jpg';
+                    btnDownload.download = 'acuitix_etalon_v92.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1178,7 +1183,12 @@
         }
 
         window.resetCurrentPos = function() {
-            resetCanvasAndTempPos();
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            redrawCanvas();
         }
 
         window.askValidateStep = function() {
@@ -1226,7 +1236,9 @@
                 tempY = box1.y;
                 tempAngle = box1.angle;
                 tempSize = box1.size;
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
@@ -1234,37 +1246,47 @@
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
                 tempAngle = 0;
                 tempSize = box1.size * 1.2;
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 3) {
                 corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
                 step = 4;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 4) {
                 corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
                 step = 5;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 5) {
                 corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
                 step = 6;
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
                 tempX = canvas.width * 0.5;
                 tempY = canvas.height * 0.5;
-                resetCanvasAndTempPos();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.91) !";
+                statusText.innerText = "✅ Calage expert terminé (v.92) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1275,7 +1297,9 @@
         }
 
         function prevStep() {
-            resetCanvasAndTempPos();
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
             if (step > 1) {
                 step--;
                 if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
