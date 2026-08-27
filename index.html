@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.85 - Assistant CAO Compact</title>
+    <title>Acuitix V.86 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -141,7 +141,7 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools, #color-choice-panel, #tutorial-panel {
+        #pre-capture-tools, #color-choice-panel, #tutorial-panel, #tutorial-panel-2 {
             display: none;
             background: #3a3a3a;
             border: 2px solid #ffc107;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.85 - Assistant CAO</h1>
+    <h1>Acuitix V.86 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -420,32 +420,17 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT (V.85) -->
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT 1 (V.86) -->
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne de positionnement des éléments</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Astuce clé : <b>Jouez avec l'opacité</b> via la barre de réglage dédiée pour superposer au mieux vos éléments et aligner les bords extérieurs avec le carré rouge de fond !
+                Jouez avec l'opacité en utilisant la barre ci-dessous pour bien superposer les bords extérieurs :
             </p>
+            <div style="background: #262626; border: 1px solid #444; padding: 4px; border-radius: 4px; margin-bottom: 6px; text-align: center;">
+                <span style="font-size: 0.6rem; color: #ffc107; font-weight: bold;">Opacité repères : [---o==============] 90%</span>
+            </div>
             
             <div class="pickguards-gallery">
-                <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Parfait (Bords ext.)</div>
-                    <svg viewBox="0 0 120 80">
-                        <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
-                    </svg>
-                    <span style="font-size:0.5rem;">Bord ext. en contact avec le carré rouge</span>
-                </div>
-                
-                <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Zoom Intérieur</div>
-                    <svg viewBox="0 0 120 80">
-                        <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="30" y="22" width="60" height="36" fill="none" stroke="#00FF00" stroke-width="4" />
-                    </svg>
-                    <span style="font-size:0.5rem;">Bord int. en contact / Erreur</span>
-                </div>
-
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
                     <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Décalage</div>
                     <svg viewBox="0 0 120 80">
@@ -463,12 +448,45 @@
                             <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                         </g>
                     </svg>
-                    <span style="font-size:0.5rem;">Carré vert de biais vs rouge droit</span>
+                    <span style="font-size:0.5rem;">Carré vert de biais par rapport au rouge droit</span>
                 </div>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
                 <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Alignement des échelles) ➡️</button>
+            </div>
+        </div>
+
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT 2 : ZOOM SUR L'ALIGNEMENT DES ÉCHELLES (V.86) -->
+        <div id="tutorial-panel-2">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Zoom sur les échelles</h3>
+            <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
+                Voici le zoom unique dédié au contrôle de l'alignement des échelles :
+            </p>
+
+            <div class="pickguards-gallery">
+                <div class="pickguard-thumb valid" style="padding: 4px;">
+                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Alignement Parfait</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
+                    </svg>
+                    <span style="font-size:0.5rem;">Bords extérieurs en contact parfait avec le carré rouge</span>
+                </div>
+                
+                <div class="pickguard-thumb invalid" style="padding: 4px;">
+                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Zoom Échelle Incorrecte</div>
+                    <svg viewBox="0 0 120 80">
+                        <rect x="20" y="15" width="80" height="50" fill="red" />
+                        <rect x="30" y="22" width="60" height="36" fill="none" stroke="#00FF00" stroke-width="4" />
+                    </svg>
+                    <span style="font-size:0.5rem;">Bords intérieurs en contact / Sous-dimension</span>
+                </div>
+            </div>
+
+            <div class="nav-buttons" style="margin-top: 6px;">
+                <button class="btn btn-secondary" onclick="backToTutorialStep1()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
                 <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">OK, j'ai compris ➡️</button>
             </div>
         </div>
@@ -585,6 +603,7 @@
         const preCaptureTools = document.getElementById('pre-capture-tools');
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
+        const tutorialPanel2 = document.getElementById('tutorial-panel-2');
         const generalToolsContainer = document.getElementById('general-tools-container');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
@@ -664,6 +683,7 @@
                     preCaptureTools.style.display = 'block';
                     colorChoicePanel.style.display = 'none';
                     tutorialPanel.style.display = 'none';
+                    tutorialPanel2.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
                     sideColorDrawer.classList.remove('open');
 
@@ -755,8 +775,26 @@
             redrawCanvas();
         }
 
-        window.validateTutorialStep = function() {
+        window.goToTutorialStep2 = function() {
             tutorialPanel.style.display = 'none';
+            tutorialPanel2.style.display = 'block';
+            statusText.innerText = "Consigne de positionnement : Zoom échelles";
+            isSelectingColorState = false;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.backToTutorialStep1 = function() {
+            tutorialPanel2.style.display = 'none';
+            tutorialPanel.style.display = 'block';
+            statusText.innerText = "Consigne de positionnement des éléments";
+            isSelectingColorState = false;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.validateTutorialStep = function() {
+            tutorialPanel2.style.display = 'none';
             isSelectingColorState = false; 
             step = 1; 
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
@@ -778,6 +816,7 @@
             preCaptureTools.style.display = 'none';
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'none';
+            tutorialPanel2.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
@@ -998,7 +1037,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v85.jpg';
+                    btnDownload.download = 'acuitix_etalon_v86.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1096,8 +1135,8 @@
             if (step === 1) {
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
-                tutorialPanel.style.display = 'block';
-                statusText.innerText = "Consigne de positionnement des éléments";
+                tutorialPanel2.style.display = 'block';
+                statusText.innerText = "Consigne de positionnement : Zoom échelles";
                 sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
                 redrawCanvas();
@@ -1160,7 +1199,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.85) !";
+                statusText.innerText = "✅ Calage expert terminé (v.86) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
