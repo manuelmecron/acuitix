@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.70 - Assistant CAO Compact</title>
+    <title>Acuitix V.71 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,7 @@
         }
         .camera-badge { font-size: 1.5rem; margin-bottom: 2px; }
         
-        /* Galerie V70 : Rectangles épurés inspirés V66 (Proportions 92x140) */
+        /* Galeries de miniatures unifiées style V66/V69 */
         .pickguards-gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.70 - Assistant CAO</h1>
+    <h1>Acuitix V.71 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -376,6 +376,27 @@
             <h3>📷 1. Orientation & Cadrage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionne l'image (extrémités visibles).</p>
             
+            <!-- EXEMPLES VISUELS MIS À JOUR POUR LE MENU DE CADRAGE (V71) -->
+            <div class="pickguards-gallery" style="margin-bottom: 6px;">
+                <div class="pickguard-thumb valid">
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
+                    <svg viewBox="0 0 140 92">
+                        <!-- Plaque rectangulaire parfaitement centrée -->
+                        <rect x="25" y="16" width="90" height="60" rx="8" />
+                    </svg>
+                    Bien cadrée
+                </div>
+                
+                <div class="pickguard-thumb invalid">
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
+                    <svg viewBox="0 0 140 92">
+                        <!-- Plaque coupée / hors cadre d'un côté -->
+                        <rect x="-15" y="16" width="90" height="60" rx="8" />
+                    </svg>
+                    Coupée / Désaxée
+                </div>
+            </div>
+
             <div class="camera-pan-container" style="margin-bottom: 4px;">
                 <div class="tool-section-title">🖼️ Déplacement de l'image</div>
                 <div class="camera-pan-grid">
@@ -490,12 +511,11 @@
                     <b>Toutes les extrémités doivent être visibles</b> sur la photo pour une modélisation exacte.
                 </p>
                 
-                <!-- Galerie V70 : Rectangles de plaque rectangulaire (Inspiré V66 style plaque de cavité, proportions 92x140) -->
+                <!-- Accueil (V71) -->
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
                         <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                         <svg viewBox="0 0 140 92">
-                            <!-- Plaque rectangulaire horizontale bien droite (92x140 proportion paysage) -->
                             <rect x="15" y="16" width="110" height="60" rx="8" />
                         </svg>
                         Plaque droite
@@ -504,7 +524,6 @@
                     <div class="pickguard-thumb invalid">
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
-                            <!-- Plaque rectangulaire inclinée / de biais -->
                             <g transform="rotate(15, 70, 46)">
                                 <rect x="15" y="16" width="110" height="60" rx="8" />
                             </g>
@@ -916,7 +935,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v70.jpg';
+                    btnDownload.download = 'acuitix_etalon_v71.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1079,7 +1098,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.70) !";
+                statusText.innerText = "✅ Calage expert terminé (v.71) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
