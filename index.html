@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.63 - Assistant CAO Compact</title>
+    <title>Acuitix V.64 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,6 +16,7 @@
             max-width: 450px;
             margin-left: auto;
             margin-right: auto;
+            overflow-x: hidden;
         }
         h1 { font-size: 1rem; margin: 2px 0; text-transform: uppercase; color: #ffc107;}
         #status-text { 
@@ -283,21 +284,75 @@
             margin: 8px 0;
         }
         .color-choice-btn {
-            padding: 12px;
+            padding: 10px 4px;
             border-radius: 6px;
             border: 2px solid #555;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         .color-choice-btn.selected { border-color: #fff; box-shadow: 0 0 8px #ffc107; }
+
+        /* Tiroir latéral coulissant pour la couleur */
+        #side-color-drawer {
+            position: fixed;
+            top: 0;
+            right: -240px;
+            width: 220px;
+            height: 100%;
+            background: #252525;
+            border-left: 2px solid #ffc107;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.7);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        #side-color-drawer.open {
+            right: 0;
+        }
+        .drawer-handle {
+            position: absolute;
+            left: -40px;
+            top: 120px;
+            width: 40px;
+            height: 70px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            font-size: 0.7rem;
+            writing-mode: vertical-lr;
+            text-orientation: sideways;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+            cursor: pointer;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.4);
+        }
     </style>
 </head>
 <body>
 
-    <h1>Acuitix V.63 - Assistant CAO</h1>
+    <h1>Acuitix V.64 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
+
+    <!-- Tiroir latéral coulissant pour changer la couleur à tout moment -->
+    <div id="side-color-drawer">
+        <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
+        <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
+        <p style="font-size: 0.7rem; color: #ccc;">Modifiez le tracé instantanément :</p>
+        <div class="color-palette">
+            <button class="color-choice-btn drawer-btn-cyan" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
+            <button class="color-choice-btn drawer-btn-yellow" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
+            <button class="color-choice-btn drawer-btn-magenta" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
+            <button class="color-choice-btn drawer-btn-white" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
+        </div>
+        <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖</button>
+    </div>
 
     <div class="box">
         <canvas id="canvas"></canvas>
@@ -328,14 +383,14 @@
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Suivant : Choisir la couleur ➡️</button>
+            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Validé ce cadrage ➡️</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- Étape intermédiaire : Choix de la couleur (Manuel) -->
+        <!-- Étape intermédiaire : Choix de la couleur (Manuel avec carré témoin) -->
         <div id="color-choice-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">🎨 Choix de la couleur du tracé</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur qui contrastera le mieux avec votre pièce :</p>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur (le carré central témoin s'actualise) :</p>
             
             <div class="color-palette">
                 <button class="color-choice-btn selected" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
@@ -487,6 +542,7 @@
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
         const holeActionPanel = document.getElementById('hole-action-panel');
+        const sideColorDrawer = document.getElementById('side-color-drawer');
 
         let currentImg = null;
         let step = 1; 
@@ -512,6 +568,7 @@
 
         let elementColor = "#00FFFF"; // Cyan par défaut
         let currentOpacity = 0.9;
+        let isSelectingColorState = false; // Indique si on est dans l'étape d'affichage du carré témoin
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -552,6 +609,7 @@
                     
                     preCaptureTools.style.display = 'block';
                     colorChoicePanel.style.display = 'none';
+                    sideColorDrawer.classList.remove('open');
 
                     redrawCanvas();
                 };
@@ -577,7 +635,7 @@
                 imgY = clientClickY;
             }
 
-            if (step >= 1 && step <= 7) {
+            if (!isSelectingColorState && step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
                 manualPanX = 0;
@@ -586,26 +644,57 @@
             }
         });
 
+        window.toggleColorDrawer = function() {
+            sideColorDrawer.classList.toggle('open');
+        }
+
         window.selectColorManual = function(colorHex, element) {
             elementColor = colorHex;
             document.querySelectorAll('.color-choice-btn').forEach(btn => btn.classList.remove('selected'));
-            element.classList.add('selected');
+            document.querySelectorAll(`.color-choice-btn`).forEach(btn => {
+                if(btn.style.backgroundColor === hexToRgbString(colorHex) || btn.textContent.toLowerCase().includes(getColorName(colorHex))) {
+                    btn.classList.add('selected');
+                }
+            });
+            // Met à jour la sélection visuelle spécifique du groupe actuel
+            if(element) {
+                element.classList.add('selected');
+            }
+            redrawCanvas();
+        }
+
+        function getColorName(hex) {
+            if(hex === '#00FFFF') return 'cyan';
+            if(hex === '#FFFF00') return 'jaune';
+            if(hex === '#FF00FF') return 'magenta';
+            if(hex === '#FFFFFF') return 'blanc';
+            return '';
+        }
+
+        function hexToRgbString(hex) {
+            // Helper simple pour s'aligner sur les boutons si besoin
+            return hex;
         }
 
         window.goToColorSelection = function() {
             preCaptureTools.style.display = 'none';
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Sélection de la couleur";
+            isSelectingColorState = true;
+            redrawCanvas(); // Affiche le carré témoin central
         }
 
         window.backToPreCapture = function() {
             colorChoicePanel.style.display = 'none';
             preCaptureTools.style.display = 'block';
             statusText.innerText = "Étape 0 : Orientation et Cadrage";
+            isSelectingColorState = false;
+            redrawCanvas(); // Retire le carré témoin
         }
 
         window.validateColorStep = function() {
             colorChoicePanel.style.display = 'none';
+            isSelectingColorState = false; // Le carré témoin disparaît complètement
             step = 1; 
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
             generalToolsContainer.style.display = 'block';
@@ -630,6 +719,7 @@
             btnRetry.style.display = 'none';
             welcomePanel.style.display = 'block';
             statusText.style.display = 'none';
+            sideColorDrawer.classList.remove('open');
             fileInput.value = '';
             currentImg = null;
             holes = [];
@@ -640,6 +730,7 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
+            isSelectingColorState = false;
         }
 
         window.changerOpacite = function(val) {
@@ -745,80 +836,91 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
+            // Si on est dans l'étape de choix de couleur, on affiche un carré témoin au centre pour voir la couleur
+            if (isSelectingColorState && !isForExport) {
+                ctx.save();
+                let sampleSize = canvas.width * 0.15;
+                drawRotatedRect(canvas.width / 2, canvas.height / 2, sampleSize, 0, elementColor);
+                dessinerCroixCentre(canvas.width / 2, canvas.height / 2);
+                ctx.restore();
+            }
+
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            if (step >= 1) {
-                let rx = step === 1 ? tempX : box1.x;
-                let ry = step === 1 ? tempY : box1.y;
-                let rsz = step === 1 ? tempSize : box1.size;
-                let rang = step === 1 ? tempAngle : box1.angle;
-                drawRotatedRect(rx, ry, rsz, rang, elementColor);
-                dessinerCroixCentre(rx, ry);
-            }
-            if (step >= 2) {
-                let rx2 = step === 2 ? tempX : box2.x;
-                let ry2 = step === 2 ? tempY : box2.y;
-                let rsz2 = step === 2 ? tempSize : box2.size;
-                let rang2 = step === 2 ? tempAngle : box2.angle;
-                drawRotatedRect(rx2, ry2, rsz2, rang2, elementColor);
-                dessinerCroixCentre(rx2, ry2);
-            }
-
-            for (let i = 0; i < 4; i++) {
-                let isActive = (step === i + 3 && !isForExport);
-                let isPassed = (step > i + 3 || isForExport);
-                if (isPassed || isActive) {
-                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
-                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
-                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
-                    let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
-
-                    drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
-                    dessinerCroixCentre(cx, cy);
+            if (!isSelectingColorState) {
+                if (step >= 1) {
+                    let rx = step === 1 ? tempX : box1.x;
+                    let ry = step === 1 ? tempY : box1.y;
+                    let rsz = step === 1 ? tempSize : box1.size;
+                    let rang = step === 1 ? tempAngle : box1.angle;
+                    drawRotatedRect(rx, ry, rsz, rang, elementColor);
+                    dessinerCroixCentre(rx, ry);
                 }
-            }
+                if (step >= 2) {
+                    let rx2 = step === 2 ? tempX : box2.x;
+                    let ry2 = step === 2 ? tempY : box2.y;
+                    let rsz2 = step === 2 ? tempSize : box2.size;
+                    let rang2 = step === 2 ? tempAngle : box2.angle;
+                    drawRotatedRect(rx2, ry2, rsz2, rang2, elementColor);
+                    dessinerCroixCentre(rx2, ry2);
+                }
 
-            if (step >= 7) {
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(3, refW / 350);
-                ctx.beginPath();
-                ctx.moveTo(corners[0].x, corners[0].y);
-                ctx.lineTo(corners[2].x, corners[2].y);
-                ctx.moveTo(corners[1].x, corners[1].y);
-                ctx.lineTo(corners[3].x, corners[3].y);
-                ctx.stroke();
-                ctx.restore();
+                for (let i = 0; i < 4; i++) {
+                    let isActive = (step === i + 3 && !isForExport);
+                    let isPassed = (step > i + 3 || isForExport);
+                    if (isPassed || isActive) {
+                        let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
+                        let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
+                        let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
+                        let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
 
-                if (!isForExport && step === 7) {
+                        drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
+                        dessinerCroixCentre(cx, cy);
+                    }
+                }
+
+                if (step >= 7) {
+                    ctx.save();
+                    ctx.strokeStyle = elementColor;
+                    ctx.lineWidth = Math.max(3, refW / 350);
+                    ctx.beginPath();
+                    ctx.moveTo(corners[0].x, corners[0].y);
+                    ctx.lineTo(corners[2].x, corners[2].y);
+                    ctx.moveTo(corners[1].x, corners[1].y);
+                    ctx.lineTo(corners[3].x, corners[3].y);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    if (!isForExport && step === 7) {
+                        ctx.save();
+                        ctx.strokeStyle = elementColor;
+                        ctx.fillStyle = elementColor;
+                        ctx.globalAlpha = currentOpacity * 0.4;
+                        ctx.lineWidth = Math.max(3, refW / 400);
+                        ctx.beginPath();
+                        ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.restore();
+                        dessinerCroixCentre(tempX, tempY);
+                    }
+                }
+
+                holes.forEach(h => {
                     ctx.save();
                     ctx.strokeStyle = elementColor;
                     ctx.fillStyle = elementColor;
-                    ctx.globalAlpha = currentOpacity * 0.4;
+                    ctx.globalAlpha = currentOpacity * 0.3;
                     ctx.lineWidth = Math.max(3, refW / 400);
                     ctx.beginPath();
-                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
-                    dessinerCroixCentre(tempX, tempY);
-                }
+                    dessinerCroixCentre(h.x, h.y);
+                });
             }
-
-            holes.forEach(h => {
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.fillStyle = elementColor;
-                ctx.globalAlpha = currentOpacity * 0.3;
-                ctx.lineWidth = Math.max(3, refW / 400);
-                ctx.beginPath();
-                ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-                ctx.restore();
-                dessinerCroixCentre(h.x, h.y);
-            });
 
             ctx.restore();
             ctx.restore();
@@ -827,7 +929,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v63.jpg';
+                    btnDownload.download = 'acuitix_etalon_v64.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -927,7 +1029,9 @@
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 colorChoicePanel.style.display = 'block';
+                isSelectingColorState = true;
                 statusText.innerText = "Sélection de la couleur";
+                sideColorDrawer.classList.remove('open');
                 redrawCanvas();
                 return;
             }
@@ -987,7 +1091,8 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.63) !";
+                sideColorDrawer.classList.remove('open');
+                statusText.innerText = "✅ Calage expert terminé (v.64) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1019,6 +1124,10 @@
             let btnPrev = document.getElementById('btn-prev-step');
             
             btnPrev.style.display = (step >= 1) ? 'block' : 'none';
+
+            if (step >= 1) {
+                sideColorDrawer.classList.remove('open'); // On garde le tiroir fermé par défaut mais accessible
+            }
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
