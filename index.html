@@ -420,7 +420,7 @@
             </div>
         </div>
 
-        <!-- 4 ÉTAPES DE TUTORIEL AVEC ZOOM D'ALIGNEMENT, BORD EXTÉRIEUR ET CURSEUR D'OPACITÉ INTÉGRÉ -->
+        <!-- 4 ÉTAPES DE TUTORIEL AVEC ZOOM SUR LA SUPERPOSITION (COIN DU CARRÉ) -->
         <div id="tutorial-panel">
             <h3 id="tut-title" style="color: #ffc107; margin-top:0; font-size:0.9rem;">📐 Consigne 1/4 : Orientation</h3>
             
@@ -434,14 +434,6 @@
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <canvas id="tut-schema-good" class="schema-canvas" width="120" height="70"></canvas>
                     <span id="tut-good-text">Superposé (Extérieur)</span>
-                </div>
-            </div>
-
-            <!-- Mini insert simulant la barre d'opacité pour l'étape 4 -->
-            <div id="tut-opacity-mini-box" style="display:none; background:#222; border:1px solid #ffc107; padding:4px; border-radius:4px; margin-bottom:4px; text-align:center;">
-                <span style="font-size:0.65rem; color:#ffc107; font-weight:bold;">Curseur d'opacité actif : 90%</span>
-                <div style="background:#444; height:6px; border-radius:3px; margin-top:3px; position:relative;">
-                    <div style="background:#28a745; width:90%; height:100%; border-radius:3px;"></div>
                 </div>
             </div>
 
@@ -599,7 +591,7 @@
         let isSelectingColorState = false;
         let tutorialSubStep = 1; // 1: Orientation, 2: Décalage, 3: Bord Extérieur vs Intérieur, 4: Opacité
 
-        // Schémas explicatifs : Zoom sur superposition exacte (bord extérieur), décalage, bord intérieur erroné
+        // Schémas explicatifs avec zoom sur le coin/superposition
         function drawSchema(c, type) {
             let sc = c.getContext('2d');
             let w = c.width;
@@ -608,15 +600,15 @@
             sc.fillRect(0, 0, w, h);
 
             if (type === 'valide') {
-                // Correct : Zoom centré sur la superposition parfaite en bord extérieur (sans marge)
+                // Correct : Zoom fort sur le coin supérieur droit pour montrer la superposition parfaite (carré vert sur carré rouge au bord extérieur)
                 sc.save();
-                sc.translate(w * 0.5, h * 0.5);
-                sc.scale(1.4, 1.4); // Zoom visuel pour bien voir la superposition
+                sc.translate(w * 0.7, h * 0.7);
+                sc.scale(2.2, 2.2);
                 sc.fillStyle = '#FF0000';
-                sc.fillRect(-w * 0.2, -h * 0.25, w * 0.4, h * 0.5);
+                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
                 sc.strokeStyle = '#00FF00';
-                sc.lineWidth = 2.5;
-                sc.strokeRect(-w * 0.2, -h * 0.25, w * 0.4, h * 0.5);
+                sc.lineWidth = 2;
+                sc.strokeRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
                 sc.restore();
             } else if (type === 'orientation') {
                 // Erreur : Zoom sur décalage angulaire de biais
@@ -642,29 +634,28 @@
                 sc.strokeRect(-w * 0.1, -h * 0.25, w * 0.4, h * 0.5);
                 sc.restore();
             } else if (type === 'bordinterieur') {
-                // Erreur : Zoom montrant un réglage en BORD INTÉRIEUR (trop petit ou décalé à l'intérieur)
+                // Erreur : Tracé vert strictement À L'INTÉRIEUR (montrant qu'on ne travaille jamais en bord intérieur)
                 sc.save();
                 sc.translate(w * 0.5, h * 0.5);
                 sc.scale(1.3, 1.3);
                 sc.fillStyle = '#FF0000';
-                sc.fillRect(-w * 0.25, -h * 0.3, w * 0.5, h * 0.6);
-                // Le tracé vert est rentré à l'intérieur (bord intérieur erroné)
-                sc.strokeStyle = '#FF4500';
+                sc.fillRect(-w * 0.25, -h * 0.25, w * 0.5, h * 0.5);
+                sc.strokeStyle = '#00FF00'; // Tracé vert en bord intérieur (plus petit)
                 sc.lineWidth = 2.5;
-                sc.strokeRect(-w * 0.18, -h * 0.22, w * 0.36, h * 0.44);
+                sc.strokeRect(-w * 0.15, -h * 0.15, w * 0.3, h * 0.3);
                 sc.restore();
             } else if (type === 'opacite') {
-                // Illustration du réglage d'opacité : superposition parfaite en teinte mixte avec loupe/zoom
+                // Illustration du réglage d'opacité : superposition parfaite en teinte mixte avec zoom coin
                 sc.save();
-                sc.translate(w * 0.5, h * 0.5);
-                sc.scale(1.4, 1.4);
+                sc.translate(w * 0.7, h * 0.7);
+                sc.scale(2.2, 2.2);
                 sc.fillStyle = '#FF0000';
-                sc.fillRect(-w * 0.2, -h * 0.25, w * 0.4, h * 0.5);
-                sc.fillStyle = 'rgba(0, 255, 0, 0.45)';
-                sc.fillRect(-w * 0.2, -h * 0.25, w * 0.4, h * 0.5);
-                sc.strokeStyle = '#00FF00';
-                sc.lineWidth = 2.5;
-                sc.strokeRect(-w * 0.2, -h * 0.25, w * 0.4, h * 0.5);
+                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
+                sc.fillStyle = 'rgba(0, 255, 255, 0.45)';
+                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
+                sc.strokeStyle = '#00FFFF';
+                sc.lineWidth = 2;
+                sc.strokeRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
                 sc.restore();
             }
         }
@@ -853,10 +844,6 @@
             let goodText = document.getElementById('tut-good-text');
             let badIcon = document.getElementById('tut-bad-icon');
             let descEl = document.getElementById('tut-desc');
-            let miniOpacityBox = document.getElementById('tut-opacity-mini-box');
-
-            // Par défaut masquer l'insert opacité mini
-            miniOpacityBox.style.display = 'none';
 
             if (tutorialSubStep === 1) {
                 titleEl.innerText = "📐 Consigne 1/4 : Orientation";
@@ -866,7 +853,7 @@
                 goodText.innerText = "Superposé (Extérieur)";
                 badIcon.innerText = "❌ Erreur";
                 badIcon.style.color = "#dc3545";
-                descEl.innerHTML = "Évitez toute inclinaison incorrecte : le corps vert doit épouser parfaitement l'angle du corps rouge en <b>bord extérieur</b> sans rotation de travers.";
+                descEl.innerHTML = "Évitez toute inclinaison incorrecte : le tracé doit épouser parfaitement l'angle de l'objet en <b>bord extérieur</b> (zoom coin) sans rotation de travers.";
             } else if (tutorialSubStep === 2) {
                 titleEl.innerText = "📐 Consigne 2/4 : Décalage";
                 badCanvas.setAttribute('data-type', 'decalage');
@@ -875,7 +862,7 @@
                 goodText.innerText = "Superposé (Extérieur)";
                 badIcon.innerText = "❌ Erreur";
                 badIcon.style.color = "#dc3545";
-                descEl.innerHTML = "Le repère vert doit être superposé exactement au corps rouge en <b>bord extérieur</b>, sans aucun décalage latéral ni vertical.";
+                descEl.innerHTML = "Le repère doit être superposé exactement sur l'arête en <b>bord extérieur</b>, sans aucun décalage latéral ni vertical.";
             } else if (tutorialSubStep === 3) {
                 titleEl.innerText = "📐 Consigne 3/4 : Bord Extérieur vs Intérieur";
                 badCanvas.setAttribute('data-type', 'bordinterieur');
@@ -884,7 +871,7 @@
                 goodText.innerText = "Bord Extérieur (Correct)";
                 badIcon.innerText = "⚠️ Erreur";
                 badIcon.style.color = "#ffc107";
-                descEl.innerHTML = "Attention à la nuance : ne travaillez jamais en <b>bord intérieur</b> (qui crée du jeu). Ajustez l'échelle pour superposer parfaitement les arêtes en <b>bord extérieur</b>.";
+                descEl.innerHTML = "Attention : ne travaillez jamais en <b>bord intérieur</b> (tracé vert à l'intérieur créant du jeu). Ajustez l'échelle pour superposer parfaitement les arêtes sur le contour externe.";
             } else if (tutorialSubStep === 4) {
                 titleEl.innerText = "🔍 Consigne 4/4 : Gestion de l'opacité";
                 badCanvas.setAttribute('data-type', 'orientation');
@@ -893,8 +880,7 @@
                 goodText.innerText = "Opacité Réglée (Mixte)";
                 badIcon.innerText = "ℹ️ Astuce";
                 badIcon.style.color = "#17a2b8";
-                miniOpacityBox.style.display = 'block';
-                descEl.innerHTML = "Utilisez le <b>curseur d'opacité</b> (ci-dessus) pour fusionner les vues et valider visuellement la superposition exacte des contours en transparence.";
+                descEl.innerHTML = "Ajustez l'opacité pour fusionner les vues et valider visuellement la superposition exacte des contours en transparence.";
             }
         }
 
