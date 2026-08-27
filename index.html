@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.69 - Assistant CAO Compact</title>
+    <title>Acuitix V.70 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,7 @@
         }
         .camera-badge { font-size: 1.5rem; margin-bottom: 2px; }
         
-        /* Galerie V69 : Comparatif Bon / Mauvais cadrage plaque arrière */
+        /* Galerie V70 : Rectangles épurés inspirés V66 (Proportions 92x140) */
         .pickguards-gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -106,7 +106,7 @@
         }
         .pickguard-thumb svg {
             width: 75px;
-            height: 45px;
+            height: 48px;
             stroke: #ffc107;
             fill: rgba(255,193,7,0.1);
             stroke-width: 2;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.69 - Assistant CAO</h1>
+    <h1>Acuitix V.70 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -490,31 +490,23 @@
                     <b>Toutes les extrémités doivent être visibles</b> sur la photo pour une modélisation exacte.
                 </p>
                 
-                <!-- Galerie V69 : Plaque arrière droite vs Plaque arrière de biais -->
+                <!-- Galerie V70 : Rectangles de plaque rectangulaire (Inspiré V66 style plaque de cavité, proportions 92x140) -->
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
                         <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                        <svg viewBox="0 0 160 90">
-                            <!-- Plaque arrière horizontale bien droite -->
-                            <rect x="15" y="20" width="130" height="50" rx="8" />
-                            <circle cx="35" cy="45" r="4" />
-                            <circle cx="65" cy="45" r="4" />
-                            <circle cx="95" cy="45" r="4" />
-                            <circle cx="125" cy="45" r="4" />
+                        <svg viewBox="0 0 140 92">
+                            <!-- Plaque rectangulaire horizontale bien droite (92x140 proportion paysage) -->
+                            <rect x="15" y="16" width="110" height="60" rx="8" />
                         </svg>
                         Plaque droite
                     </div>
                     
                     <div class="pickguard-thumb invalid">
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                        <svg viewBox="0 0 160 90">
-                            <!-- Plaque arrière inclinée / de biais -->
-                            <g transform="rotate(15, 80, 45)">
-                                <rect x="15" y="20" width="130" height="50" rx="8" />
-                                <circle cx="35" cy="45" r="4" />
-                                <circle cx="65" cy="45" r="4" />
-                                <circle cx="95" cy="45" r="4" />
-                                <circle cx="125" cy="45" r="4" />
+                        <svg viewBox="0 0 140 92">
+                            <!-- Plaque rectangulaire inclinée / de biais -->
+                            <g transform="rotate(15, 70, 46)">
+                                <rect x="15" y="16" width="110" height="60" rx="8" />
                             </g>
                         </svg>
                         Plaque de biais
@@ -924,7 +916,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v69.jpg';
+                    btnDownload.download = 'acuitix_etalon_v70.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1087,7 +1079,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.69) !";
+                statusText.innerText = "✅ Calage expert terminé (v.70) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
