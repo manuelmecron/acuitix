@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.65 - Assistant CAO Compact</title>
+    <title>Acuitix V.66 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -294,7 +294,7 @@
         }
         .color-choice-btn.selected { border-color: #fff; box-shadow: 0 0 8px #ffc107; }
 
-        /* Tiroir latéral coulissant à GAUCHE (évite les conflits de gestes natifs) */
+        /* Tiroir latéral coulissant à GAUCHE (masqué par défaut, affiché uniquement pendant le calage) */
         #side-color-drawer {
             position: fixed;
             top: 0;
@@ -309,6 +309,7 @@
             padding: 10px;
             box-sizing: border-box;
             text-align: left;
+            display: none; /* Caché au départ */
         }
         #side-color-drawer.open {
             left: 0;
@@ -337,10 +338,10 @@
 </head>
 <body>
 
-    <h1>Acuitix V.65 - Assistant CAO</h1>
+    <h1>Acuitix V.66 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
-    <!-- Tiroir latéral coulissant à gauche pour changer la couleur à tout moment -->
+    <!-- Tiroir latéral coulissant à gauche (disponible uniquement pendant le calage actif) -->
     <div id="side-color-drawer">
         <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
         <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
@@ -609,6 +610,7 @@
                     
                     preCaptureTools.style.display = 'block';
                     colorChoicePanel.style.display = 'none';
+                    sideColorDrawer.style.display = 'none'; // Masqué à l'étape 0
                     sideColorDrawer.classList.remove('open');
 
                     redrawCanvas();
@@ -679,6 +681,7 @@
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Sélection de la couleur";
             isSelectingColorState = true;
+            sideColorDrawer.style.display = 'none'; // Masqué ici aussi
             redrawCanvas();
         }
 
@@ -687,6 +690,7 @@
             preCaptureTools.style.display = 'block';
             statusText.innerText = "Étape 0 : Orientation et Cadrage";
             isSelectingColorState = false;
+            sideColorDrawer.style.display = 'none';
             redrawCanvas();
         }
 
@@ -697,6 +701,7 @@
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
             generalToolsContainer.style.display = 'block';
             adjustPanel.style.display = 'block';
+            sideColorDrawer.style.display = 'block'; // Actif uniquement à partir du calage effectif
             resetCanvasAndTempPos();
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
@@ -717,6 +722,7 @@
             btnRetry.style.display = 'none';
             welcomePanel.style.display = 'block';
             statusText.style.display = 'none';
+            sideColorDrawer.style.display = 'none'; // Masqué sur l'accueil
             sideColorDrawer.classList.remove('open');
             fileInput.value = '';
             currentImg = null;
@@ -926,7 +932,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v65.jpg';
+                    btnDownload.download = 'acuitix_etalon_v66.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1027,6 +1033,7 @@
                 colorChoicePanel.style.display = 'block';
                 isSelectingColorState = true;
                 statusText.innerText = "Sélection de la couleur";
+                sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
                 redrawCanvas();
                 return;
@@ -1087,8 +1094,8 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                sideColorDrawer.classList.remove('open');
-                statusText.innerText = "✅ Calage expert terminé (v.65) !";
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.66) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1122,7 +1129,9 @@
             btnPrev.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step >= 1) {
-                sideColorDrawer.classList.remove('open');
+                sideColorDrawer.style.display = 'block'; // Actif pendant le calage
+            } else {
+                sideColorDrawer.style.display = 'none';
             }
 
             if (step === 7) {
