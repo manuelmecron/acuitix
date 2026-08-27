@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.86 - Assistant CAO Compact</title>
+    <title>Acuitix V.87 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.86 - Assistant CAO</h1>
+    <h1>Acuitix V.87 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -367,7 +367,7 @@
 
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionne l'image (extrémités visibles).</p>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (extrémités visibles).</p>
             
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
@@ -420,24 +420,26 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT 1 (V.86) -->
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT 1 (V.87) : OPACITÉ & ZOOM ANGLE -->
         <div id="tutorial-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Jouez avec l'opacité en utilisant la barre ci-dessous pour bien superposer les bords extérieurs :
+                Jouez avec l'opacité en utilisant la barre ci-dessous pour bien superposer les bords extérieurs sur l'angle du carré :
             </p>
             <div style="background: #262626; border: 1px solid #444; padding: 4px; border-radius: 4px; margin-bottom: 6px; text-align: center;">
-                <span style="font-size: 0.6rem; color: #ffc107; font-weight: bold;">Opacité repères : [---o==============] 90%</span>
+                <label style="font-size: 0.6rem; color: #ffc107; font-weight: bold; display:block; margin-bottom:2px;">Opacité repères : 90%</label>
+                <input type="range" min="20" max="100" value="90" style="width:100%; cursor:pointer;" disabled>
             </div>
             
             <div class="pickguards-gallery">
-                <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Décalage</div>
+                <div class="pickguard-thumb valid" style="padding: 4px;">
+                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Angle Parfait</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="32" y="8" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
+                        <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
+                        <circle cx="20" cy="15" r="8" fill="#ffc107" />
                     </svg>
-                    <span style="font-size:0.5rem;">Carré vert non aligné au fond</span>
+                    <span style="font-size:0.5rem;">Zoom rapproché sur l'angle aligné</span>
                 </div>
 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
@@ -458,30 +460,30 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT 2 : ZOOM SUR L'ALIGNEMENT DES ÉCHELLES (V.86) -->
+        <!-- PAGE TUTORIEL DE POSITIONNEMENT 2 (V.87) : DÉCALAGE / CARRÉ BIEN AXÉ -->
         <div id="tutorial-panel-2">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Zoom sur les échelles</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Décalage & Alignement</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Voici le zoom unique dédié au contrôle de l'alignement des échelles :
+                Vérifiez la distinction entre un élément bien axé et un élément décalé :
             </p>
 
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Alignement Parfait</div>
+                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Carré bien axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem;">Bords extérieurs en contact parfait avec le carré rouge</span>
+                    <span style="font-size:0.5rem;">Superposition exacte des bords extérieurs</span>
                 </div>
                 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Zoom Échelle Incorrecte</div>
+                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Élément Décalé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="30" y="22" width="60" height="36" fill="none" stroke="#00FF00" stroke-width="4" />
+                        <rect x="32" y="22" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem;">Bords intérieurs en contact / Sous-dimension</span>
+                    <span style="font-size:0.5rem;">Décalage visible des contours extérieurs</span>
                 </div>
             </div>
 
@@ -559,7 +561,7 @@
 
         <div id="welcome-panel">
             <div class="photo-guide-frame">
-                <div class="camera-badge">📸 📷 📷</div>
+                <div class="camera-badge">📸 📸 📸</div>
                 <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin: 2px 0; text-transform: uppercase;">
                     Attention : Prenez l'objet ENTIER !
                 </p>
@@ -778,7 +780,7 @@
         window.goToTutorialStep2 = function() {
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'block';
-            statusText.innerText = "Consigne de positionnement : Zoom échelles";
+            statusText.innerText = "Consigne de positionnement : Décalage";
             isSelectingColorState = false;
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
@@ -1037,7 +1039,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v86.jpg';
+                    btnDownload.download = 'acuitix_etalon_v87.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1136,7 +1138,7 @@
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
                 tutorialPanel2.style.display = 'block';
-                statusText.innerText = "Consigne de positionnement : Zoom échelles";
+                statusText.innerText = "Consigne de positionnement : Décalage";
                 sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
                 redrawCanvas();
@@ -1199,7 +1201,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.86) !";
+                statusText.innerText = "✅ Calage expert terminé (v.87) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
