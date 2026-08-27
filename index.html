@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.62 - Assistant CAO Compact</title>
+    <title>Acuitix V.63 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,15 +29,6 @@
             display: none;
         }
         
-        /* Conteneur principal avec menu latéral intégré */
-        .workspace-layout {
-            display: flex;
-            gap: 4px;
-            align-items: flex-start;
-            justify-content: center;
-            margin: 2px auto;
-        }
-
         .box {
             background: #2a2a2a;
             border: 2px solid #555;
@@ -48,8 +39,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-grow: 1;
-            max-height: 36vh;
+            margin: 2px auto;
+            max-height: 38vh;
         }
         canvas {
             max-width: 100%;
@@ -59,29 +50,6 @@
             touch-action: manipulation;
             object-fit: contain;
         }
-
-        /* Menu latéral compact pour les couleurs */
-        #color-sidebar {
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            background: #262626;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 4px;
-            flex-shrink: 0;
-        }
-        .color-dot {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-            transition: transform 0.1s;
-        }
-        .color-dot:active { transform: scale(0.9); }
-        .color-dot.active-color { border-color: #ffc107; transform: scale(1.15); }
         
         #welcome-panel {
             display: block;
@@ -164,13 +132,14 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools {
+        #pre-capture-tools, #color-choice-panel {
             display: none;
             background: #3a3a3a;
             border: 2px solid #17a2b8;
             border-radius: 6px;
             padding: 6px;
             margin-bottom: 4px;
+            text-align: left;
         }
 
         .tool-section-title {
@@ -179,7 +148,6 @@
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 3px;
-            text-align: left;
         }
         
         .safe-button-grid {
@@ -306,25 +274,33 @@
             width: 100%;
             cursor: pointer;
         }
+
+        /* Sélection de couleur manuelle compacte */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .color-choice-btn {
+            padding: 12px;
+            border-radius: 6px;
+            border: 2px solid #555;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        .color-choice-btn.selected { border-color: #fff; box-shadow: 0 0 8px #ffc107; }
     </style>
 </head>
 <body>
 
-    <h1>Acuitix V.62 - Assistant CAO</h1>
+    <h1>Acuitix V.63 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
-    <!-- Zone Canvas + Menu Latéral de couleur intégrés côte à côte -->
-    <div class="workspace-layout">
-        <div class="box" style="flex-grow: 1;">
-            <canvas id="canvas"></canvas>
-        </div>
-        <!-- Menu latéral compact des couleurs -->
-        <div id="color-sidebar">
-            <div title="Cyan" class="color-dot active-color" style="background:#00FFFF;" onclick="setTraceColor('#00FFFF', this)"></div>
-            <div title="Jaune" class="color-dot" style="background:#FFFF00;" onclick="setTraceColor('#FFFF00', this)"></div>
-            <div title="Magenta" class="color-dot" style="background:#FF00FF;" onclick="setTraceColor('#FF00FF', this)"></div>
-            <div title="Blanc" class="color-dot" style="background:#FFFFFF;" onclick="setTraceColor('#FFFFFF', this)"></div>
-        </div>
+    <div class="box">
+        <canvas id="canvas"></canvas>
     </div>
 
     <div>
@@ -352,8 +328,26 @@
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="validatePreCaptureStep()">Commencer le calage</button>
+            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Suivant : Choisir la couleur ➡️</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+        </div>
+
+        <!-- Étape intermédiaire : Choix de la couleur (Manuel) -->
+        <div id="color-choice-panel">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">🎨 Choix de la couleur du tracé</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur qui contrastera le mieux avec votre pièce :</p>
+            
+            <div class="color-palette">
+                <button class="color-choice-btn selected" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
+                <button class="color-choice-btn" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
+                <button class="color-choice-btn" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
+                <button class="color-choice-btn" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
+            </div>
+
+            <div class="nav-buttons" style="margin-top: 8px;">
+                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn" onclick="validateColorStep()" style="margin-top:0;">Commencer le calage ➡️</button>
+            </div>
         </div>
 
         <!-- Panneau outils généraux -->
@@ -417,7 +411,7 @@
                 </div>
 
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; display:none; padding: 10px;">⬅️ Retour</button>
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; padding: 10px;">⬅️ Retour</button>
                     <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape</button>
                 </div>
             </div>
@@ -487,8 +481,8 @@
         const statusText = document.getElementById('status-text');
         const welcomePanel = document.getElementById('welcome-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
+        const colorChoicePanel = document.getElementById('color-choice-panel');
         const generalToolsContainer = document.getElementById('general-tools-container');
-        const colorSidebar = document.getElementById('color-sidebar');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
         const adjustPanel = document.getElementById('adjust-panel');
@@ -557,7 +551,7 @@
                     statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
                     preCaptureTools.style.display = 'block';
-                    colorSidebar.style.display = 'none';
+                    colorChoicePanel.style.display = 'none';
 
                     redrawCanvas();
                 };
@@ -592,12 +586,36 @@
             }
         });
 
-        window.setTraceColor = function(colorHex, element) {
+        window.selectColorManual = function(colorHex, element) {
             elementColor = colorHex;
-            document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active-color'));
-            if (element) {
-                element.classList.add('active-color');
-            }
+            document.querySelectorAll('.color-choice-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        window.goToColorSelection = function() {
+            preCaptureTools.style.display = 'none';
+            colorChoicePanel.style.display = 'block';
+            statusText.innerText = "Sélection de la couleur";
+        }
+
+        window.backToPreCapture = function() {
+            colorChoicePanel.style.display = 'none';
+            preCaptureTools.style.display = 'block';
+            statusText.innerText = "Étape 0 : Orientation et Cadrage";
+        }
+
+        window.validateColorStep = function() {
+            colorChoicePanel.style.display = 'none';
+            step = 1; 
+            statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
+            generalToolsContainer.style.display = 'block';
+            adjustPanel.style.display = 'block';
+            resetCanvasAndTempPos();
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            tempAngle = 0;
+            tempSize = canvas.width * 0.055;
+            updateUIState();
             redrawCanvas();
         }
 
@@ -605,8 +623,8 @@
             stopAction();
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
+            colorChoicePanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
-            colorSidebar.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
@@ -809,7 +827,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v62.jpg';
+                    btnDownload.download = 'acuitix_etalon_v63.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -888,22 +906,6 @@
             resetCanvasAndTempPos();
         }
 
-        window.validatePreCaptureStep = function() {
-            preCaptureTools.style.display = 'none';
-            step = 1; 
-            statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
-            generalToolsContainer.style.display = 'block';
-            colorSidebar.style.display = 'flex'; // Affichage du menu latéral de couleurs
-            adjustPanel.style.display = 'block';
-            resetCanvasAndTempPos();
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            tempAngle = 0;
-            tempSize = canvas.width * 0.055;
-            updateUIState();
-            redrawCanvas();
-        }
-
         window.askValidateStep = function() {
             stopAction();
             let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
@@ -920,6 +922,16 @@
 
         window.askPrevStep = function() {
             stopAction();
+            if (step === 1) {
+                // Retour vers l'écran de choix de couleur
+                generalToolsContainer.style.display = 'none';
+                adjustPanel.style.display = 'none';
+                colorChoicePanel.style.display = 'block';
+                statusText.innerText = "Sélection de la couleur";
+                redrawCanvas();
+                return;
+            }
+
             let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let prevLabel = stepNames[step - 1] || "l'étape précédente";
             
@@ -975,8 +987,7 @@
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                colorSidebar.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.62) !";
+                statusText.innerText = "✅ Calage expert terminé (v.63) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
