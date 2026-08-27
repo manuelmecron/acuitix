@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.90 - Assistant CAO Compact</title>
+    <title>Acuitix V.91 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.90 - Assistant CAO</h1>
+    <h1>Acuitix V.91 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -427,7 +427,6 @@
             </div>
         </div>
 
-        <!-- MENU 1 (V.90) : ORIENTATION DES ÉLÉMENTS -->
         <div id="tutorial-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
@@ -462,7 +461,6 @@
             </div>
         </div>
 
-        <!-- MENU 2 (V.90) : CENTRAGE DES ÉLÉMENTS -->
         <div id="tutorial-panel-2">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
@@ -495,9 +493,8 @@
             </div>
         </div>
 
-        <!-- MENU 3 (V.90) : ALIGNEMENT DE L'ÉCHELLE DES ÉLÉMENTS -->
         <div id="tutorial-panel-3">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne : Alignement de l'échelle des éléments</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Alignement des échelles</h3>
             
             <div class="opacity-control-box" style="margin-top:4px; padding:4px;">
                 <label style="font-size: 0.65rem;">Opacité repères : 90%</label>
@@ -505,32 +502,31 @@
             </div>
 
             <div class="pickguards-gallery" style="margin-top:4px;">
-                <!-- Correct: alignement des bords extérieurs -->
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ alignement des bords extérieurs</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <svg viewBox="0 0 40 40">
                         <rect x="-10" y="-10" width="60" height="60" fill="red" />
                         <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="5" />
                         <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords extérieurs alignés</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords alignés</span>
                 </div>
                 
-                <!-- Incorrect: element trop grand -->
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Élément trop grand</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                     <svg viewBox="0 0 40 40">
                         <rect x="5" y="5" width="45" height="45" fill="red" />
                         <rect x="-2" y="-2" width="55" height="55" fill="none" stroke="#00FF00" stroke-width="5" />
                         <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Utilisation des bords intérieurs rendront la conception imprécise</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Imprécis</span>
                 </div>
             </div>
 
             <div class="tip-box">
-                💡 <b>Astuce :</b> positionnement de l'élément "à raz"<br>
-                📌 <b>Remarque :</b> Pour une précision optimale, veillez à placer le bord extérieur des éléments sur la pièce à détourer
+                💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élement "à raz" l'objet à détourer<br><br>
+                📌 <b>Remarque :</b> Pour une précision optimale, veillez à NE JAMAIS UTILISER LES BORDS INTERIEURS DES ELEMENTS DE DETOURAGE<br>
+                🛑 <b>TOUTE PHOTO UTILISANT LES BORDS INTERIEURS RENDRA VOTRE CONCEPTION INUTILISABLE CAR TROP IMPRECISE !!!</b>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
@@ -1106,7 +1102,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v90.jpg';
+                    btnDownload.download = 'acuitix_etalon_v91.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1268,7 +1264,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.90) !";
+                statusText.innerText = "✅ Calage expert terminé (v.91) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
