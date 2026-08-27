@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.88 - Assistant CAO Compact</title>
+    <title>Acuitix V.89 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.88 - Assistant CAO</h1>
+    <h1>Acuitix V.89 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -427,7 +427,7 @@
             </div>
         </div>
 
-        <!-- MENU 1 (V.88) : ORIENTATION DES ÉLÉMENTS -->
+        <!-- MENU 1 (V.89) : ORIENTATION DES ÉLÉMENTS -->
         <div id="tutorial-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
@@ -462,7 +462,7 @@
             </div>
         </div>
 
-        <!-- MENU 2 (V.88) : CENTRAGE DES ÉLÉMENTS -->
+        <!-- MENU 2 (V.89) : CENTRAGE DES ÉLÉMENTS -->
         <div id="tutorial-panel-2">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
@@ -495,7 +495,7 @@
             </div>
         </div>
 
-        <!-- MENU 3 (V.88) : ALIGNEMENT DE L'ÉCHELLE DES ÉLÉMENTS -->
+        <!-- MENU 3 (V.89) : ALIGNEMENT DE L'ÉCHELLE DES ÉLÉMENTS (AVEC ZOOM TRÈS FORT SUR L'ANGLE) -->
         <div id="tutorial-panel-3">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne : Alignement de l'échelle des éléments</h3>
             
@@ -505,30 +505,32 @@
             </div>
 
             <div class="pickguards-gallery" style="margin-top:4px;">
+                <!-- Correct: Super zoom angle parfait -->
                 <div class="pickguard-thumb valid" style="padding: 4px;">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Zoom Angle Parfait</div>
-                    <svg viewBox="0 0 120 90">
-                        <rect x="10" y="10" width="100" height="70" fill="red" />
-                        <rect x="10" y="10" width="100" height="70" fill="none" stroke="#00FF00" stroke-width="5" />
-                        <circle cx="10" cy="10" r="14" fill="none" stroke="#ffc107" stroke-width="3" stroke-dasharray="3,2" />
-                        <path d="M 2 2 L 40 40" stroke="#ffc107" stroke-width="2" />
+                    <svg viewBox="0 0 40 40">
+                        <rect x="-10" y="-10" width="60" height="60" fill="red" />
+                        <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="5" />
+                        <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
                     <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords extérieurs alignés</span>
                 </div>
                 
+                <!-- Incorrect: Super zoom angle décalé / trop grand -->
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Échelle Incorrecte (Vue Zoomée)</div>
-                    <svg viewBox="0 0 120 90">
-                        <rect x="30" y="25" width="60" height="40" fill="red" />
-                        <rect x="10" y="10" width="100" height="70" fill="none" stroke="#00FF00" stroke-width="5" />
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Échelle Incorrecte (Zoom Angle)</div>
+                    <svg viewBox="0 0 40 40">
+                        <rect x="5" y="5" width="45" height="45" fill="red" />
+                        <rect x="-2" y="-2" width="55" height="55" fill="none" stroke="#00FF00" stroke-width="5" />
+                        <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Carré vert trop grand / Rouge à l'intérieur</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Carré vert trop grand / Rouge intérieur</span>
                 </div>
             </div>
 
             <div class="tip-box">
                 💡 <b>Astuce :</b> Utilisez l'opacité pour aligner le bord de l'élément d'identification au bord de l'élément à copier.<br>
-                📌 <b>Remarque :</b> Pour plus de précision, nous travaillons avec le bord extérieur des éléments.
+                📌 <b>Remarque :</b> Pour une précision optimale, veillez à placer le bord extérieur des éléments sur la pièce à détourer
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
@@ -1104,7 +1106,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v88.jpg';
+                    btnDownload.download = 'acuitix_etalon_v89.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1266,7 +1268,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.88) !";
+                statusText.innerText = "✅ Calage expert terminé (v.89) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
