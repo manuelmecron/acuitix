@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.71 - Assistant CAO Compact</title>
+    <title>Acuitix V.72 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -71,7 +71,6 @@
         }
         .camera-badge { font-size: 1.5rem; margin-bottom: 2px; }
         
-        /* Galeries de miniatures unifiées style V66/V69 */
         .pickguards-gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -349,7 +348,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.71 - Assistant CAO</h1>
+    <h1>Acuitix V.72 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -376,12 +375,10 @@
             <h3>📷 1. Orientation & Cadrage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionne l'image (extrémités visibles).</p>
             
-            <!-- EXEMPLES VISUELS MIS À JOUR POUR LE MENU DE CADRAGE (V71) -->
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <svg viewBox="0 0 140 92">
-                        <!-- Plaque rectangulaire parfaitement centrée -->
                         <rect x="25" y="16" width="90" height="60" rx="8" />
                     </svg>
                     Bien cadrée
@@ -390,7 +387,6 @@
                 <div class="pickguard-thumb invalid">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                     <svg viewBox="0 0 140 92">
-                        <!-- Plaque coupée / hors cadre d'un côté -->
                         <rect x="-15" y="16" width="90" height="60" rx="8" />
                     </svg>
                     Coupée / Désaxée
@@ -511,7 +507,6 @@
                     <b>Toutes les extrémités doivent être visibles</b> sur la photo pour une modélisation exacte.
                 </p>
                 
-                <!-- Accueil (V71) -->
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
                         <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
@@ -594,7 +589,14 @@
                 const img = new Image();
                 img.onload = function() {
                     currentImg = img;
-                    rotationAngle = 0;
+                    
+                    // Auto-détection de l'orientation portrait (9/16) pour mise en paysage automatique
+                    if (img.naturalHeight > img.naturalWidth) {
+                        rotationAngle = 90;
+                    } else {
+                        rotationAngle = 0;
+                    }
+
                     imgOffsetX = 0;
                     imgOffsetY = 0;
                     updateCanvasDimensions();
@@ -763,6 +765,8 @@
             imgOffsetX = 0;
             imgOffsetY = 0;
             updateCanvasDimensions();
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
             resetCanvasAndTempPos();
         }
 
@@ -771,6 +775,8 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             redrawCanvas();
@@ -935,7 +941,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v71.jpg';
+                    btnDownload.download = 'acuitix_etalon_v72.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1098,7 +1104,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.71) !";
+                statusText.innerText = "✅ Calage expert terminé (v.72) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
