@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.87 - Assistant CAO Compact</title>
+    <title>Acuitix V.88 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -95,18 +95,13 @@
         .pickguard-thumb.valid { border-color: #28a745; }
         .pickguard-thumb.invalid { border-color: #dc3545; }
         .thumb-status-icon {
-            font-size: 1rem;
+            font-size: 0.6rem;
             font-weight: bold;
             margin-bottom: 2px;
         }
         .pickguard-thumb svg {
-            width: 75px;
-            height: 48px;
-            stroke: #ffc107;
-            fill: rgba(255,193,7,0.1);
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            width: 80px;
+            height: 52px;
         }
 
         .btn {
@@ -141,7 +136,7 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools, #color-choice-panel, #tutorial-panel, #tutorial-panel-2 {
+        #pre-capture-tools, #color-choice-panel, #tutorial-panel, #tutorial-panel-2, #tutorial-panel-3 {
             display: none;
             background: #3a3a3a;
             border: 2px solid #ffc107;
@@ -338,11 +333,23 @@
             cursor: pointer;
             box-shadow: 2px 0 5px rgba(0,0,0,0.4);
         }
+
+        .tip-box {
+            background: rgba(255,193,7,0.15);
+            border-left: 3px solid #ffc107;
+            padding: 6px;
+            border-radius: 4px;
+            margin: 6px 0 4px 0;
+            text-align: left;
+            font-size: 0.68rem;
+            color: #fff;
+            line-height: 1.3;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Acuitix V.87 - Assistant CAO</h1>
+    <h1>Acuitix V.88 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -372,12 +379,12 @@
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" /></svg>
+                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
                     Bien cadrée
                 </div>
                 <div class="pickguard-thumb invalid">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" /></svg>
+                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
                     Coupée / Désaxée
                 </div>
             </div>
@@ -420,75 +427,112 @@
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT 1 (V.87) : OPACITÉ & ZOOM ANGLE -->
+        <!-- MENU 1 (V.88) : ORIENTATION DES ÉLÉMENTS -->
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement des éléments</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Jouez avec l'opacité en utilisant la barre ci-dessous pour bien superposer les bords extérieurs sur l'angle du carré :
+                Le carré vert doit être parfaitement aligné et parallèle au carré rouge :
             </p>
-            <div style="background: #262626; border: 1px solid #444; padding: 4px; border-radius: 4px; margin-bottom: 6px; text-align: center;">
-                <label style="font-size: 0.6rem; color: #ffc107; font-weight: bold; display:block; margin-bottom:2px;">Opacité repères : 90%</label>
-                <input type="range" min="20" max="100" value="90" style="width:100%; cursor:pointer;" disabled>
-            </div>
             
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Zoom Angle Parfait</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Parfaitement axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
-                        <circle cx="20" cy="15" r="8" fill="#ffc107" />
                     </svg>
-                    <span style="font-size:0.5rem;">Zoom rapproché sur l'angle aligné</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Orientation correcte</span>
                 </div>
 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Rotation (45°)</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Rotation (45°)</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <g transform="rotate(45, 60, 40)">
                             <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                         </g>
                     </svg>
-                    <span style="font-size:0.5rem;">Carré vert de biais par rapport au rouge droit</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Carré vert de biais</span>
                 </div>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
                 <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
-                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Alignement des échelles) ➡️</button>
+                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Centrage) ➡️</button>
             </div>
         </div>
 
-        <!-- PAGE TUTORIEL DE POSITIONNEMENT 2 (V.87) : DÉCALAGE / CARRÉ BIEN AXÉ -->
+        <!-- MENU 2 (V.88) : CENTRAGE DES ÉLÉMENTS -->
         <div id="tutorial-panel-2">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Décalage & Alignement</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Vérifiez la distinction entre un élément bien axé et un élément décalé :
+                Vérifiez la superposition exacte des contours extérieurs :
             </p>
 
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745; font-size:0.55rem;">✅ Carré bien axé</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Carré bien axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem;">Superposition exacte des bords extérieurs</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Superposition parfaite</span>
                 </div>
                 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545; font-size:0.55rem;">❌ Élément Décalé</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Décalage</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="32" y="22" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
+                        <rect x="35" y="24" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem;">Décalage visible des contours extérieurs</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Élément vert décalé</span>
                 </div>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
                 <button class="btn btn-secondary" onclick="backToTutorialStep1()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="goToTutorialStep3()" style="margin-top:0; padding:8px;">Suivant (Échelle) ➡️</button>
+            </div>
+        </div>
+
+        <!-- MENU 3 (V.88) : ALIGNEMENT DE L'ÉCHELLE DES ÉLÉMENTS -->
+        <div id="tutorial-panel-3">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne : Alignement de l'échelle des éléments</h3>
+            
+            <div class="opacity-control-box" style="margin-top:4px; padding:4px;">
+                <label style="font-size: 0.65rem;">Opacité repères : 90%</label>
+                <input type="range" min="20" max="100" value="90" style="width:100%; cursor:pointer;" disabled>
+            </div>
+
+            <div class="pickguards-gallery" style="margin-top:4px;">
+                <div class="pickguard-thumb valid" style="padding: 4px;">
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Zoom Angle Parfait</div>
+                    <svg viewBox="0 0 120 90">
+                        <rect x="10" y="10" width="100" height="70" fill="red" />
+                        <rect x="10" y="10" width="100" height="70" fill="none" stroke="#00FF00" stroke-width="5" />
+                        <circle cx="10" cy="10" r="14" fill="none" stroke="#ffc107" stroke-width="3" stroke-dasharray="3,2" />
+                        <path d="M 2 2 L 40 40" stroke="#ffc107" stroke-width="2" />
+                    </svg>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords extérieurs alignés</span>
+                </div>
+                
+                <div class="pickguard-thumb invalid" style="padding: 4px;">
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Échelle Incorrecte (Vue Zoomée)</div>
+                    <svg viewBox="0 0 120 90">
+                        <rect x="30" y="25" width="60" height="40" fill="red" />
+                        <rect x="10" y="10" width="100" height="70" fill="none" stroke="#00FF00" stroke-width="5" />
+                    </svg>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Carré vert trop grand / Rouge à l'intérieur</span>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                💡 <b>Astuce :</b> Utilisez l'opacité pour aligner le bord de l'élément d'identification au bord de l'élément à copier.<br>
+                📌 <b>Remarque :</b> Pour plus de précision, nous travaillons avec le bord extérieur des éléments.
+            </div>
+
+            <div class="nav-buttons" style="margin-top: 6px;">
+                <button class="btn btn-secondary" onclick="backToTutorialStep2()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
                 <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">OK, j'ai compris ➡️</button>
             </div>
         </div>
@@ -572,13 +616,13 @@
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
                         <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                        <svg viewBox="0 0 140 92"><rect x="15" y="16" width="110" height="60" rx="8" /></svg>
+                        <svg viewBox="0 0 140 92"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
                         Plaque droite
                     </div>
                     <div class="pickguard-thumb invalid">
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
-                            <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" /></g>
+                            <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
                         </svg>
                         Plaque de biais
                     </div>
@@ -606,6 +650,7 @@
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
         const tutorialPanel2 = document.getElementById('tutorial-panel-2');
+        const tutorialPanel3 = document.getElementById('tutorial-panel-3');
         const generalToolsContainer = document.getElementById('general-tools-container');
         const btnDownload = document.getElementById('btn-download');
         const btnRetry = document.getElementById('btn-retry');
@@ -686,6 +731,7 @@
                     colorChoicePanel.style.display = 'none';
                     tutorialPanel.style.display = 'none';
                     tutorialPanel2.style.display = 'none';
+                    tutorialPanel3.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
                     sideColorDrawer.classList.remove('open');
 
@@ -762,7 +808,7 @@
         window.goToTutorialStep = function() {
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'block';
-            statusText.innerText = "Consigne de positionnement des éléments";
+            statusText.innerText = "Consigne : Orientation des éléments";
             isSelectingColorState = false; 
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
@@ -780,7 +826,7 @@
         window.goToTutorialStep2 = function() {
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'block';
-            statusText.innerText = "Consigne de positionnement : Décalage";
+            statusText.innerText = "Consigne : Centrage des éléments";
             isSelectingColorState = false;
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
@@ -789,14 +835,32 @@
         window.backToTutorialStep1 = function() {
             tutorialPanel2.style.display = 'none';
             tutorialPanel.style.display = 'block';
-            statusText.innerText = "Consigne de positionnement des éléments";
+            statusText.innerText = "Consigne : Orientation des éléments";
+            isSelectingColorState = false;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.goToTutorialStep3 = function() {
+            tutorialPanel2.style.display = 'none';
+            tutorialPanel3.style.display = 'block';
+            statusText.innerText = "Consigne : Alignement de l'échelle";
+            isSelectingColorState = false;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.backToTutorialStep2 = function() {
+            tutorialPanel3.style.display = 'none';
+            tutorialPanel2.style.display = 'block';
+            statusText.innerText = "Consigne : Centrage des éléments";
             isSelectingColorState = false;
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
         }
 
         window.validateTutorialStep = function() {
-            tutorialPanel2.style.display = 'none';
+            tutorialPanel3.style.display = 'none';
             isSelectingColorState = false; 
             step = 1; 
             statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
@@ -819,6 +883,7 @@
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'none';
+            tutorialPanel3.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
@@ -1039,7 +1104,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v87.jpg';
+                    btnDownload.download = 'acuitix_etalon_v88.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1137,8 +1202,8 @@
             if (step === 1) {
                 generalToolsContainer.style.display = 'none';
                 adjustPanel.style.display = 'none';
-                tutorialPanel2.style.display = 'block';
-                statusText.innerText = "Consigne de positionnement : Décalage";
+                tutorialPanel3.style.display = 'block';
+                statusText.innerText = "Consigne : Alignement de l'échelle";
                 sideColorDrawer.style.display = 'none';
                 sideColorDrawer.classList.remove('open');
                 redrawCanvas();
@@ -1201,7 +1266,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.87) !";
+                statusText.innerText = "✅ Calage expert terminé (v.88) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
