@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.67 - Assistant CAO Compact</title>
+    <title>Acuitix V.68 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -136,7 +136,7 @@
         #pre-capture-tools, #color-choice-panel {
             display: none;
             background: #3a3a3a;
-            border: 2px solid #17a2b8;
+            border: 2px solid #ffc107;
             border-radius: 6px;
             padding: 6px;
             margin-bottom: 4px;
@@ -145,7 +145,7 @@
 
         .tool-section-title {
             font-size: 0.7rem;
-            color: #17a2b8;
+            color: #ffc107;
             font-weight: bold;
             text-transform: uppercase;
             margin-bottom: 3px;
@@ -226,7 +226,7 @@
             cursor: pointer;
             touch-action: manipulation;
         }
-        .dpad-grid button:active { background: #007bff; }
+        .dpad-grid button:active { background: #ffc107; color: #000; }
 
         .controls-right {
             display: flex;
@@ -266,7 +266,7 @@
         }
         .opacity-control-box label {
             font-size: 0.75rem;
-            color: #4CAF50;
+            color: #ffc107;
             font-weight: bold;
             display: block;
             margin-bottom: 2px;
@@ -291,7 +291,7 @@
             text-align: center;
             font-size: 0.75rem;
         }
-        .color-choice-btn.selected { border-color: #fff; box-shadow: 0 0 8px #ffc107; }
+        .color-choice-btn.selected { border-color: #ffc107; box-shadow: 0 0 8px #ffc107; }
 
         #side-color-drawer {
             position: fixed;
@@ -336,7 +336,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.67 - Assistant CAO</h1>
+    <h1>Acuitix V.68 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -429,7 +429,7 @@
 
                 <div class="gameboy-container">
                     <div class="dpad-container">
-                        <div class="tool-section-title" style="color: #00FF00; margin-bottom:2px;">Ajustement</div>
+                        <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Ajustement</div>
                         <div class="dpad-grid">
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
@@ -646,27 +646,16 @@
         window.selectColorManual = function(colorHex, element) {
             elementColor = colorHex;
             document.querySelectorAll('.color-choice-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelectorAll(`.color-choice-btn`).forEach(btn => {
-                if(btn.style.backgroundColor === hexToRgbString(colorHex) || btn.textContent.toLowerCase().includes(getColorName(colorHex))) {
-                    btn.classList.add('selected');
-                }
-            });
             if(element) {
                 element.classList.add('selected');
+            } else {
+                document.querySelectorAll('.color-choice-btn').forEach(btn => {
+                    if(btn.style.backgroundColor === colorHex || btn.getAttribute('onclick')?.includes(colorHex)) {
+                        btn.classList.add('selected');
+                    }
+                });
             }
             redrawCanvas();
-        }
-
-        function getColorName(hex) {
-            if(hex === '#00FFFF') return 'cyan';
-            if(hex === '#FFFF00') return 'jaune';
-            if(hex === '#FF00FF') return 'magenta';
-            if(hex === '#FFFFFF') return 'blanc';
-            return '';
-        }
-
-        function hexToRgbString(hex) {
-            return hex;
         }
 
         window.goToColorSelection = function() {
@@ -925,7 +914,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v67.jpg';
+                    btnDownload.download = 'acuitix_etalon_v68.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1088,7 +1077,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.67) !";
+                statusText.innerText = "✅ Calage expert terminé (v.68) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
