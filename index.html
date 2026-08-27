@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.80 - Assistant CAO Compact</title>
+    <title>Acuitix V.81 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -342,7 +342,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.80 - Assistant CAO</h1>
+    <h1>Acuitix V.81 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -589,9 +589,9 @@
         let elementColor = "#00FFFF";
         let currentOpacity = 0.9;
         let isSelectingColorState = false;
-        let tutorialSubStep = 1; // 1: Orientation, 2: Décalage, 3: Bord Extérieur vs Intérieur, 4: Opacité & Zoom coin
+        let tutorialSubStep = 1; 
 
-        // Schémas explicatifs (zoom coin uniquement sur la consigne 4/4 avec ligne verte et fond rouge)
+        // Schémas explicatifs modifiés selon vos demandes précises
         function drawSchema(c, type) {
             let sc = c.getContext('2d');
             let w = c.width;
@@ -600,14 +600,12 @@
             sc.fillRect(0, 0, w, h);
 
             if (type === 'valide') {
-                // Correct standard (sans zoom exagéré)
                 sc.fillStyle = '#333';
                 sc.fillRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);
                 sc.strokeStyle = '#28a745';
                 sc.lineWidth = 2;
                 sc.strokeRect(w * 0.25, h * 0.25, w * 0.5, h * 0.5);
             } else if (type === 'orientation') {
-                // Erreur orientation standard
                 sc.save();
                 sc.translate(w * 0.5, h * 0.5);
                 sc.rotate(15 * Math.PI / 180);
@@ -618,29 +616,32 @@
                 sc.strokeRect(-w * 0.25, -h * 0.25, w * 0.5, h * 0.5);
                 sc.restore();
             } else if (type === 'decalage') {
-                // Erreur décalage standard
                 sc.fillStyle = '#333';
                 sc.fillRect(w * 0.15, h * 0.25, w * 0.5, h * 0.5);
                 sc.strokeStyle = '#dc3545';
                 sc.lineWidth = 2;
                 sc.strokeRect(w * 0.35, h * 0.25, w * 0.5, h * 0.5);
             } else if (type === 'bordinterieur') {
-                // Erreur bord intérieur : Fond rouge, tracé vert à l'intérieur
-                sc.fillStyle = '#FF0000';
-                sc.fillRect(w * 0.2, h * 0.2, w * 0.6, h * 0.6);
-                sc.strokeStyle = '#00FF00';
-                sc.lineWidth = 2.5;
-                sc.strokeRect(w * 0.35, h * 0.35, w * 0.3, h * 0.3);
-            } else if (type === 'zoomcoin') {
-                // Consigne 4/4 : Zoom sur le coin, fond rouge, ligne en vert
+                // Consigne 3/4 : Zoom identique au coin, fond rouge, tracé vert collé bord intérieur (à raz)
                 sc.save();
                 sc.translate(w * 0.7, h * 0.7);
                 sc.scale(2.2, 2.2);
                 sc.fillStyle = '#FF0000'; // Fond rouge
                 sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
-                sc.strokeStyle = '#00FF00'; // Ligne en vert
+                sc.strokeStyle = '#00FF00'; // Ligne verte à raz du bord intérieur
                 sc.lineWidth = 2;
-                sc.strokeRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
+                sc.strokeRect(-w * 0.25, -h * 0.25, w * 0.4, h * 0.4);
+                sc.restore();
+            } else if (type === 'zoomcoin') {
+                // Consigne 4/4 : Zoom sur le coin, fond rouge, ligne verte très légèrement décalée pour montrer la précision du bord extérieur
+                sc.save();
+                sc.translate(w * 0.7, h * 0.7);
+                sc.scale(2.2, 2.2);
+                sc.fillStyle = '#FF0000'; // Fond rouge
+                sc.fillRect(-w * 0.3, -h * 0.3, w * 0.5, h * 0.5);
+                sc.strokeStyle = '#00FF00'; // Ligne verte très légèrement décalée (précision bord extérieur)
+                sc.lineWidth = 2;
+                sc.strokeRect(-w * 0.33, -h * 0.33, w * 0.56, h * 0.56);
                 sc.restore();
             }
         }
@@ -856,16 +857,16 @@
                 goodText.innerText = "Bord Extérieur (Correct)";
                 badIcon.innerText = "⚠️ Erreur";
                 badIcon.style.color = "#ffc107";
-                descEl.innerHTML = "Attention : ne travaillez jamais en <b>bord intérieur</b> (tracé vert à l'intérieur sur fond rouge). Ajustez l'échelle pour superposer parfaitement les arêtes sur le contour externe.";
+                descEl.innerHTML = "Attention : ne travaillez jamais en <b>bord intérieur</b> (tracé vert à raz à l'intérieur sur fond rouge). Ajustez l'échelle pour superposer parfaitement les arêtes sur le contour externe.";
             } else if (tutorialSubStep === 4) {
                 titleEl.innerText = "🔍 Consigne 4/4 : Gestion de l'opacité & Zoom Coin";
                 badCanvas.setAttribute('data-type', 'orientation');
                 goodCanvas.setAttribute('data-type', 'zoomcoin');
                 badText.innerText = "Opacité 100%";
-                goodText.innerText = "Zoom Coin (Vert)";
+                goodText.innerText = "Zoom Coin (Précision Extérieur)";
                 badIcon.innerText = "ℹ️ Astuce";
                 badIcon.style.color = "#17a2b8";
-                descEl.innerHTML = "Ajustez l'opacité et vérifiez la superposition exacte sur le coin de l'élément (ligne en vert sur fond rouge).";
+                descEl.innerHTML = "Ajustez l'opacité et vérifiez la superposition exacte sur le coin de l'élément (ligne verte légèrement décalée sur fond rouge pour prouver la précision extérieure).";
             }
         }
 
@@ -1095,7 +1096,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v80.jpg';
+                    btnDownload.download = 'acuitix_etalon_v81.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1260,7 +1261,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.80) !";
+                statusText.innerText = "✅ Calage expert terminé (v.81) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
