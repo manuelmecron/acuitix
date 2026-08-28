@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.96 - Assistant CAO Compact</title>
+    <title>Acuitix V.97 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.96 - Assistant CAO</h1>
+    <h1>Acuitix V.97 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -1172,7 +1172,7 @@
             }
 
             if (step >= 1 || isForExport) {
-                drawStandardsLegend(refW);
+                drawStandardsSplitCorners(refW);
             }
 
             ctx.restore();
@@ -1182,44 +1182,73 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v96.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v97.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
 
-        function drawStandardsLegend(refW) {
+        function drawStandardsSplitCorners(refW) {
             ctx.save();
-            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
-            ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(2, refW / 400);
-            
-            let boxX = 20, boxY = 20, boxW = Math.max(310, refW * 0.42), boxH = 120;
-            ctx.fillRect(boxX, boxY, boxW, boxH);
-            ctx.strokeRect(boxX, boxY, boxW, boxH);
-
-            ctx.fillStyle = elementColor;
-            ctx.font = "bold " + Math.max(12, refW / 65) + "px Arial";
-            ctx.fillText("ACUITIX V.96 | LISTE DES ÉTALONS:", boxX + 10, boxY + 22);
-
             let info1 = getStandardInfo(standard1Type);
             let info2 = getStandardInfo(standard2Type);
 
-            ctx.font = Math.max(11, refW / 72) + "px Arial";
-            ctx.fillStyle = "#FFFFFF";
-            
-            ctx.fillText("1. " + info1.name + " (" + info1.val + ")", boxX + 10, boxY + 52);
-            ctx.fillText("2. " + info2.name + " (" + info2.val + ")", boxX + 10, boxY + 88);
+            let fontSize = Math.max(10, refW / 75);
+            ctx.font = "bold " + fontSize + "px Arial";
+            let paddingH = 12;
+            let paddingV = 8;
 
-            let currentSizeForTwin = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
-            let twin1X = boxX + boxW - 55;
-            let twin1Y = boxY + 52;
-            
+            // --- ÉTALON 1 (Haut-Gauche) ---
+            let text1 = "1. " + info1.name + " (" + info1.val + ")";
+            ctx.font = "bold " + fontSize + "px Arial";
+            let metrics1 = ctx.measureText(text1);
+            let box1W = metrics1.width + (paddingH * 2);
+            let box1H = fontSize + (paddingV * 2) + 75; // Espace supplémentaire pour la figure en dessous
+
+            let box1X = 15;
+            let box1Y = 15;
+
+            // Fond et contour étalon 1
+            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
+            ctx.strokeStyle = elementColor;
+            ctx.lineWidth = Math.max(2, refW / 400);
+            ctx.fillRect(box1X, box1Y, box1W, box1H);
+            ctx.strokeRect(box1X, box1Y, box1W, box1H);
+
+            // Texte étalon 1
+            ctx.fillStyle = elementColor;
+            ctx.fillText(text1, box1X + paddingH, box1Y + paddingV + fontSize);
+
+            // Figure étalon 1 (centrée horizontalement sous le texte, avec de grandes marges)
+            let currentSizeForTwin1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
+            let shape1X = box1X + (box1W / 2);
+            let shape1Y = box1Y + paddingV + fontSize + 42;
+            drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
+
+
+            // --- ÉTALON 2 (Haut-Droite) ---
+            let text2 = "2. " + info2.name + " (" + info2.val + ")";
+            let metrics2 = ctx.measureText(text2);
+            let box2W = metrics2.width + (paddingH * 2);
+            let box2H = fontSize + (paddingV * 2) + 75;
+
+            let box2X = canvas.width - box2W - 15;
+            let box2Y = 15;
+
+            // Fond et contour étalon 2
+            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
+            ctx.strokeStyle = elementColor;
+            ctx.fillRect(box2X, box2Y, box2W, box2H);
+            ctx.strokeRect(box2X, box2Y, box2W, box2H);
+
+            // Texte étalon 2
+            ctx.fillStyle = elementColor;
+            ctx.fillText(text2, box2X + paddingH, box2Y + paddingV + fontSize);
+
+            // Figure étalon 2 (centrée horizontalement sous le texte, avec de grandes marges)
             let currentSizeForTwin2 = (step >= 2) ? box2.size : refW * 0.055;
-            let twin2X = boxX + boxW - 55;
-            let twin2Y = boxY + 88;
-
-            drawStandardShape(twin1X, twin1Y, currentSizeForTwin, 0, elementColor, standard1Type);
-            drawStandardShape(twin2X, twin2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
+            let shape2X = box2X + (box2W / 2);
+            let shape2Y = box2Y + paddingV + fontSize + 42;
+            drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
 
             ctx.restore();
         }
@@ -1414,7 +1443,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.96) !";
+                statusText.innerText = "✅ Calage expert terminé (v.97) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
