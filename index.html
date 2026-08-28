@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.102 - Assistant CAO Compact</title>
+    <title>Acuitix V.103 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.102 - Assistant CAO</h1>
+    <h1>Acuitix V.103 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -387,7 +387,7 @@
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
             
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche) :</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche - Maître) :</label>
             <select id="select-standard-1" class="standard-select">
                 <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -401,7 +401,7 @@
                 <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit) :</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit - Esclave) :</label>
             <select id="select-standard-2" class="standard-select">
                 <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -702,18 +702,40 @@
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
 
-        // Synchronisation forcée de l'Étalon 11
-        selectStandard1.addEventListener('change', function() {
-            if (selectStandard1.value === '11') {
-                selectStandard2.value = '11';
-            }
-        });
+        // Synchronisation hiérarchique Maître / Esclave (V103)
+        function updateStandardsSync() {
+            const val1 = selectStandard1.value;
 
-        selectStandard2.addEventListener('change', function() {
-            if (selectStandard2.value === '11') {
-                selectStandard1.value = '11';
+            for (let option of selectStandard2.options) {
+                if (val1 === '11') {
+                    if (option.value === '11') {
+                        option.disabled = false;
+                    } else {
+                        option.disabled = true;
+                    }
+                } else {
+                    if (option.value === '11') {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                }
             }
-        });
+
+            if (val1 === '11') {
+                selectStandard2.value = '11';
+                selectStandard2.disabled = true; // Figé
+            } else {
+                selectStandard2.disabled = false; // Modifiable
+                if (selectStandard2.value === '11') {
+                    selectStandard2.value = '2E'; // Bascule par défaut si l'esclave était sur 11
+                }
+            }
+        }
+
+        selectStandard1.addEventListener('change', updateStandardsSync);
+        // Initialisation au chargement
+        updateStandardsSync();
 
         let currentImg = null;
         let step = 1; 
@@ -1198,7 +1220,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v102.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v103.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1452,7 +1474,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.102) !";
+                statusText.innerText = "✅ Calage expert terminé (v.103) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
