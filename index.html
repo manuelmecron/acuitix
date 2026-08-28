@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.98 - Assistant CAO Compact</title>
+    <title>Acuitix V.99 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.98 - Assistant CAO</h1>
+    <h1>Acuitix V.99 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -1182,7 +1182,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v98.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v99.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1192,22 +1192,22 @@
             let info1 = getStandardInfo(standard1Type);
             let info2 = getStandardInfo(standard2Type);
 
-            let fontSize = Math.max(10, refW / 75);
+            let fontSize = Math.max(11, refW / 65);
             ctx.font = "bold " + fontSize + "px Arial";
-            let paddingH = 12;
-            let paddingV = 8;
+            let paddingH = 16;
+            let paddingV = 10;
 
-            // --- ÉTALON 1 (Haut-Gauche) ---
             let text1 = "1. " + info1.name + " (" + info1.val + ")";
-            ctx.font = "bold " + fontSize + "px Arial";
             let metrics1 = ctx.measureText(text1);
             let box1W = metrics1.width + (paddingH * 2);
-            let box1H = fontSize + (paddingV * 2) + 75;
+            
+            let currentSizeForTwin1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
+            let box1H = fontSize + (paddingV * 3) + currentSizeForTwin1 + 10;
 
             let box1X = 15;
             let box1Y = 15;
 
-            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
+            ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
             ctx.strokeStyle = elementColor;
             ctx.lineWidth = Math.max(2, refW / 400);
             ctx.fillRect(box1X, box1Y, box1W, box1H);
@@ -1216,32 +1216,31 @@
             ctx.fillStyle = elementColor;
             ctx.fillText(text1, box1X + paddingH, box1Y + paddingV + fontSize);
 
-            let currentSizeForTwin1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
             let shape1X = box1X + (box1W / 2);
-            let shape1Y = box1Y + paddingV + fontSize + 42;
+            let shape1Y = box1Y + paddingV + fontSize + 15 + (currentSizeForTwin1 / 2);
             drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
 
-
-            // --- ÉTALON 2 (Haut-Droite) ---
             let text2 = "2. " + info2.name + " (" + info2.val + ")";
             let metrics2 = ctx.measureText(text2);
             let box2W = metrics2.width + (paddingH * 2);
-            let box2H = fontSize + (paddingV * 2) + 75;
+
+            let currentSizeForTwin2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.055);
+            let box2H = fontSize + (paddingV * 3) + currentSizeForTwin2 + 10;
 
             let box2X = canvas.width - box2W - 15;
             let box2Y = 15;
 
-            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
+            ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
             ctx.strokeStyle = elementColor;
+            ctx.lineWidth = Math.max(2, refW / 400);
             ctx.fillRect(box2X, box2Y, box2W, box2H);
             ctx.strokeRect(box2X, box2Y, box2W, box2H);
 
             ctx.fillStyle = elementColor;
             ctx.fillText(text2, box2X + paddingH, box2Y + paddingV + fontSize);
 
-            let currentSizeForTwin2 = (step >= 2) ? box2.size : refW * 0.055;
             let shape2X = box2X + (box2W / 2);
-            let shape2Y = box2Y + paddingV + fontSize + 42;
+            let shape2Y = box2Y + paddingV + fontSize + 15 + (currentSizeForTwin2 / 2);
             drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
 
             ctx.restore();
@@ -1437,7 +1436,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.98) !";
+                statusText.innerText = "✅ Calage expert terminé (v.99) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
