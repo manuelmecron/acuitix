@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.97 - Assistant CAO Compact</title>
+    <title>Acuitix V.93 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -136,7 +136,7 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools, #calibration-panel, #color-choice-panel, #tutorial-panel, #tutorial-panel-2, #tutorial-panel-3 {
+        #pre-capture-tools, #color-choice-panel, #tutorial-panel, #tutorial-panel-2, #tutorial-panel-3 {
             display: none;
             background: #3a3a3a;
             border: 2px solid #ffc107;
@@ -296,6 +296,17 @@
         }
         .color-choice-btn.selected { border-color: #ffc107; box-shadow: 0 0 8px #ffc107; }
 
+        .standard-select {
+            width: 100%;
+            padding: 8px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
         #side-color-drawer {
             position: fixed;
             top: 0;
@@ -349,8 +360,8 @@
 </head>
 <body>
 
-    <h1>Acuitix V.97 - Assistant CAO</h1>
-    <div id="status-text">Orientation et Cadrage</div>
+    <h1>Acuitix V.93 - Assistant CAO</h1>
+    <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
         <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
@@ -372,6 +383,42 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
+        <!-- PANNEAU ÉTALONNAGE INITIAL (V95) INTÉGRÉ À LA V93 -->
+        <div id="initial-standard-panel" style="display: block; background: #2a2a2a; border-radius: 8px; padding: 10px; margin-top: 4px; text-align: left;">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
+            <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
+            
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche) :</label>
+            <select id="select-standard-1" class="standard-select">
+                <option value="11">Étalon 11</option>
+                <option value="2E" selected>Pièce de 2 € (Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Ø 16.25 mm)</option>
+                <option value="CARD">Carte de visite (85 x 54 mm)</option>
+            </select>
+
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit) :</label>
+            <select id="select-standard-2" class="standard-select">
+                <option value="11">Étalon 11</option>
+                <option value="2E" selected>Pièce de 2 € (Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Ø 16.25 mm)</option>
+                <option value="CARD">Carte de visite (85 x 54 mm)</option>
+            </select>
+
+            <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons & Prendre la photo ➡️</button>
+        </div>
+
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (extrémités visibles).</p>
@@ -379,15 +426,13 @@
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                    <svg viewBox="0 0 140 92"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                    Plaque droite
+                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
+                    Bien cadrée
                 </div>
                 <div class="pickguard-thumb invalid">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                    <svg viewBox="0 0 140 92">
-                        <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
-                    </svg>
-                    Plaque de biais
+                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
+                    Coupée / Désaxée
                 </div>
             </div>
 
@@ -408,37 +453,8 @@
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="goToCalibrationStep()">Valider ce cadrage ➡️</button>
+            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Valider ce cadrage ➡️</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
-        </div>
-
-        <div id="calibration-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage de l'échelle (Référence connue)</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'objet de référence présent sur la photo (ex: carte bancaire ou pièce de monnaie) :</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
-                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(85.6, 'Carte bancaire (85.6 mm)')">💳 Carte bancaire / ISO 7810 (85.6 mm)</button>
-                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(24.25, 'Pièce de 1 Euro (24.25 mm)')">🪙 Pièce de 1 Euro (24.25 mm)</button>
-                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(25.75, 'Pièce de 2 Euros (25.75 mm)')">🪙 Pièce de 2 Euros (25.75 mm)</button>
-            </div>
-
-            <div class="opacity-control-box" style="padding:4px; margin-bottom:6px;">
-                <label style="font-size: 0.7rem;">Référence sélectionnée : <span id="calib-label" style="color:#fff;">Carte bancaire (85.6 mm)</span></label>
-                <label style="font-size: 0.65rem; margin-top:4px;">Ajuster la taille de la référence sur l'écran :</label>
-                <div class="safe-button-grid" style="margin-top:4px;">
-                    <button class="btn-info" style="padding:6px; font-size:0.75rem;" onclick="adjustCalibrationSize(5)">➕ Agrandir</button>
-                    <button class="btn-info" style="padding:6px; font-size:0.75rem;" onclick="adjustCalibrationSize(-5)">➖ Réduire</button>
-                </div>
-            </div>
-
-            <div class="tip-box">
-                ℹ️ <b>Instructions :</b> Déplacez et redimensionnez le cadre jaune pour qu'il corresponde exactement aux contours de votre objet étalon physique visible sur la photo.
-            </div>
-
-            <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="backToPreCaptureFromCalib()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
-                <button class="btn" onclick="goToColorSelection()" style="margin-top:0; padding:8px;">Valider l'étalonnage ➡️</button>
-            </div>
         </div>
 
         <div id="color-choice-panel">
@@ -453,7 +469,7 @@
             </div>
 
             <div class="nav-buttons" style="margin-top: 8px;">
-                <button class="btn btn-secondary" onclick="backToCalibration()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
                 <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
             </div>
         </div>
@@ -556,8 +572,7 @@
 
             <div class="tip-box">
                 💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élement "à raz" l'objet à détourer<br><br>
-                📌 <b>Remarque :</b> Pour une précision optimale, veillez à NE JAMAIS UTILISER LES BORDS INTERIEURS DES ELEMENTS DE DETOURAGE<br>
-                🛑 <b>TOUTE PHOTO UTILISANT LES BORDS INTERIEURS RENDRA VOTRE CONCEPTION INUTILISABLE CAR TROP IMPRECISE !!!</b>
+                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python de conversion DXF.
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
@@ -632,14 +647,14 @@
             </div>
         </div>
 
-        <div id="welcome-panel">
+        <div id="welcome-panel" style="display: none;">
             <div class="photo-guide-frame">
                 <div class="camera-badge">📸 📸 📸</div>
                 <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin: 2px 0; text-transform: uppercase;">
                     Attention : Prenez l'objet ENTIER !
                 </p>
                 <p style="color: #fff; font-size: 0.75rem; margin: 2px 0;">
-                    <b>Toutes les extrémités doivent être visibles</b> sur la photo pour une modélisation exacte.
+                    Placez vos <b>2 étalons</b> choisis à gauche et à droite de l'objet.
                 </p>
                 
                 <div class="pickguards-gallery">
@@ -658,11 +673,8 @@
                 </div>
             </div>
 
-            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 1 : PRENDRE LA PHOTO</p>
-            <p style="color: #ddd; font-size: 0.75rem; margin: 2px 0 6px 0;">
-                Photographiez votre élément à plat en mode paysage de préférence.
-            </p>
-            <label for="file-input" class="btn" style="margin-top:0;">📸 Lancer l'appareil photo</label>
+            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 0 : PRENDRE LA PHOTO</p>
+            <label for="file-input" class="btn" style="margin-top:6px;">📸 Lancer l'appareil photo</label>
         </div>
         
         <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive</a>
@@ -675,8 +687,8 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('status-text');
         const welcomePanel = document.getElementById('welcome-panel');
+        const initialStandardPanel = document.getElementById('initial-standard-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
-        const calibrationPanel = document.getElementById('calibration-panel');
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
         const tutorialPanel2 = document.getElementById('tutorial-panel-2');
@@ -694,7 +706,6 @@
         let imgOffsetX = 0;
         let imgOffsetY = 0;
 
-        let calibrationRef = { x: 0, y: 0, size: 100, realSizeMm: 85.6, name: "Carte bancaire (85.6 mm)" };
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
         let corners = [
@@ -714,7 +725,18 @@
         let elementColor = "#00FFFF";
         let currentOpacity = 0.9;
         let isSelectingColorState = false;
-        let isCalibrationState = false;
+
+        let standard1Type = "2E";
+        let standard2Type = "2E";
+
+        window.goToPhotoCapture = function() {
+            standard1Type = document.getElementById('select-standard-1').value;
+            standard2Type = document.getElementById('select-standard-2').value;
+            initialStandardPanel.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.innerText = "Étape 0 : Prise de vue";
+        }
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -745,10 +767,6 @@
                     let h = canvas.height;
                     let defaultSize = w * 0.055; 
 
-                    calibrationRef.x = w * 0.5;
-                    calibrationRef.y = h * 0.5;
-                    calibrationRef.size = w * 0.25;
-
                     box1.size = defaultSize;
                     box2.size = defaultSize;
                     for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
@@ -764,7 +782,6 @@
                     statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
                     preCaptureTools.style.display = 'block';
-                    calibrationPanel.style.display = 'none';
                     colorChoicePanel.style.display = 'none';
                     tutorialPanel.style.display = 'none';
                     tutorialPanel2.style.display = 'none';
@@ -796,11 +813,7 @@
                 imgY = clientClickY;
             }
 
-            if (isCalibrationState) {
-                calibrationRef.x = imgX;
-                calibrationRef.y = imgY;
-                redrawCanvas();
-            } else if (!isSelectingColorState && step >= 1 && step <= 7) {
+            if (!isSelectingColorState && step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
                 manualPanX = 0;
@@ -828,51 +841,11 @@
             redrawCanvas();
         }
 
-        window.goToCalibrationStep = function() {
-            preCaptureTools.style.display = 'none';
-            calibrationPanel.style.display = 'block';
-            statusText.innerText = "Étape 0b : Étalonnage de l'échelle";
-            isCalibrationState = true;
-            sideColorDrawer.style.display = 'none';
-            redrawCanvas();
-        }
-
-        window.backToPreCaptureFromCalib = function() {
-            calibrationPanel.style.display = 'none';
-            preCaptureTools.style.display = 'block';
-            statusText.innerText = "Étape 0 : Orientation et Cadrage";
-            isCalibrationState = false;
-            sideColorDrawer.style.display = 'none';
-            redrawCanvas();
-        }
-
-        window.setCalibrationRef = function(sizeMm, nameStr) {
-            calibrationRef.realSizeMm = sizeMm;
-            calibrationRef.name = nameStr;
-            document.getElementById('calib-label').innerText = nameStr;
-        }
-
-        window.adjustCalibrationSize = function(delta) {
-            calibrationRef.size = Math.max(20, calibrationRef.size + delta);
-            redrawCanvas();
-        }
-
         window.goToColorSelection = function() {
-            calibrationPanel.style.display = 'none';
+            preCaptureTools.style.display = 'none';
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Sélection de la couleur";
-            isCalibrationState = false;
             isSelectingColorState = true;
-            sideColorDrawer.style.display = 'none';
-            redrawCanvas();
-        }
-
-        window.backToCalibration = function() {
-            colorChoicePanel.style.display = 'none';
-            calibrationPanel.style.display = 'block';
-            statusText.innerText = "Étape 0b : Étalonnage de l'échelle";
-            isCalibrationState = true;
-            isSelectingColorState = false;
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
         }
@@ -944,7 +917,7 @@
             tutorialPanel3.style.display = 'none';
             isSelectingColorState = false; 
             step = 1; 
-            statusText.innerText = "Étape 1 / 6 : Carré GAUCHE";
+            statusText.innerText = "Étape 1 / 6 : Étalon GAUCHE (" + standard1Type + ")";
             generalToolsContainer.style.display = 'block';
             adjustPanel.style.display = 'block';
             sideColorDrawer.style.display = 'block';
@@ -965,7 +938,6 @@
             stopAction();
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
-            calibrationPanel.style.display = 'none';
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'none';
@@ -974,7 +946,8 @@
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
-            welcomePanel.style.display = 'block';
+            welcomePanel.style.display = 'none';
+            initialStandardPanel.style.display = 'block';
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
             sideColorDrawer.classList.remove('open');
@@ -989,7 +962,6 @@
             manualPanX = 0;
             manualPanY = 0;
             isSelectingColorState = false;
-            isCalibrationState = false;
         }
 
         window.changerOpacite = function(val) {
@@ -1099,15 +1071,6 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
-            if (isCalibrationState && !isForExport) {
-                ctx.save();
-                ctx.strokeStyle = '#FFFF00';
-                ctx.lineWidth = Math.max(3, refW / 300);
-                ctx.strokeRect(calibrationRef.x - calibrationRef.size/2, calibrationRef.y - calibrationRef.size/4, calibrationRef.size, calibrationRef.size/2);
-                dessinerCroixCentre(calibrationRef.x, calibrationRef.y);
-                ctx.restore();
-            }
-
             if (isSelectingColorState && !isForExport) {
                 ctx.save();
                 let sampleSize = canvas.width * 0.15;
@@ -1119,7 +1082,7 @@
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            if (!isSelectingColorState && !isCalibrationState) {
+            if (!isSelectingColorState) {
                 if (step >= 1) {
                     let rx = step === 1 ? tempX : box1.x;
                     let ry = step === 1 ? tempY : box1.y;
@@ -1127,6 +1090,9 @@
                     let rang = step === 1 ? tempAngle : box1.angle;
                     drawRotatedRect(rx, ry, rsz, rang, elementColor);
                     dessinerCroixCentre(rx, ry);
+                    if (isForExport || step > 1) {
+                        drawStandardLabel(rx, ry, "ETALON 1: " + standard1Type, elementColor);
+                    }
                 }
                 if (step >= 2) {
                     let rx2 = step === 2 ? tempX : box2.x;
@@ -1135,6 +1101,9 @@
                     let rang2 = step === 2 ? tempAngle : box2.angle;
                     drawRotatedRect(rx2, ry2, rsz2, rang2, elementColor);
                     dessinerCroixCentre(rx2, ry2);
+                    if (isForExport || step > 2) {
+                        drawStandardLabel(rx2, ry2, "ETALON 2: " + standard2Type, elementColor);
+                    }
                 }
 
                 for (let i = 0; i < 4; i++) {
@@ -1193,6 +1162,14 @@
                 });
             }
 
+            if (isForExport) {
+                ctx.save();
+                ctx.fillStyle = "#FFC107";
+                ctx.font = "bold " + Math.max(16, refW / 45) + "px Arial";
+                ctx.fillText("ACUITIX V.93 | ETALON 1: " + standard1Type + " | ETALON 2: " + standard2Type, 20, 40);
+                ctx.restore();
+            }
+
             ctx.restore();
             ctx.restore();
 
@@ -1200,7 +1177,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v97.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v93.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1217,6 +1194,14 @@
             ctx.strokeStyle = color;
             ctx.lineWidth = Math.max(3, canvas.width / 300);
             ctx.strokeRect(-size / 2, -size / 2, size, size);
+            ctx.restore();
+        }
+
+        function drawStandardLabel(x, y, text, color) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.font = "bold " + Math.max(12, canvas.width / 60) + "px Arial";
+            ctx.fillText(text, x - 40, y - 25);
             ctx.restore();
         }
 
@@ -1286,13 +1271,11 @@
 
         window.askValidateStep = function() {
             stopAction();
-            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let stepNames = ["", "Étalon 1 (" + standard1Type + ")", "Étalon 2 (" + standard2Type + ")", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let label = stepNames[step] || "cette étape";
-            
             if (step === 7 && holes.length === 0) {
-                if (!confirm("Aucun perçage n'a été ajouté. Voulez-vous vraiment terminer sans perçage ?")) return;
+                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
             }
-
             if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
                 validateStep();
             }
@@ -1305,81 +1288,57 @@
                 adjustPanel.style.display = 'none';
                 tutorialPanel3.style.display = 'block';
                 statusText.innerText = "Consigne : Alignement de l'échelle";
-                sideColorDrawer.style.display = 'none';
-                sideColorDrawer.classList.remove('open');
                 redrawCanvas();
                 return;
             }
-
-            let stepNames = ["", "Carré Gauche", "Carré Droit", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
-            let prevLabel = stepNames[step - 1] || "l'étape précédente";
-            
-            if (confirm("⚠️ Voulez-vous vraiment revenir en arrière vers l'étape : " + prevLabel + " ?")) {
+            if (confirm("Voulez-vous vraiment revenir en arrière ?")) {
                 prevStep();
             }
         }
 
         window.validateStep = function() {
             stopAction();
-
             if (step === 1) {
                 box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
                 step = 2;
-                tempX = box1.x + (canvas.width * 0.15); 
-                tempY = box1.y;
-                tempAngle = box1.angle;
-                tempSize = box1.size;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                tempX = box1.x + (canvas.width * 0.15); tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 2) {
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3; 
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-                tempAngle = 0;
-                tempSize = box1.size * 1.2;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                tempAngle = 0; tempSize = box1.size * 1.2;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 3) {
                 corners[0].x = tempX; corners[0].y = tempY; corners[0].angle = tempAngle; corners[0].size = tempSize;
                 step = 4;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 4) {
                 corners[1].x = tempX; corners[1].y = tempY; corners[1].angle = tempAngle; corners[1].size = tempSize;
                 step = 5;
                 tempX = Math.max(box1.x, box2.x) + (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 5) {
                 corners[2].x = tempX; corners[2].y = tempY; corners[2].angle = tempAngle; corners[2].size = tempSize;
                 step = 6;
                 tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
                 tempY = Math.max(box1.y, box2.y) + (canvas.height * 0.08);
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
                 step = 7; 
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 7) {
                 step = 8; 
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.97) !";
+                statusText.innerText = "✅ Calage expert terminé (v.93) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1390,9 +1349,7 @@
         }
 
         function prevStep() {
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
+            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             if (step > 1) {
                 step--;
                 if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
@@ -1411,14 +1368,8 @@
         function updateUIState() {
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
-            
             btnPrev.style.display = (step >= 1) ? 'block' : 'none';
-
-            if (step >= 1) {
-                sideColorDrawer.style.display = 'block';
-            } else {
-                sideColorDrawer.style.display = 'none';
-            }
+            sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
@@ -1430,8 +1381,8 @@
 
             const descriptions = [
                 "",
-                "Étape 1 / 6 : Carré GAUCHE",
-                "Étape 2 / 6 : Carré DROIT",
+                "Étape 1 / 6 : Étalon GAUCHE (" + standard1Type + ")",
+                "Étape 2 / 6 : Étalon DROIT (" + standard2Type + ")",
                 "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)",
                 "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)",
                 "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
@@ -1441,9 +1392,7 @@
             statusText.innerText = descriptions[step] || "";
         }
 
-        btnRetry.addEventListener('click', function() {
-            resetToWelcome();
-        });
+        btnRetry.addEventListener('click', function() { resetToWelcome(); });
     </script>
 </body>
 </html>
