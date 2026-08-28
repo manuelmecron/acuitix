@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.94 - Assistant CAO Compact</title>
+    <title>Acuitix V.95 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.94 - Assistant CAO</h1>
+    <h1>Acuitix V.95 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -1171,7 +1171,6 @@
                 });
             }
 
-            // Affichage de la liste des étalons en haut à gauche (si étape >= 1 ou export)
             if (step >= 1 || isForExport) {
                 drawStandardsLegend(refW);
             }
@@ -1183,7 +1182,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v94.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v95.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1194,21 +1193,36 @@
             ctx.strokeStyle = elementColor;
             ctx.lineWidth = Math.max(2, refW / 400);
             
-            let boxX = 20, boxY = 20, boxW = Math.max(260, refW * 0.38), boxH = 95;
+            let boxX = 20, boxY = 20, boxW = Math.max(310, refW * 0.42), boxH = 120;
             ctx.fillRect(boxX, boxY, boxW, boxH);
             ctx.strokeRect(boxX, boxY, boxW, boxH);
 
             ctx.fillStyle = elementColor;
             ctx.font = "bold " + Math.max(12, refW / 65) + "px Arial";
-            ctx.fillText("ACUITIX V.94 | LISTE DES ÉTALONS:", boxX + 10, boxY + 22);
+            ctx.fillText("ACUITIX V.95 | LISTE DES ÉTALONS:", boxX + 10, boxY + 22);
 
             let info1 = getStandardInfo(standard1Type);
             let info2 = getStandardInfo(standard2Type);
 
             ctx.font = Math.max(11, refW / 72) + "px Arial";
             ctx.fillStyle = "#FFFFFF";
-            ctx.fillText("1. " + info1.name + " (" + info1.val + ")", boxX + 10, boxY + 50);
-            ctx.fillText("2. " + info2.name + " (" + info2.val + ")", boxX + 10, boxY + 76);
+            
+            // Lignes espacées verticalement
+            ctx.fillText("1. " + info1.name + " (" + info1.val + ")", boxX + 10, boxY + 52);
+            ctx.fillText("2. " + info2.name + " (" + info2.val + ")", boxX + 10, boxY + 88);
+
+            // Dessin des jumeaux (étalons fixes en haut à droite de la boîte de légende)
+            let currentSizeForTwin = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
+            let twin1X = boxX + boxW - 55;
+            let twin1Y = boxY + 52;
+            
+            let currentSizeForTwin2 = (step >= 2) ? box2.size : refW * 0.055;
+            let twin2X = boxX + boxW - 55;
+            let twin2Y = boxY + 88;
+
+            drawStandardShape(twin1X, twin1Y, currentSizeForTwin, 0, elementColor, standard1Type);
+            drawStandardShape(twin2X, twin2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
+
             ctx.restore();
         }
 
@@ -1218,7 +1232,6 @@
             ctx.rotate((angleDeg * Math.PI) / 180);
 
             if (type === '11') {
-                // Carré (Étalon 11 - 10x10 mm)
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(6, canvas.width / 200);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
@@ -1227,7 +1240,6 @@
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
             } else if (type === 'CARD') {
-                // Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)
                 let cardH = size;
                 let cardW = size * (85 / 54);
                 let radius = cardH * 0.12;
@@ -1240,7 +1252,6 @@
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
             } else {
-                // Pièce de monnaie (Cercle)
                 let radius = size / 2;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(6, canvas.width / 200);
@@ -1405,7 +1416,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.94) !";
+                statusText.innerText = "✅ Calage expert terminé (v.95) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
