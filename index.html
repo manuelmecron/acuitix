@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.96 - Assistant CAO Compact</title>
+    <title>Acuitix V.97 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -136,7 +136,7 @@
             margin-top: 4px;
         }
 
-        #pre-capture-tools, #color-choice-panel, #tutorial-panel, #tutorial-panel-2, #tutorial-panel-3 {
+        #pre-capture-tools, #calibration-panel, #color-choice-panel, #tutorial-panel, #tutorial-panel-2, #tutorial-panel-3 {
             display: none;
             background: #3a3a3a;
             border: 2px solid #ffc107;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.96 - Assistant CAO</h1>
+    <h1>Acuitix V.97 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -408,8 +408,37 @@
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Valider ce cadrage ➡️</button>
+            <button class="btn" style="margin-top: 4px;" onclick="goToCalibrationStep()">Valider ce cadrage ➡️</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+        </div>
+
+        <div id="calibration-panel">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage de l'échelle (Référence connue)</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'objet de référence présent sur la photo (ex: carte bancaire ou pièce de monnaie) :</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(85.6, 'Carte bancaire (85.6 mm)')">💳 Carte bancaire / ISO 7810 (85.6 mm)</button>
+                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(24.25, 'Pièce de 1 Euro (24.25 mm)')">🪙 Pièce de 1 Euro (24.25 mm)</button>
+                <button class="btn btn-secondary" style="margin-top:0; padding:8px; font-size:0.8rem;" onclick="setCalibrationRef(25.75, 'Pièce de 2 Euros (25.75 mm)')">🪙 Pièce de 2 Euros (25.75 mm)</button>
+            </div>
+
+            <div class="opacity-control-box" style="padding:4px; margin-bottom:6px;">
+                <label style="font-size: 0.7rem;">Référence sélectionnée : <span id="calib-label" style="color:#fff;">Carte bancaire (85.6 mm)</span></label>
+                <label style="font-size: 0.65rem; margin-top:4px;">Ajuster la taille de la référence sur l'écran :</label>
+                <div class="safe-button-grid" style="margin-top:4px;">
+                    <button class="btn-info" style="padding:6px; font-size:0.75rem;" onclick="adjustCalibrationSize(5)">➕ Agrandir</button>
+                    <button class="btn-info" style="padding:6px; font-size:0.75rem;" onclick="adjustCalibrationSize(-5)">➖ Réduire</button>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                ℹ️ <b>Instructions :</b> Déplacez et redimensionnez le cadre jaune pour qu'il corresponde exactement aux contours de votre objet étalon physique visible sur la photo.
+            </div>
+
+            <div class="nav-buttons" style="margin-top: 6px;">
+                <button class="btn btn-secondary" onclick="backToPreCaptureFromCalib()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="goToColorSelection()" style="margin-top:0; padding:8px;">Valider l'étalonnage ➡️</button>
+            </div>
         </div>
 
         <div id="color-choice-panel">
@@ -424,7 +453,7 @@
             </div>
 
             <div class="nav-buttons" style="margin-top: 8px;">
-                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn btn-secondary" onclick="backToCalibration()" style="margin-top:0;">⬅️ Retour</button>
                 <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
             </div>
         </div>
@@ -647,6 +676,7 @@
         const statusText = document.getElementById('status-text');
         const welcomePanel = document.getElementById('welcome-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
+        const calibrationPanel = document.getElementById('calibration-panel');
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
         const tutorialPanel2 = document.getElementById('tutorial-panel-2');
@@ -664,6 +694,7 @@
         let imgOffsetX = 0;
         let imgOffsetY = 0;
 
+        let calibrationRef = { x: 0, y: 0, size: 100, realSizeMm: 85.6, name: "Carte bancaire (85.6 mm)" };
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
         let corners = [
@@ -683,6 +714,7 @@
         let elementColor = "#00FFFF";
         let currentOpacity = 0.9;
         let isSelectingColorState = false;
+        let isCalibrationState = false;
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -713,6 +745,10 @@
                     let h = canvas.height;
                     let defaultSize = w * 0.055; 
 
+                    calibrationRef.x = w * 0.5;
+                    calibrationRef.y = h * 0.5;
+                    calibrationRef.size = w * 0.25;
+
                     box1.size = defaultSize;
                     box2.size = defaultSize;
                     for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
@@ -728,6 +764,7 @@
                     statusText.innerText = "Étape 0 : Orientation et Cadrage";
                     
                     preCaptureTools.style.display = 'block';
+                    calibrationPanel.style.display = 'none';
                     colorChoicePanel.style.display = 'none';
                     tutorialPanel.style.display = 'none';
                     tutorialPanel2.style.display = 'none';
@@ -759,7 +796,11 @@
                 imgY = clientClickY;
             }
 
-            if (!isSelectingColorState && step >= 1 && step <= 7) {
+            if (isCalibrationState) {
+                calibrationRef.x = imgX;
+                calibrationRef.y = imgY;
+                redrawCanvas();
+            } else if (!isSelectingColorState && step >= 1 && step <= 7) {
                 tempX = imgX;
                 tempY = imgY;
                 manualPanX = 0;
@@ -787,11 +828,51 @@
             redrawCanvas();
         }
 
-        window.goToColorSelection = function() {
+        window.goToCalibrationStep = function() {
             preCaptureTools.style.display = 'none';
+            calibrationPanel.style.display = 'block';
+            statusText.innerText = "Étape 0b : Étalonnage de l'échelle";
+            isCalibrationState = true;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.backToPreCaptureFromCalib = function() {
+            calibrationPanel.style.display = 'none';
+            preCaptureTools.style.display = 'block';
+            statusText.innerText = "Étape 0 : Orientation et Cadrage";
+            isCalibrationState = false;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.setCalibrationRef = function(sizeMm, nameStr) {
+            calibrationRef.realSizeMm = sizeMm;
+            calibrationRef.name = nameStr;
+            document.getElementById('calib-label').innerText = nameStr;
+        }
+
+        window.adjustCalibrationSize = function(delta) {
+            calibrationRef.size = Math.max(20, calibrationRef.size + delta);
+            redrawCanvas();
+        }
+
+        window.goToColorSelection = function() {
+            calibrationPanel.style.display = 'none';
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Sélection de la couleur";
+            isCalibrationState = false;
             isSelectingColorState = true;
+            sideColorDrawer.style.display = 'none';
+            redrawCanvas();
+        }
+
+        window.backToCalibration = function() {
+            colorChoicePanel.style.display = 'none';
+            calibrationPanel.style.display = 'block';
+            statusText.innerText = "Étape 0b : Étalonnage de l'échelle";
+            isCalibrationState = true;
+            isSelectingColorState = false;
             sideColorDrawer.style.display = 'none';
             redrawCanvas();
         }
@@ -884,6 +965,7 @@
             stopAction();
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
+            calibrationPanel.style.display = 'none';
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'none';
@@ -907,6 +989,7 @@
             manualPanX = 0;
             manualPanY = 0;
             isSelectingColorState = false;
+            isCalibrationState = false;
         }
 
         window.changerOpacite = function(val) {
@@ -1016,6 +1099,15 @@
             let refW = (rotationAngle === 90 || rotationAngle === 270) ? currentImg.naturalHeight : currentImg.naturalWidth;
             ctx.lineWidth = Math.max(4, refW / 300);
 
+            if (isCalibrationState && !isForExport) {
+                ctx.save();
+                ctx.strokeStyle = '#FFFF00';
+                ctx.lineWidth = Math.max(3, refW / 300);
+                ctx.strokeRect(calibrationRef.x - calibrationRef.size/2, calibrationRef.y - calibrationRef.size/4, calibrationRef.size, calibrationRef.size/2);
+                dessinerCroixCentre(calibrationRef.x, calibrationRef.y);
+                ctx.restore();
+            }
+
             if (isSelectingColorState && !isForExport) {
                 ctx.save();
                 let sampleSize = canvas.width * 0.15;
@@ -1027,7 +1119,7 @@
             ctx.save();
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            if (!isSelectingColorState) {
+            if (!isSelectingColorState && !isCalibrationState) {
                 if (step >= 1) {
                     let rx = step === 1 ? tempX : box1.x;
                     let ry = step === 1 ? tempY : box1.y;
@@ -1108,7 +1200,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v96.jpg';
+                    btnDownload.download = 'acuitix_etalon_v97.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1287,7 +1379,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.96) !";
+                statusText.innerText = "✅ Calage expert terminé (v.97) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
