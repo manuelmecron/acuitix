@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.92 - Assistant CAO Compact</title>
+    <title>Acuitix V.93 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.92 - Assistant CAO</h1>
+    <h1>Acuitix V.93 - Assistant CAO</h1>
     <div id="status-text">Orientation et Cadrage</div>
 
     <div id="side-color-drawer">
@@ -866,7 +866,6 @@
             adjustPanel.style.display = 'block';
             sideColorDrawer.style.display = 'block';
             
-            // Correction clé : Ne PAS écraser imgOffsetX et imgOffsetY ici pour conserver le cadrage de l'étape 0 !
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
@@ -976,7 +975,8 @@
             if (step === 7) {
                 if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
                     holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
-                    resetCanvasAndTempPos();
+                    // Correction V.93 : Ne pas réinitialiser brutalement tempX/tempY pour éviter le saut de position du curseur de perçage
+                    redrawCanvas();
                 }
             }
         }
@@ -996,12 +996,14 @@
 
             ctx.save();
 
+            // Correction V.93 : Désactivation du zoom/pan de navigation global lors de l'exportation pour éviter tout décalage d'échelle ou de centrage sur le fichier final
             if (!isForExport && zoomLevel !== 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
 
+            // Dessin de l'image de fond avec son décalage exact défini à l'étape 0
             ctx.save();
             ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
             ctx.rotate((rotationAngle * Math.PI) / 180);
@@ -1107,7 +1109,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_v92.jpg';
+                    btnDownload.download = 'acuitix_etalon_v93.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1286,7 +1288,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.92) !";
+                statusText.innerText = "✅ Calage expert terminé (v.93) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
