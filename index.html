@@ -383,37 +383,36 @@
     <div>
         <input type="file" id="file-input" accept="image/*" capture="environment">
 
-        <!-- PANNEAU ÉTALONNAGE INITIAL (V95) INTÉGRÉ À LA V93 -->
         <div id="initial-standard-panel" style="display: block; background: #2a2a2a; border-radius: 8px; padding: 10px; margin-top: 4px; text-align: left;">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
             
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche) :</label>
             <select id="select-standard-1" class="standard-select">
-                <option value="11">Étalon 11</option>
-                <option value="2E" selected>Pièce de 2 € (Ø 25.75 mm)</option>
-                <option value="1E">Pièce de 1 € (Ø 23.25 mm)</option>
-                <option value="0.50E">Pièce de 50 Centimes (Ø 24.25 mm)</option>
-                <option value="0.20E">Pièce de 20 Centimes (Ø 22.25 mm)</option>
-                <option value="0.10E">Pièce de 10 Centimes (Ø 19.75 mm)</option>
-                <option value="0.05E">Pièce de 5 Centimes (Ø 21.25 mm)</option>
-                <option value="0.02E">Pièce de 2 Centimes (Ø 18.75 mm)</option>
-                <option value="0.01E">Pièce de 1 Centime (Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite (85 x 54 mm)</option>
+                <option value="11">Étalon 11 (Carré)</option>
+                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit) :</label>
             <select id="select-standard-2" class="standard-select">
-                <option value="11">Étalon 11</option>
-                <option value="2E" selected>Pièce de 2 € (Ø 25.75 mm)</option>
-                <option value="1E">Pièce de 1 € (Ø 23.25 mm)</option>
-                <option value="0.50E">Pièce de 50 Centimes (Ø 24.25 mm)</option>
-                <option value="0.20E">Pièce de 20 Centimes (Ø 22.25 mm)</option>
-                <option value="0.10E">Pièce de 10 Centimes (Ø 19.75 mm)</option>
-                <option value="0.05E">Pièce de 5 Centimes (Ø 21.25 mm)</option>
-                <option value="0.02E">Pièce de 2 Centimes (Ø 18.75 mm)</option>
-                <option value="0.01E">Pièce de 1 Centime (Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite (85 x 54 mm)</option>
+                <option value="11">Étalon 11 (Carré)</option>
+                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons & Prendre la photo ➡️</button>
@@ -477,7 +476,7 @@
         <div id="tutorial-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Le carré vert doit être parfaitement aligné et parallèle au carré rouge :
+                Le repère vert doit être parfaitement aligné et parallèle au modèle rouge :
             </p>
             
             <div class="pickguards-gallery">
@@ -498,7 +497,7 @@
                             <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                         </g>
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Carré vert de biais</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Repère vert de biais</span>
                 </div>
             </div>
 
@@ -516,7 +515,7 @@
 
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Carré bien axé</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Élément bien axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
@@ -571,8 +570,8 @@
             </div>
 
             <div class="tip-box">
-                💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élement "à raz" l'objet à détourer<br><br>
-                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python de conversion DXF.
+                💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élément "à raz" l'objet à détourer<br><br>
+                📌 <b>Remarque :</b> Vos deux étalons sélectionnés (Carré, Cercle ou Rectangle arrondi) serviront de base de calcul fixe pour le script Python.
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
@@ -1074,7 +1073,7 @@
             if (isSelectingColorState && !isForExport) {
                 ctx.save();
                 let sampleSize = canvas.width * 0.15;
-                drawRotatedRect(canvas.width / 2, canvas.height / 2, sampleSize, 0, elementColor);
+                drawStandardShape(canvas.width / 2, canvas.height / 2, sampleSize, 0, elementColor, standard1Type);
                 dessinerCroixCentre(canvas.width / 2, canvas.height / 2);
                 ctx.restore();
             }
@@ -1088,7 +1087,7 @@
                     let ry = step === 1 ? tempY : box1.y;
                     let rsz = step === 1 ? tempSize : box1.size;
                     let rang = step === 1 ? tempAngle : box1.angle;
-                    drawRotatedRect(rx, ry, rsz, rang, elementColor);
+                    drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
                     dessinerCroixCentre(rx, ry);
                     if (isForExport || step > 1) {
                         drawStandardLabel(rx, ry, "ETALON 1: " + standard1Type, elementColor);
@@ -1099,7 +1098,7 @@
                     let ry2 = step === 2 ? tempY : box2.y;
                     let rsz2 = step === 2 ? tempSize : box2.size;
                     let rang2 = step === 2 ? tempAngle : box2.angle;
-                    drawRotatedRect(rx2, ry2, rsz2, rang2, elementColor);
+                    drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
                     dessinerCroixCentre(rx2, ry2);
                     if (isForExport || step > 2) {
                         drawStandardLabel(rx2, ry2, "ETALON 2: " + standard2Type, elementColor);
@@ -1182,19 +1181,64 @@
             }
         }
 
-        function drawRotatedRect(x, y, size, angleDeg, color) {
+        function drawStandardShape(x, y, size, angleDeg, color, type) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
-            
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(6, canvas.width / 200);
-            ctx.strokeRect(-size / 2, -size / 2, size, size);
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(3, canvas.width / 300);
-            ctx.strokeRect(-size / 2, -size / 2, size, size);
+            if (type === '11') {
+                // Carré (Étalon 11)
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                ctx.strokeRect(-size / 2, -size / 2, size, size);
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.strokeRect(-size / 2, -size / 2, size, size);
+            } else if (type === 'CARD') {
+                // Carte de visite / Bancaire (Rectangle avec coins arrondis - Ratio 85x54)
+                let cardH = size;
+                let cardW = size * (85 / 54);
+                let radius = cardH * 0.12;
+
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
+            } else {
+                // Pièce de monnaie (Cercle)
+                let radius = size / 2;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
             ctx.restore();
+        }
+
+        function strokeRoundedRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.stroke();
         }
 
         function drawStandardLabel(x, y, text, color) {
