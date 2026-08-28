@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.104 - Assistant CAO Compact</title>
+    <title>Acuitix V.105 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.104 - Assistant CAO</h1>
+    <h1>Acuitix V.105 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -624,12 +624,16 @@
 
                     <div class="controls-right">
                         <div class="control-row">
-                            <button onclick="adjustZoom(0.3)">🔍+ Zoom</button>
-                            <button onclick="adjustZoom(-0.3)">🔍- Zoom</button>
+                            <button onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                            <button onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                         </div>
                         <div class="control-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                             <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
+                        </div>
+                        <div class="control-row">
+                            <button onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                            <button onclick="adjustZoom(-0.3)">🔍- Zoom</button>
                         </div>
                     </div>
                 </div>
@@ -702,7 +706,7 @@
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
 
-        // Synchronisation hiérarchique Maître / Esclave (V104)
+        // Synchronisation hiérarchique Maître / Esclave (V105)
         function updateStandardsSync() {
             const val1 = selectStandard1.value;
 
@@ -1226,7 +1230,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v104.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v105.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1480,7 +1484,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.104) !";
+                statusText.innerText = "✅ Calage expert terminé (v.105) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
