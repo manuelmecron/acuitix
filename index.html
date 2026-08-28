@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.93 - Assistant CAO Compact</title>
+    <title>Acuitix V.94 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.93 - Assistant CAO</h1>
+    <h1>Acuitix V.94 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -389,7 +389,7 @@
             
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche) :</label>
             <select id="select-standard-1" class="standard-select">
-                <option value="11">Étalon 11 (Carré)</option>
+                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
                 <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
                 <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
@@ -403,7 +403,7 @@
 
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit) :</label>
             <select id="select-standard-2" class="standard-select">
-                <option value="11">Étalon 11 (Carré)</option>
+                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
                 <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
                 <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
@@ -571,7 +571,7 @@
 
             <div class="tip-box">
                 💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élément "à raz" l'objet à détourer<br><br>
-                📌 <b>Remarque :</b> Vos deux étalons sélectionnés (Carré, Cercle ou Rectangle arrondi) serviront de base de calcul fixe pour le script Python.
+                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python.
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
@@ -727,6 +727,22 @@
 
         let standard1Type = "2E";
         let standard2Type = "2E";
+
+        function getStandardInfo(type) {
+            switch(type) {
+                case '11': return { name: 'Étalon 11 (Carré)', val: '10x10 mm' };
+                case '2E': return { name: 'Pièce de 2 €', val: 'Ø 25.75 mm' };
+                case '1E': return { name: 'Pièce de 1 €', val: 'Ø 23.25 mm' };
+                case '0.50E': return { name: 'Pièce de 50 Centimes', val: 'Ø 24.25 mm' };
+                case '0.20E': return { name: 'Pièce de 20 Centimes', val: 'Ø 22.25 mm' };
+                case '0.10E': return { name: 'Pièce de 10 Centimes', val: 'Ø 19.75 mm' };
+                case '0.05E': return { name: 'Pièce de 5 Centimes', val: 'Ø 21.25 mm' };
+                case '0.02E': return { name: 'Pièce de 2 Centimes', val: 'Ø 18.75 mm' };
+                case '0.01E': return { name: 'Pièce de 1 Centime', val: 'Ø 16.25 mm' };
+                case 'CARD': return { name: 'Carte de visite / Bancaire', val: '85x54 mm' };
+                default: return { name: type, val: '' };
+            }
+        }
 
         window.goToPhotoCapture = function() {
             standard1Type = document.getElementById('select-standard-1').value;
@@ -1089,9 +1105,6 @@
                     let rang = step === 1 ? tempAngle : box1.angle;
                     drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
                     dessinerCroixCentre(rx, ry);
-                    if (isForExport || step > 1) {
-                        drawStandardLabel(rx, ry, "ETALON 1: " + standard1Type, elementColor);
-                    }
                 }
                 if (step >= 2) {
                     let rx2 = step === 2 ? tempX : box2.x;
@@ -1100,9 +1113,6 @@
                     let rang2 = step === 2 ? tempAngle : box2.angle;
                     drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
                     dessinerCroixCentre(rx2, ry2);
-                    if (isForExport || step > 2) {
-                        drawStandardLabel(rx2, ry2, "ETALON 2: " + standard2Type, elementColor);
-                    }
                 }
 
                 for (let i = 0; i < 4; i++) {
@@ -1161,12 +1171,9 @@
                 });
             }
 
-            if (isForExport) {
-                ctx.save();
-                ctx.fillStyle = "#FFC107";
-                ctx.font = "bold " + Math.max(16, refW / 45) + "px Arial";
-                ctx.fillText("ACUITIX V.93 | ETALON 1: " + standard1Type + " | ETALON 2: " + standard2Type, 20, 40);
-                ctx.restore();
+            // Affichage de la liste des étalons en haut à gauche (si étape >= 1 ou export)
+            if (step >= 1 || isForExport) {
+                drawStandardsLegend(refW);
             }
 
             ctx.restore();
@@ -1176,9 +1183,33 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v93.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v94.jpg';
                 }, 'image/jpeg', 0.98);
             }
+        }
+
+        function drawStandardsLegend(refW) {
+            ctx.save();
+            ctx.fillStyle = "rgba(20, 20, 20, 0.85)";
+            ctx.strokeStyle = elementColor;
+            ctx.lineWidth = Math.max(2, refW / 400);
+            
+            let boxX = 20, boxY = 20, boxW = Math.max(260, refW * 0.38), boxH = 95;
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+            ctx.fillStyle = elementColor;
+            ctx.font = "bold " + Math.max(12, refW / 65) + "px Arial";
+            ctx.fillText("ACUITIX V.94 | LISTE DES ÉTALONS:", boxX + 10, boxY + 22);
+
+            let info1 = getStandardInfo(standard1Type);
+            let info2 = getStandardInfo(standard2Type);
+
+            ctx.font = Math.max(11, refW / 72) + "px Arial";
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillText("1. " + info1.name + " (" + info1.val + ")", boxX + 10, boxY + 50);
+            ctx.fillText("2. " + info2.name + " (" + info2.val + ")", boxX + 10, boxY + 76);
+            ctx.restore();
         }
 
         function drawStandardShape(x, y, size, angleDeg, color, type) {
@@ -1187,7 +1218,7 @@
             ctx.rotate((angleDeg * Math.PI) / 180);
 
             if (type === '11') {
-                // Carré (Étalon 11)
+                // Carré (Étalon 11 - 10x10 mm)
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(6, canvas.width / 200);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
@@ -1196,7 +1227,7 @@
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
             } else if (type === 'CARD') {
-                // Carte de visite / Bancaire (Rectangle avec coins arrondis - Ratio 85x54)
+                // Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)
                 let cardH = size;
                 let cardW = size * (85 / 54);
                 let radius = cardH * 0.12;
@@ -1239,14 +1270,6 @@
             ctx.quadraticCurveTo(x, y, x + radius, y);
             ctx.closePath();
             ctx.stroke();
-        }
-
-        function drawStandardLabel(x, y, text, color) {
-            ctx.save();
-            ctx.fillStyle = color;
-            ctx.font = "bold " + Math.max(12, canvas.width / 60) + "px Arial";
-            ctx.fillText(text, x - 40, y - 25);
-            ctx.restore();
         }
 
         function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
@@ -1382,7 +1405,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.93) !";
+                statusText.innerText = "✅ Calage expert terminé (v.94) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
