@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.99 - Assistant CAO Compact</title>
+    <title>Acuitix V.100 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.99 - Assistant CAO</h1>
+    <h1>Acuitix V.100 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -388,7 +388,7 @@
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
             
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche) :</label>
-            <select id="select-standard-1" class="standard-select">
+            <select id="select-standard-1" class="standard-select" onchange="onStandard1Change()">
                 <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
                 <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
@@ -398,7 +398,7 @@
                 <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
                 <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
                 <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
+                <option value="CARD">Carte de visite (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit) :</label>
@@ -412,7 +412,7 @@
                 <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
                 <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
                 <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
+                <option value="CARD">Carte de visite (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons & Prendre la photo ➡️</button>
@@ -666,7 +666,7 @@
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
                             <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
-                        </svg>
+                        </g>
                         Plaque de biais
                     </div>
                 </div>
@@ -698,6 +698,8 @@
         const adjustPanel = document.getElementById('adjust-panel');
         const holeActionPanel = document.getElementById('hole-action-panel');
         const sideColorDrawer = document.getElementById('side-color-drawer');
+        const selectStandard1 = document.getElementById('select-standard-1');
+        const selectStandard2 = document.getElementById('select-standard-2');
 
         let currentImg = null;
         let step = 1; 
@@ -739,14 +741,23 @@
                 case '0.05E': return { name: 'Pièce de 5 Centimes', val: 'Ø 21.25 mm' };
                 case '0.02E': return { name: 'Pièce de 2 Centimes', val: 'Ø 18.75 mm' };
                 case '0.01E': return { name: 'Pièce de 1 Centime', val: 'Ø 16.25 mm' };
-                case 'CARD': return { name: 'Carte de visite / Bancaire', val: '85x54 mm' };
+                case 'CARD': return { name: 'Carte de visite', val: '85x54 mm' };
                 default: return { name: type, val: '' };
             }
         }
 
+        window.onStandard1Change = function() {
+            if (selectStandard1.value === '11') {
+                selectStandard2.value = '11';
+                selectStandard2.disabled = true;
+            } else {
+                selectStandard2.disabled = false;
+            }
+        }
+
         window.goToPhotoCapture = function() {
-            standard1Type = document.getElementById('select-standard-1').value;
-            standard2Type = document.getElementById('select-standard-2').value;
+            standard1Type = selectStandard1.value;
+            standard2Type = selectStandard2.value;
             initialStandardPanel.style.display = 'none';
             welcomePanel.style.display = 'block';
             statusText.style.display = 'block';
@@ -977,6 +988,7 @@
             manualPanX = 0;
             manualPanY = 0;
             isSelectingColorState = false;
+            selectStandard2.disabled = false;
         }
 
         window.changerOpacite = function(val) {
@@ -1182,7 +1194,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v99.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v100.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1436,7 +1448,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.99) !";
+                statusText.innerText = "✅ Calage expert terminé (v.100) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
