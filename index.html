@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.101 - Assistant CAO Compact</title>
+    <title>Acuitix V.102 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.101 - Assistant CAO</h1>
+    <h1>Acuitix V.102 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -699,6 +699,22 @@
         const holeActionPanel = document.getElementById('hole-action-panel');
         const sideColorDrawer = document.getElementById('side-color-drawer');
 
+        const selectStandard1 = document.getElementById('select-standard-1');
+        const selectStandard2 = document.getElementById('select-standard-2');
+
+        // Synchronisation forcée de l'Étalon 11
+        selectStandard1.addEventListener('change', function() {
+            if (selectStandard1.value === '11') {
+                selectStandard2.value = '11';
+            }
+        });
+
+        selectStandard2.addEventListener('change', function() {
+            if (selectStandard2.value === '11') {
+                selectStandard1.value = '11';
+            }
+        });
+
         let currentImg = null;
         let step = 1; 
         let rotationAngle = 0; 
@@ -745,8 +761,8 @@
         }
 
         window.goToPhotoCapture = function() {
-            standard1Type = document.getElementById('select-standard-1').value;
-            standard2Type = document.getElementById('select-standard-2').value;
+            standard1Type = selectStandard1.value;
+            standard2Type = selectStandard2.value;
             initialStandardPanel.style.display = 'none';
             welcomePanel.style.display = 'block';
             statusText.style.display = 'block';
@@ -1182,7 +1198,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v101.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v102.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1436,7 +1452,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.101) !";
+                statusText.innerText = "✅ Calage expert terminé (v.102) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
