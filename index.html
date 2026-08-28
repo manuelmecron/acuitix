@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.106 - Assistant CAO Compact</title>
+    <title>Acuitix V.107 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.106 - Assistant CAO</h1>
+    <h1>Acuitix V.107 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -387,7 +387,7 @@
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
             
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 1 (Gauche - Maître) :</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
             <select id="select-standard-1" class="standard-select">
                 <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -398,10 +398,10 @@
                 <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
                 <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
                 <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
+                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon 2 (Droit - Esclave) :</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
             <select id="select-standard-2" class="standard-select">
                 <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                 <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -412,7 +412,7 @@
                 <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
                 <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
                 <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de visite / Bancaire (Rectangle arrondi - 85x54 mm)</option>
+                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons & Prendre la photo ➡️</button>
@@ -702,7 +702,7 @@
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
 
-        // Synchronisation hiérarchique Maître / Esclave (V106)
+        // Synchronisation hiérarchique Étalon principal / secondaire (V107)
         function updateStandardsSync() {
             const val1 = selectStandard1.value;
 
@@ -728,7 +728,7 @@
             } else {
                 selectStandard2.disabled = false; // Modifiable
                 if (selectStandard2.value === '11') {
-                    selectStandard2.value = '2E'; // Bascule par défaut si l'esclave était sur 11
+                    selectStandard2.value = '2E'; // Bascule par défaut si le secondaire était sur 11
                 }
             }
         }
@@ -777,7 +777,7 @@
                 case '0.05E': return { name: 'Pièce de 5 Centimes', val: 'Ø 21.25 mm' };
                 case '0.02E': return { name: 'Pièce de 2 Centimes', val: 'Ø 18.75 mm' };
                 case '0.01E': return { name: 'Pièce de 1 Centime', val: 'Ø 16.25 mm' };
-                case 'CARD': return { name: 'Carte de visite / Bancaire', val: '85x54 mm' };
+                case 'CARD': return { name: 'Carte de fidélité standard', val: '85x54 mm' };
                 default: return { name: type, val: '' };
             }
         }
@@ -970,7 +970,7 @@
             tutorialPanel3.style.display = 'none';
             isSelectingColorState = false; 
             step = 1; 
-            statusText.innerText = "Étape 1 / 6 : Étalon GAUCHE (" + standard1Type + ")";
+            statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
             generalToolsContainer.style.display = 'block';
             adjustPanel.style.display = 'block';
             sideColorDrawer.style.display = 'block';
@@ -1226,7 +1226,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v106.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v107.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1413,7 +1413,7 @@
 
         window.askValidateStep = function() {
             stopAction();
-            let stepNames = ["", "Étalon 1 (" + standard1Type + ")", "Étalon 2 (" + standard2Type + ")", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            let stepNames = ["", "Étalon principal (" + standard1Type + ")", "Étalon secondaire (" + standard2Type + ")", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
@@ -1480,7 +1480,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.106) !";
+                statusText.innerText = "✅ Calage expert terminé (v.107) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1523,8 +1523,8 @@
 
             const descriptions = [
                 "",
-                "Étape 1 / 6 : Étalon GAUCHE (" + standard1Type + ")",
-                "Étape 2 / 6 : Étalon DROIT (" + standard2Type + ")",
+                "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")",
+                "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")",
                 "Étape 3 / 6 : Coin 1 / 4 (Haut-Gauche)",
                 "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)",
                 "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
