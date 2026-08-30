@@ -900,6 +900,19 @@
     </div>
 
     <script>
+        // --- NOUVEAU : FORCER LE PORTRAIT AU DÉMARRAGE ---
+        async function forcePortrait() {
+            if (screen.orientation && screen.orientation.lock) {
+                try {
+                    await screen.orientation.lock('portrait-primary');
+                } catch (e) {
+                    console.warn("Verrouillage portrait non supporté");
+                }
+            }
+        }
+        window.addEventListener('load', forcePortrait);
+        // ------------------------------------------------
+
         const fileInput = document.getElementById('file-input');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -1079,6 +1092,12 @@
             standard1Type = selectStandard1.value;
             standard2Type = selectStandard2.value;
 
+            // --- NOUVEAU : Forcer le mode paysage ---
+            if (screen.orientation && screen.orientation.lock) {
+                try { await screen.orientation.lock('landscape-primary'); } catch (e) {}
+            }
+            // ----------------------------------------
+
             try {
                 const constraints = {
                     video: {
@@ -1088,6 +1107,16 @@
                     }
                 };
                 mediaStreamObj = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // --- NOUVEAU : Verrouiller le zoom matériel à 1x ---
+                const [track] = mediaStreamObj.getVideoTracks();
+                const capabilities = track.getCapabilities();
+                if (capabilities.zoom) {
+                    const minZoom = capabilities.zoom.min || 1;
+                    await track.applyConstraints({ advanced: [{ zoom: minZoom }] });
+                }
+                // ----------------------------------------------------
+
                 cameraStream.srcObject = mediaStreamObj;
                 
                 cameraStream.onloadedmetadata = () => {
@@ -1193,6 +1222,13 @@
                 mediaStreamObj.getTracks().forEach(track => track.stop());
             }
             cameraModal.style.display = 'none';
+
+            // --- NOUVEAU : Remettre l'écran en portrait après la photo ---
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            }
+            forcePortrait();
+            // -------------------------------------------------------------
 
             const dataURL = hiddenCanvas.toDataURL('image/jpeg', 0.98);
             processLoadedImage(dataURL);
