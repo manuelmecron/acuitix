@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.109 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.110 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -357,7 +357,7 @@
             line-height: 1.3;
         }
 
-        /* V109 : Style interface caméra plein écran paysage & ligne rouge continue */
+        /* V110 : Style interface caméra enrichie (Zoom, 4 carrés guides, Axe X fixe) */
         #camera-modal {
             display: none;
             position: fixed;
@@ -370,11 +370,23 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+        }
+        .camera-video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
         #camera-stream {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transform-origin: center center;
+            transition: transform 0.2s ease;
         }
         .camera-guide-line-x {
             position: absolute;
@@ -399,6 +411,56 @@
             padding: 2px 6px;
             border-radius: 3px;
         }
+        /* 4 carrés guides sur le viseur caméra */
+        .cam-guide-square {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border: 2px dashed rgba(255, 193, 7, 0.8);
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 2010;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            color: #ffc107;
+            background: rgba(0,0,0,0.2);
+        }
+        #cam-sq-tl { top: 20%; left: 15%; }
+        #cam-sq-tr { top: 20%; right: 15%; }
+        #cam-sq-bl { bottom: 20%; left: 15%; }
+        #cam-sq-br { bottom: 20%; right: 15%; }
+
+        /* Barre de contrôle zoom intégrée dans la caméra */
+        .camera-toolbar {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 2020;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid #555;
+        }
+        .zoom-cam-btn {
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .zoom-cam-btn.active {
+            background: #ffc107;
+            color: #000;
+        }
+
         .camera-capture-action-btn {
             position: absolute;
             bottom: 20px;
@@ -419,13 +481,24 @@
 </head>
 <body>
 
-    <h1>Acuitix V.109 - Assistant CAO</h1>
+    <h1>Acuitix V.110 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
-    <!-- V109 : Interface flux caméra plein écran avec ligne rouge continue -->
+    <!-- V110 : Interface caméra avec Zoom, 4 carrés et axe X -->
     <div id="camera-modal">
-        <video id="camera-stream" autoplay playsinline></video>
-        <div class="camera-guide-line-x"></div>
+        <div class="camera-toolbar">
+            <button class="zoom-cam-btn active" onclick="setCamZoom(1, this)">1x</button>
+            <button class="zoom-cam-btn" onclick="setCamZoom(1.5, this)">1.5x</button>
+            <button class="zoom-cam-btn" onclick="setCamZoom(2, this)">2x</button>
+        </div>
+        <div class="camera-video-wrapper">
+            <video id="camera-stream" autoplay playsinline></video>
+            <div class="camera-guide-line-x"></div>
+            <div class="cam-guide-square" id="cam-sq-tl">Étalon G</div>
+            <div class="cam-guide-square" id="cam-sq-tr">Étalon D</div>
+            <div class="cam-guide-square" id="cam-sq-bl">Coin BL</div>
+            <div class="cam-guide-square" id="cam-sq-br">Coin BR</div>
+        </div>
         <button class="camera-capture-action-btn" id="btn-snap-photo">📸 Capturer</button>
     </div>
     <canvas id="hidden-canvas" style="display:none;"></canvas>
@@ -740,7 +813,6 @@
             </div>
 
             <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 0 : PRENDRE LA PHOTO</p>
-            <!-- V109 : Déclencheur direct du flux caméra paysage -->
             <button class="btn" style="margin-top:6px;" onclick="openCameraStream()">📸 Lancer l'appareil photo</button>
         </div>
         
@@ -770,45 +842,31 @@
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
 
-        // V109 : Éléments du flux caméra en direct
         const cameraModal = document.getElementById('camera-modal');
         const cameraStream = document.getElementById('camera-stream');
         const btnSnapPhoto = document.getElementById('btn-snap-photo');
         const hiddenCanvas = document.getElementById('hidden-canvas');
         const hiddenCtx = hiddenCanvas.getContext('2d');
         let mediaStreamObj = null;
+        let currentCamZoom = 1;
 
-        // Synchronisation hiérarchique Étalon principal / secondaire (V107)
         function updateStandardsSync() {
             const val1 = selectStandard1.value;
-
             for (let option of selectStandard2.options) {
                 if (val1 === '11') {
-                    if (option.value === '11') {
-                        option.disabled = false;
-                    } else {
-                        option.disabled = true;
-                    }
+                    option.disabled = (option.value !== '11');
                 } else {
-                    if (option.value === '11') {
-                        option.disabled = true;
-                    } else {
-                        option.disabled = false;
-                    }
+                    option.disabled = (option.value === '11');
                 }
             }
-
             if (val1 === '11') {
                 selectStandard2.value = '11';
-                selectStandard2.disabled = true; // Figé
+                selectStandard2.disabled = true;
             } else {
-                selectStandard2.disabled = false; // Modifiable
-                if (selectStandard2.value === '11') {
-                    selectStandard2.value = '2E'; // Bascule par défaut si le secondaire était sur 11
-                }
+                selectStandard2.disabled = false;
+                if (selectStandard2.value === '11') selectStandard2.value = '2E';
             }
         }
-
         selectStandard1.addEventListener('change', updateStandardsSync);
         updateStandardsSync();
 
@@ -820,18 +878,12 @@
 
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        let corners = [
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }, 
-            { x: 0, y: 0, size: 0, angle: 0 }  
-        ];
+        let corners = [{ x: 0, y: 0, size: 0, angle: 0 }, { x: 0, y: 0, size: 0, angle: 0 }, { x: 0, y: 0, size: 0, angle: 0 }, { x: 0, y: 0, size: 0, angle: 0 }];
         let holes = []; 
 
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let zoomLevel = 1.0;
-        let manualPanX = 0; 
-        let manualPanY = 0;
+        let manualPanX = 0, manualPanY = 0;
         let actionInterval = null;
 
         let elementColor = "#00FFFF";
@@ -866,18 +918,19 @@
             statusText.innerText = "Étape 0 : Prise de vue";
         }
 
-        // V109 : Ouverture de la caméra en plein écran avec verrouillage paysage et ligne rouge continue
+        window.setCamZoom = function(zoomVal, btnElement) {
+            currentCamZoom = zoomVal;
+            cameraStream.style.transform = `scale(${zoomVal})`;
+            document.querySelectorAll('.zoom-cam-btn').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+        }
+
         window.openCameraStream = async function() {
             standard1Type = selectStandard1.value;
             standard2Type = selectStandard2.value;
 
-            // Tentative de verrouillage paysage si supporté
             if (screen.orientation && screen.orientation.lock) {
-                try {
-                    await screen.orientation.lock('landscape');
-                } catch (e) {
-                    console.log("Verrouillage paysage non disponible :", e);
-                }
+                try { await screen.orientation.lock('landscape'); } catch (e) {}
             }
 
             try {
@@ -890,22 +943,50 @@
                 };
                 mediaStreamObj = await navigator.mediaDevices.getUserMedia(constraints);
                 cameraStream.srcObject = mediaStreamObj;
+                setCamZoom(1, document.querySelector('.zoom-cam-btn'));
                 cameraModal.style.display = 'flex';
             } catch (err) {
-                console.error("Erreur caméra, bascule vers input file :", err);
                 fileInput.click();
             }
         };
 
-        // V109 : Capture depuis le flux vidéo actif de la caméra
+        // V110 : Gravure de l'axe X (et de la ligne rouge d'alignement) directement sur l'image capturée
         btnSnapPhoto.addEventListener('click', function() {
             if (!cameraStream.videoWidth) return;
 
             hiddenCanvas.width = cameraStream.videoWidth;
             hiddenCanvas.height = cameraStream.videoHeight;
-            hiddenCtx.drawImage(cameraStream, 0, 0);
+            
+            // Dessin de la vidéo tenant compte du zoom appliqué via CSS
+            let sw = hiddenCanvas.width / currentCamZoom;
+            let sh = hiddenCanvas.height / currentCamZoom;
+            let sx = (hiddenCanvas.width - sw) / 2;
+            let sy = (hiddenCanvas.height - sh) / 2;
 
-            // Arrêt des flux de la caméra
+            hiddenCtx.drawImage(cameraStream, sx, sy, sw, sh, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+
+            // Impression permanente de la ligne rouge de l'Axe X sur la photo sauvegardée
+            hiddenCtx.save();
+            hiddenCtx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+            hiddenCtx.lineWidth = Math.max(3, hiddenCanvas.width / 400);
+            hiddenCtx.beginPath();
+            let lineY = hiddenCanvas.height / 2;
+            hiddenCtx.moveTo(0, lineY);
+            hiddenCtx.lineTo(hiddenCanvas.width, lineY);
+            hiddenCtx.stroke();
+
+            // Libellé de l'axe X sur l'image imprimée
+            let fontSize = Math.max(16, hiddenCanvas.width / 40);
+            hiddenCtx.font = "bold " + fontSize + "px Arial";
+            hiddenCtx.fillStyle = "red";
+            let labelText = "AXE X - ALIGNEMENT";
+            let metrics = hiddenCtx.measureText(labelText);
+            hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
+            hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
+            hiddenCtx.fillStyle = "red";
+            hiddenCtx.fillText(labelText, hiddenCanvas.width - metrics.width - 25, lineY - 10);
+            hiddenCtx.restore();
+
             if (mediaStreamObj) {
                 mediaStreamObj.getTracks().forEach(track => track.stop());
             }
@@ -915,15 +996,11 @@
             processLoadedImage(dataURL);
         });
 
-        // Fallback input file classique
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(event) {
-                processLoadedImage(event.target.result);
-            };
+            reader.onload = function(event) { processLoadedImage(event.target.result); };
             reader.readAsDataURL(file);
         });
 
@@ -931,13 +1008,7 @@
             const img = new Image();
             img.onload = function() {
                 currentImg = img;
-                
-                if (img.naturalHeight > img.naturalWidth) {
-                    rotationAngle = 270;
-                } else {
-                    rotationAngle = 0;
-                }
-
+                rotationAngle = (img.naturalHeight > img.naturalWidth) ? 270 : 0;
                 imgOffsetX = 0;
                 imgOffsetY = 0;
                 updateCanvasDimensions();
@@ -1004,9 +1075,7 @@
             }
         });
 
-        window.toggleColorDrawer = function() {
-            sideColorDrawer.classList.toggle('open');
-        }
+        window.toggleColorDrawer = function() { sideColorDrawer.classList.toggle('open'); }
 
         window.selectColorManual = function(colorHex, element) {
             elementColor = colorHex;
@@ -1128,7 +1197,7 @@
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
-            welcomePanel.style.display = 'block'; // V109 : Retour propre à l'écran d'accueil complet
+            welcomePanel.style.display = 'block';
             initialStandardPanel.style.display = 'block';
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
@@ -1192,16 +1261,12 @@
             actionInterval = setInterval(actionFn, speedMs);
         }
         window.stopAction = function() { 
-            if (actionInterval) { 
-                clearInterval(actionInterval); 
-                actionInterval = null; 
-            } 
+            if (actionInterval) { clearInterval(actionInterval); actionInterval = null; } 
         }
 
         window.moveTarget = function(dx, dy) { tempX += dx; tempY += dy; redrawCanvas(); }
         window.panCamera = function(dx, dy) { manualPanX += dx; manualPanY += dy; redrawCanvas(); }
         window.panImage = function(dx, dy) { imgOffsetX += dx; imgOffsetY += dy; redrawCanvas(); }
-        
         window.adjustZoom = function(delta) {
             zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
             redrawCanvas();
@@ -1229,15 +1294,12 @@
         }
 
         window.askResetCurrentPos = function() {
-            if (confirm("Recentrez l'élément ?")) {
-                resetCurrentPos();
-            }
+            if (confirm("Recentrez l'élément ?")) { resetCurrentPos(); }
         }
 
         function redrawCanvas(isForExport = false) {
             if (!currentImg) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             ctx.save();
 
             if (!isForExport && zoomLevel !== 1.0) {
@@ -1355,7 +1417,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v109.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v110.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1569,9 +1631,7 @@
                 redrawCanvas();
                 return;
             }
-            if (confirm("Voulez-vous vraiment revenir en arrière ?")) {
-                prevStep();
-            }
+            if (confirm("Voulez-vous vraiment revenir en arrière ?")) { prevStep(); }
         }
 
         window.validateStep = function() {
@@ -1616,7 +1676,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.109) !";
+                statusText.innerText = "✅ Calage expert terminé (v.110) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
