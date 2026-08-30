@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.114 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.115 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -410,7 +410,7 @@
             transform: translateY(-50%);
         }
         .cam-axis-x::after {
-            content: "AXE X UNIQUE - V114";
+            content: "AXE X UNIQUE - V115";
             position: absolute;
             right: 15px;
             top: -22px;
@@ -529,7 +529,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.114 - Assistant CAO</h1>
+    <h1>Acuitix V.115 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="camera-modal">
@@ -1024,74 +1024,15 @@
                 setCamZoom(1, document.querySelector('.zoom-cam-btn'));
                 cameraModal.style.display = 'flex';
                 isCameraActive = true;
-                
-                // LANCEMENT AUTOMATIQUE SEULEMENT SI LIGNE ET CARRES PRESENTES
-                startAutoDetectionCheck();
             } catch (err) {
                 fileInput.click();
             }
         };
 
-        // Détection simulée/effective de la ligne rouge et des deux carrés guides
-        function startAutoDetectionCheck() {
-            if (autoCaptureInterval) clearInterval(autoCaptureInterval);
-            
-            // On vérifie en continu si les éléments graphiques de guidage sont bien affichés (ligne + carrés)
-            autoCaptureInterval = setInterval(() => {
-                if (!isCameraActive) return;
-
-                let lineVisible = document.getElementById('guide-line') !== null;
-                let sqLeftVisible = document.getElementById('cam-sq-left') !== null;
-                let sqRightVisible = document.getElementById('cam-sq-right') !== null;
-
-                // SI LA LIGNE ROUGE ET LES DEUX CARRES SONT DETECTÉS -> LANCEMENT DU COMPTE À REBOURS TOUT SEUL
-                if (lineVisible && sqLeftVisible && sqRightVisible) {
-                    clearInterval(autoCaptureInterval);
-                    startAutomaticCountdown();
-                }
-            }, 200);
-        }
-
-        function startAutomaticCountdown() {
-            autoCaptureTimer = 3000; // 3 secondes de compte à rebours automatique
-            autocaptureStatus.style.display = 'block';
-            
-            if (autoCaptureInterval) clearInterval(autoCaptureInterval);
-            
-            autoCaptureInterval = setInterval(() => {
-                if (!isCameraActive) return;
-                
-                autoCaptureTimer -= 100;
-                let secondsLeft = (autoCaptureTimer / 1000).toFixed(1);
-                autocaptureTimerSpan.innerText = secondsLeft;
-
-                if (autoCaptureTimer <= 0) {
-                    clearInterval(autoCaptureInterval);
-                    executeCapture();
-                }
-            }, 100);
-        }
-
-        // Déclenchement manuel par l'utilisateur (laisse la possibilité de prendre la photo par soi-même avec un compte à rebours de 3 sec)
+        // Déclenchement manuel par l'utilisateur (prend la photo instantanément sans compte à rebours)
         window.triggerManualCountdown = function() {
             if (!isCameraActive) return;
-            if (autoCaptureInterval) clearInterval(autoCaptureInterval);
-            
-            autoCaptureTimer = 3000; // 3 secondes demandées pour le déclenchement utilisateur
-            autocaptureStatus.style.display = 'block';
-
-            autoCaptureInterval = setInterval(() => {
-                if (!isCameraActive) return;
-                
-                autoCaptureTimer -= 100;
-                let secondsLeft = (autoCaptureTimer / 1000).toFixed(1);
-                autocaptureTimerSpan.innerText = secondsLeft;
-
-                if (autoCaptureTimer <= 0) {
-                    clearInterval(autoCaptureInterval);
-                    executeCapture();
-                }
-            }, 100);
+            executeCapture();
         }
 
         function executeCapture() {
@@ -1128,7 +1069,7 @@
             let fontSize = Math.max(16, hiddenCanvas.width / 40);
             hiddenCtx.font = "bold " + fontSize + "px Arial";
             hiddenCtx.fillStyle = "red";
-            let labelText = "AXE X UNIQUE - V114";
+            let labelText = "AXE X UNIQUE - V115";
             let metrics = hiddenCtx.measureText(labelText);
             hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
             hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
@@ -1580,7 +1521,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v114.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v115.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1834,7 +1775,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.114) !";
+                statusText.innerText = "✅ Calage expert terminé (v.115) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
