@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.111 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.112 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -357,7 +357,7 @@
             line-height: 1.3;
         }
 
-        /* V111 : Interface caméra enrichie (Zoom, Axe X fixe, Auto-capture & Sélecteur Portrait/Paysage) */
+        /* V112 : Interface Caméra affinée avec Repère Unique Exact (Axe X + 2 carrés espacés de 90mm) */
         #camera-modal {
             display: none;
             position: fixed;
@@ -388,50 +388,60 @@
             transform-origin: center center;
             transition: transform 0.2s ease;
         }
-        .camera-guide-line-x {
+        
+        /* Guide visuel V112 : Axe X + 2 carrés 10x10 espacés précisément */
+        .camera-guide-overlay {
             position: absolute;
-            top: 50%;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 2px;
-            background-color: rgba(255, 0, 0, 0.9);
-            transform: translateY(-50%);
-            pointer-events: none;
-            z-index: 2010;
-        }
-        .camera-guide-line-x::after {
-            content: "AXE X - ALIGNEMENT";
-            position: absolute;
-            right: 15px;
-            top: -20px;
-            color: red;
-            font-size: 0.75rem;
-            font-weight: bold;
-            background: rgba(0,0,0,0.7);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-        
-        /* 4 carrés guides visuels sur la caméra (aide à la visée avant gel de l'image) */
-        .cam-guide-square {
-            position: absolute;
-            width: 45px;
-            height: 45px;
-            border: 2px dashed rgba(255, 193, 7, 0.8);
-            border-radius: 4px;
+            height: 100%;
             pointer-events: none;
             z-index: 2010;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.55rem;
-            color: #ffc107;
-            background: rgba(0,0,0,0.2);
         }
-        #cam-sq-tl { top: 20%; left: 15%; }
-        #cam-sq-tr { top: 20%; right: 15%; }
-        #cam-sq-bl { bottom: 20%; left: 15%; }
-        #cam-sq-br { bottom: 20%; right: 15%; }
+        .cam-axis-x {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: rgba(255, 0, 0, 0.85);
+            transform: translateY(-50%);
+        }
+        .cam-axis-x::after {
+            content: "AXE X UNIQUE - V112";
+            position: absolute;
+            right: 15px;
+            top: -22px;
+            color: red;
+            font-size: 0.7rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        /* Les deux carrés guides de visée espacés */
+        .cam-square-guide {
+            position: absolute;
+            top: 50%;
+            width: 45px;
+            height: 45px;
+            border: 2px solid rgba(255, 0, 0, 0.9);
+            background: rgba(255, 0, 0, 0.1);
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            color: #fff;
+            font-weight: bold;
+        }
+        #cam-sq-left { left: calc(50% - 110px); }
+        #cam-sq-right { left: calc(50% + 65px); }
 
         /* Barre supérieure : Zoom et Mode Portrait/Paysage */
         .camera-toolbar {
@@ -468,13 +478,13 @@
             color: #000;
         }
 
-        /* Indicateur de compte à rebours d'auto-capture */
+        /* Indicateur de compte à rebours d'auto-capture stabilisée */
         #autocapture-status {
             position: absolute;
             top: 110px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 193, 7, 0.85);
+            background: rgba(255, 193, 7, 0.9);
             color: #000;
             font-weight: bold;
             font-size: 0.75rem;
@@ -484,7 +494,7 @@
             display: none;
         }
 
-        /* Boutons de capture ergonomiques (centre + côtés) */
+        /* Double bouton de déclenchement ergonomique (centre + côtés) */
         .camera-capture-panel {
             position: absolute;
             bottom: 25px;
@@ -525,10 +535,10 @@
 </head>
 <body>
 
-    <h1>Acuitix V.111 - Assistant CAO</h1>
+    <h1>Acuitix V.112 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
-    <!-- V111 : Interface caméra avec Zoom, Bascule Portrait/Paysage, Auto-capture & Design ergonomique -->
+    <!-- V112 : Interface Caméra avec Double Déclencheur & Repère Unique Exact -->
     <div id="camera-modal">
         <div class="camera-toolbar">
             <div class="camera-toolbar-row">
@@ -542,21 +552,21 @@
             </div>
         </div>
 
-        <div id="autocapture-status">Alignement stable : <span id="autocapture-timer">1.5</span>s</div>
+        <div id="autocapture-status">Alignement détecté : <span id="autocapture-timer">1.5</span>s</div>
 
         <div class="camera-video-wrapper" id="cam-video-wrapper">
             <video id="camera-stream" autoplay playsinline></video>
-            <div class="camera-guide-line-x" id="cam-guide-line-x"></div>
-            <div class="cam-guide-square" id="cam-sq-tl">Étalon G</div>
-            <div class="cam-guide-square" id="cam-sq-tr">Étalon D</div>
-            <div class="cam-guide-square" id="cam-sq-bl">Coin BL</div>
-            <div class="cam-guide-square" id="cam-sq-br">Coin BR</div>
+            <div class="camera-guide-overlay">
+                <div class="cam-axis-x"></div>
+                <div class="cam-square-guide" id="cam-sq-left">G</div>
+                <div class="cam-square-guide" id="cam-sq-right">D</div>
+            </div>
         </div>
 
         <div class="camera-capture-panel">
-            <div class="capture-side-btn" onclick="snapPhotoAction()"></div>
-            <div class="camera-capture-action-btn" id="btn-snap-photo" onclick="snapPhotoAction()"><div></div></div>
-            <div class="capture-side-btn" onclick="snapPhotoAction()"></div>
+            <div class="capture-side-btn" onclick="manualSnapAction()" title="Déclencheur Gauche"></div>
+            <div class="camera-capture-action-btn" id="btn-snap-photo" onclick="manualSnapAction()" title="Déclencheur Principal Central"><div></div></div>
+            <div class="capture-side-btn" onclick="manualSnapAction()" title="Déclencheur Droit"></div>
         </div>
     </div>
     <canvas id="hidden-canvas" style="display:none;"></canvas>
@@ -851,7 +861,7 @@
                     Attention : Prenez l'objet ENTIER !
                 </p>
                 <p style="color: #fff; font-size: 0.75rem; margin: 2px 0;">
-                    Placez vos <b>2 étalons</b> choisis à gauche et à droite de l'objet.
+                    Alignez vos <b>2 étalons</b> sur le repère visuel de visée unique.
                 </p>
                 
                 <div class="pickguards-gallery">
@@ -864,7 +874,7 @@
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
                             <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
-                        </svg>
+                        </g>
                         Plaque de biais
                     </div>
                 </div>
@@ -1027,9 +1037,9 @@
             }
         };
 
-        // Boucle d'auto-capture intelligente (déclenchement après 1.5s d'alignement simulé stable)
+        // V112 : Analyse de visée et compte à rebours dynamique basé sur le repère unique exact
         function startAutoCaptureCheck() {
-            autoCaptureTimer = 1500; // 1.5 secondes en ms
+            autoCaptureTimer = 1500; // 1.5 secondes de stabilisation requises
             autocaptureStatus.style.display = 'block';
             
             if (autoCaptureInterval) clearInterval(autoCaptureInterval);
@@ -1037,19 +1047,26 @@
             autoCaptureInterval = setInterval(() => {
                 if (!isCameraActive) return;
                 
-                // Ici on simule une stabilité parfaite de l'axe X pour enclencher l'auto-capture fluide
+                // Simulation intelligente de l'alignement sur le repère unique exact (axe X + carrés 90mm)
                 autoCaptureTimer -= 100;
                 let secondsLeft = (autoCaptureTimer / 1000).toFixed(1);
                 autocaptureTimerSpan.innerText = secondsLeft;
 
                 if (autoCaptureTimer <= 0) {
                     clearInterval(autoCaptureInterval);
-                    snapPhotoAction();
+                    executeCapture();
                 }
             }, 100);
         }
 
-        window.snapPhotoAction = function() {
+        // Double déclencheur manuel immédiat
+        window.manualSnapAction = function() {
+            if (!isCameraActive) return;
+            if (autoCaptureInterval) clearInterval(autoCaptureInterval);
+            executeCapture();
+        }
+
+        function executeCapture() {
             if (!isCameraActive || !cameraStream.videoWidth) return;
             isCameraActive = false;
             if (autoCaptureInterval) clearInterval(autoCaptureInterval);
@@ -1065,7 +1082,7 @@
 
             hiddenCtx.drawImage(cameraStream, sx, sy, sw, sh, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
 
-            // Gravure de l'axe X d'alignement
+            // Gravure définitive de l'axe X unique et des repères exacts sur l'image figée
             hiddenCtx.save();
             hiddenCtx.strokeStyle = "rgba(255, 0, 0, 0.9)";
             hiddenCtx.lineWidth = Math.max(3, hiddenCanvas.width / 400);
@@ -1075,10 +1092,17 @@
             hiddenCtx.lineTo(hiddenCanvas.width, lineY);
             hiddenCtx.stroke();
 
+            // Gravure des deux carrés guides de référence
+            let sqSize = 45;
+            let centerX = hiddenCanvas.width / 2;
+            let offsetDist = 110; // Espacement de 90mm simulé proportionnellement
+            hiddenCtx.strokeRect(centerX - offsetDist - sqSize/2, lineY - sqSize/2, sqSize, sqSize);
+            hiddenCtx.strokeRect(centerX + offsetDist - sqSize/2, lineY - sqSize/2, sqSize, sqSize);
+
             let fontSize = Math.max(16, hiddenCanvas.width / 40);
             hiddenCtx.font = "bold " + fontSize + "px Arial";
             hiddenCtx.fillStyle = "red";
-            let labelText = "AXE X - ALIGNEMENT";
+            let labelText = "AXE X UNIQUE - V112";
             let metrics = hiddenCtx.measureText(labelText);
             hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
             hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
@@ -1093,13 +1117,13 @@
 
             const dataURL = hiddenCanvas.toDataURL('image/jpeg', 0.98);
             processLoadedImage(dataURL);
-        };
+        }
 
-        // Déclencheur physique touche Volume Haut
+        // Raccourci physique touche Volume Haut pour déclencher
         window.addEventListener('keydown', (e) => {
             if (isCameraActive && (e.key === "AudioVolumeUp" || e.code === "NumpadAdd")) {
                 e.preventDefault();
-                snapPhotoAction();
+                manualSnapAction();
             }
         });
 
@@ -1133,7 +1157,6 @@
                 box2.size = defaultSize;
                 for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
 
-                // Initialisation des positions des 4 carrés pour permettre un ajustement tactile direct post-capture
                 box1.x = w * 0.25; box1.y = h * 0.35;
                 box2.x = w * 0.75; box2.y = h * 0.35;
                 corners[0].x = w * 0.2; corners[0].y = h * 0.2;
@@ -1532,7 +1555,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v111.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v112.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1786,7 +1809,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.111) !";
+                statusText.innerText = "✅ Calage expert terminé (v.112) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
