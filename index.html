@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.120 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.121 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -413,7 +413,7 @@
             transform: translateY(-50%);
         }
         .cam-axis-x::after {
-            content: "AXE X UNIQUE - V120";
+            content: "AXE X UNIQUE - V121";
             position: absolute;
             right: 15px;
             top: -22px;
@@ -536,23 +536,20 @@
 </head>
 <body>
 
-    <h1>Acuitix V.120 - Assistant CAO</h1>
+    <h1>Acuitix V.121 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="camera-modal">
         <div class="camera-toolbar">
-            <!-- Boutons de zoom masqués (V120) -->
             <div class="camera-toolbar-row" style="display: none;">
                 <button class="zoom-cam-btn active" onclick="setCamZoom(1, this)">1x</button>
                 <button class="zoom-cam-btn" onclick="setCamZoom(1.5, this)">1.5x</button>
                 <button class="zoom-cam-btn" onclick="setCamZoom(2, this)">2x</button>
             </div>
-            <!-- Boutons d'orientation masqués (V120) -->
             <div class="camera-toolbar-row" style="display: none;">
                 <button id="btn-mode-portrait" class="mode-cam-btn active" onclick="setCameraOrientation('portrait', this)">Portrait ↕</button>
                 <button id="btn-mode-paysage" class="mode-cam-btn" onclick="setCameraOrientation('paysage', this)">Paysage ⟷</button>
             </div>
-            <!-- Nouveaux boutons d'étalonnage pour le carré droit (V120) -->
             <div class="camera-toolbar-row" style="gap:4px;">
                 <button class="mode-cam-btn" onclick="shiftRightSquare(-5)">⬅️ Ajuster Droit</button>
                 <button class="mode-cam-btn" onclick="shiftRightSquare(5)">Ajuster Droit ➡️</button>
@@ -984,7 +981,6 @@
             e.stopPropagation();
         });
         
-        // Nouvelle fonction pour décaler via les boutons (V120)
         window.shiftRightSquare = function(val) {
             rightSquareOffsetX += val;
             rightSquareOffsetX = Math.max(-100, Math.min(250, rightSquareOffsetX));
@@ -1196,7 +1192,7 @@
             let fontSize = Math.max(16, hiddenCanvas.width / 40);
             hiddenCtx.font = "bold " + fontSize + "px Arial";
             hiddenCtx.fillStyle = "red";
-            let labelText = "AXE X UNIQUE - V120"; // Maj V120
+            let labelText = "AXE X UNIQUE - V121";
             let metrics = hiddenCtx.measureText(labelText);
             hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
             hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
@@ -1648,7 +1644,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v120.jpg'; // Maj V120
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v121.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1902,7 +1898,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.120) !"; // Maj V120
+                statusText.innerText = "✅ Calage expert terminé (v.121) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1913,7 +1909,7 @@
         }
 
         function prevStep() {
-            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0; // Correction de la typo manualNavY -> manualPanY
+            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             if (step > 1) {
                 step--;
                 if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
