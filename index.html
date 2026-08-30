@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.115 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.116 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -379,6 +379,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease;
         }
         #camera-stream {
             width: 100%;
@@ -399,6 +400,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transform-origin: center center;
+            transition: transform 0.1s ease;
         }
         .cam-axis-x {
             position: absolute;
@@ -410,7 +413,7 @@
             transform: translateY(-50%);
         }
         .cam-axis-x::after {
-            content: "AXE X UNIQUE - V115";
+            content: "AXE X UNIQUE - V116";
             position: absolute;
             right: 15px;
             top: -22px;
@@ -450,7 +453,7 @@
             align-items: center;
             gap: 6px;
             z-index: 2020;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             padding: 6px 12px;
             border-radius: 16px;
             border: 1px solid #555;
@@ -458,6 +461,8 @@
         .camera-toolbar-row {
             display: flex;
             gap: 6px;
+            align-items: center;
+            justify-content: center;
         }
         .zoom-cam-btn, .mode-cam-btn {
             background: #444;
@@ -476,7 +481,7 @@
 
         #autocapture-status {
             position: absolute;
-            top: 110px;
+            top: 120px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255, 193, 7, 0.9);
@@ -529,7 +534,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.115 - Assistant CAO</h1>
+    <h1>Acuitix V.116 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="camera-modal">
@@ -540,8 +545,12 @@
                 <button class="zoom-cam-btn" onclick="setCamZoom(2, this)">2x</button>
             </div>
             <div class="camera-toolbar-row">
-                <button id="btn-mode-paysage" class="mode-cam-btn active" onclick="setCameraOrientation('paysage', this)">Paysage ⟷</button>
-                <button id="btn-mode-portrait" class="mode-cam-btn" onclick="setCameraOrientation('portrait', this)">Portrait ↕</button>
+                <button id="btn-mode-portrait" class="mode-cam-btn active" onclick="setCameraOrientation('portrait', this)">Portrait ↕</button>
+                <button id="btn-mode-paysage" class="mode-cam-btn" onclick="setCameraOrientation('paysage', this)">Paysage ⟷</button>
+            </div>
+            <div class="camera-toolbar-row" style="font-size: 0.65rem; color:#ffc107; gap:4px;">
+                <span>Échelle repères :</span>
+                <input type="range" id="cam-scale-slider" min="0.7" max="1.5" step="0.05" value="1" oninput="updateCamGuideScale(this.value)" style="width: 100px; cursor:pointer;">
             </div>
         </div>
 
@@ -549,7 +558,7 @@
 
         <div class="camera-video-wrapper" id="cam-video-wrapper">
             <video id="camera-stream" autoplay playsinline></video>
-            <div class="camera-guide-overlay">
+            <div class="camera-guide-overlay" id="cam-guide-overlay">
                 <div class="cam-axis-x" id="guide-line"></div>
                 <div class="cam-square-guide" id="cam-sq-left">G</div>
                 <div class="cam-square-guide" id="cam-sq-right">D</div>
@@ -908,6 +917,7 @@
         const hiddenCanvas = document.getElementById('hidden-canvas');
         const hiddenCtx = hiddenCanvas.getContext('2d');
         const camVideoWrapper = document.getElementById('cam-video-wrapper');
+        const camGuideOverlay = document.getElementById('cam-guide-overlay');
         const autocaptureStatus = document.getElementById('autocapture-status');
         const autocaptureTimerSpan = document.getElementById('autocapture-timer');
 
@@ -916,6 +926,8 @@
         let isCameraActive = false;
         let autoCaptureTimer = 0;
         let autoCaptureInterval = null;
+        let currentCamOrientation = 'portrait';
+        let currentGuideScale = 1;
 
         function updateStandardsSync() {
             const val1 = selectStandard1.value;
@@ -993,9 +1005,11 @@
         }
 
         window.setCameraOrientation = function(mode, btnElement) {
+            currentCamOrientation = mode;
             document.querySelectorAll('.mode-cam-btn').forEach(b => b.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
             
+            // Applique la rotation globale sur le conteneur englobant vidéo ET repères pour que l'axe X pivote ensemble
             if (mode === 'portrait') {
                 camVideoWrapper.style.transform = "rotate(90deg)";
                 camVideoWrapper.style.width = "100vh";
@@ -1004,6 +1018,14 @@
                 camVideoWrapper.style.transform = "rotate(0deg)";
                 camVideoWrapper.style.width = "100%";
                 camVideoWrapper.style.height = "100%";
+            }
+            updateCamGuideScale(currentGuideScale);
+        }
+
+        window.updateCamGuideScale = function(scaleVal) {
+            currentGuideScale = parseFloat(scaleVal);
+            if (camGuideOverlay) {
+                camGuideOverlay.style.transform = `scale(${currentGuideScale})`;
             }
         }
 
@@ -1022,6 +1044,8 @@
                 mediaStreamObj = await navigator.mediaDevices.getUserMedia(constraints);
                 cameraStream.srcObject = mediaStreamObj;
                 setCamZoom(1, document.querySelector('.zoom-cam-btn'));
+                // Assurer l'état initial par défaut en mode portrait
+                setCameraOrientation('portrait', document.getElementById('btn-mode-portrait'));
                 cameraModal.style.display = 'flex';
                 isCameraActive = true;
             } catch (err) {
@@ -1029,7 +1053,6 @@
             }
         };
 
-        // Déclenchement manuel par l'utilisateur (prend la photo instantanément sans compte à rebours)
         window.triggerManualCountdown = function() {
             if (!isCameraActive) return;
             executeCapture();
@@ -1041,16 +1064,30 @@
             if (autoCaptureInterval) clearInterval(autoCaptureInterval);
             autocaptureStatus.style.display = 'none';
 
-            hiddenCanvas.width = cameraStream.videoWidth;
-            hiddenCanvas.height = cameraStream.videoHeight;
-            
-            let sw = hiddenCanvas.width / currentCamZoom;
-            let sh = hiddenCanvas.height / currentCamZoom;
-            let sx = (hiddenCanvas.width - sw) / 2;
-            let sy = (hiddenCanvas.height - sh) / 2;
+            let vWidth = cameraStream.videoWidth;
+            let vHeight = cameraStream.videoHeight;
+            let isPortrait = (currentCamOrientation === 'portrait');
 
-            hiddenCtx.drawImage(cameraStream, sx, sy, sw, sh, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+            // Dimensions du canvas de capture alignées exactement sur l'orientation choisie
+            hiddenCanvas.width = isPortrait ? vHeight : vWidth;
+            hiddenCanvas.height = isPortrait ? vWidth : vHeight;
 
+            hiddenCtx.save();
+            hiddenCtx.translate(hiddenCanvas.width / 2, hiddenCanvas.height / 2);
+
+            if (isPortrait) {
+                hiddenCtx.rotate(Math.PI / 2);
+            }
+
+            let sw = vWidth / currentCamZoom;
+            let sh = vHeight / currentCamZoom;
+            let sx = (vWidth - sw) / 2;
+            let sy = (vHeight - sh) / 2;
+
+            hiddenCtx.drawImage(cameraStream, sx, sy, sw, sh, -vWidth / 2, -vHeight / 2, vWidth, vHeight);
+            hiddenCtx.restore();
+
+            // Dessin des repères sur le canvas final de capture en tenant compte de l'échelle personnalisée
             hiddenCtx.save();
             hiddenCtx.strokeStyle = "rgba(255, 0, 0, 0.9)";
             hiddenCtx.lineWidth = Math.max(3, hiddenCanvas.width / 400);
@@ -1060,16 +1097,16 @@
             hiddenCtx.lineTo(hiddenCanvas.width, lineY);
             hiddenCtx.stroke();
 
-            let sqSize = 45;
+            let sqSize = 45 * currentGuideScale;
             let centerX = hiddenCanvas.width / 2;
-            let offsetDist = 110; 
+            let offsetDist = 110 * currentGuideScale; 
             hiddenCtx.strokeRect(centerX - offsetDist - sqSize/2, lineY - sqSize/2, sqSize, sqSize);
             hiddenCtx.strokeRect(centerX + offsetDist - sqSize/2, lineY - sqSize/2, sqSize, sqSize);
 
             let fontSize = Math.max(16, hiddenCanvas.width / 40);
             hiddenCtx.font = "bold " + fontSize + "px Arial";
             hiddenCtx.fillStyle = "red";
-            let labelText = "AXE X UNIQUE - V115";
+            let labelText = "AXE X UNIQUE - V116";
             let metrics = hiddenCtx.measureText(labelText);
             hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
             hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
@@ -1105,7 +1142,7 @@
             const img = new Image();
             img.onload = function() {
                 currentImg = img;
-                rotationAngle = (img.naturalHeight > img.naturalWidth) ? 270 : 0;
+                rotationAngle = (fileInput.files.length > 0 && img.naturalHeight > img.naturalWidth) ? 270 : 0;
                 imgOffsetX = 0;
                 imgOffsetY = 0;
                 updateCanvasDimensions();
@@ -1521,7 +1558,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v115.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v116.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1775,7 +1812,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.115) !";
+                statusText.innerText = "✅ Calage expert terminé (v.116) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
