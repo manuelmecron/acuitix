@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.107 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.108 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -360,7 +360,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.107 - Assistant CAO</h1>
+    <h1>Acuitix V.108 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="side-color-drawer">
@@ -672,8 +672,22 @@
                 </div>
             </div>
 
-            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 0 : PRENDRE LA PHOTO</p>
-            <label for="file-input" class="btn" style="margin-top:6px;">📸 Lancer l'appareil photo</label>
+            <!-- Visée intégrée et aperçu vidéo direct avant capture -->
+            <div id="live-camera-container" style="position: relative; width: 100%; background: #000; border-radius: 6px; overflow: hidden; margin-bottom: 6px; display: none;">
+                <video id="camera-preview" autoplay playsinline style="width: 100%; display: block; max-height: 35vh; object-fit: cover;"></video>
+                <!-- Superposition de la visée en direct avec les repères des 2 étalons et axes X -->
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; justify-content: space-between; padding: 15px; box-sizing: border-box;">
+                    <div style="border: 2px solid #ff1744; background: rgba(255,0,0,0.15); width: 45px; height: 45px; position: relative; display: flex; align-items: center;">
+                        <div style="position: absolute; width: 100%; height: 2px; background: #ff1744; top: 50%;"></div>
+                    </div>
+                    <div style="border: 2px solid #ff1744; background: rgba(255,0,0,0.15); width: 45px; height: 45px; position: relative; display: flex; align-items: center;">
+                        <div style="position: absolute; width: 100%; height: 2px; background: #ff1744; top: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btn-start-camera" class="btn" style="margin-top:6px;" onclick="startLiveCamera()">📸 Activer la caméra avec visée</button>
+            <button id="btn-capture-frame" class="btn btn-warning" style="margin-top:6px; display:none;" onclick="captureLiveCamera()">📸 Capturer la photo</button>
         </div>
         
         <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive</a>
@@ -701,8 +715,14 @@
 
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
+        
+        const videoElement = document.getElementById('camera-preview');
+        const liveCameraContainer = document.getElementById('live-camera-container');
+        const btnStartCamera = document.getElementById('btn-start-camera');
+        const btnCaptureFrame = document.getElementById('btn-capture-frame');
+        let mediaStream = null;
 
-        // Synchronisation hiérarchique Étalon principal / secondaire (V107)
+        // Synchronisation hiérarchique Étalon principal / secondaire (V108)
         function updateStandardsSync() {
             const val1 = selectStandard1.value;
 
@@ -724,18 +744,105 @@
 
             if (val1 === '11') {
                 selectStandard2.value = '11';
-                selectStandard2.disabled = true; // Figé
+                selectStandard2.disabled = true;
             } else {
-                selectStandard2.disabled = false; // Modifiable
+                selectStandard2.disabled = false;
                 if (selectStandard2.value === '11') {
-                    selectStandard2.value = '2E'; // Bascule par défaut si le secondaire était sur 11
+                    selectStandard2.value = '2E';
                 }
             }
         }
 
         selectStandard1.addEventListener('change', updateStandardsSync);
-        // Initialisation au chargement
         updateStandardsSync();
+
+        window.goToPhotoCapture = function() {
+            standard1Type = selectStandard1.value;
+            standard2Type = selectStandard2.value;
+            initialStandardPanel.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.innerText = "Étape 0 : Prise de vue avec visée intégrée";
+        }
+
+        // Activation de la caméra intégrée avec flux direct et cadres/axes de visée
+        window.startLiveCamera = async function() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: 'environment' } },
+                    audio: false
+                });
+                videoElement.srcObject = mediaStream;
+                liveCameraContainer.style.display = 'block';
+                btnStartCamera.style.display = 'none';
+                btnCaptureFrame.style.display = 'block';
+            } catch (err) {
+                alert("Impossible d'accéder à la caméra : " + err.message + "\nFallback vers le sélecteur de fichier natif.");
+                fileInput.click();
+            }
+        }
+
+        // Capture de l'image depuis le flux vidéo de la caméra intégrée
+        window.captureLiveCamera = function() {
+            if (!mediaStream) return;
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = videoElement.videoWidth || 1280;
+            tempCanvas.height = videoElement.videoHeight || 720;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Arrêt du flux de la caméra
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+
+            const img = new Image();
+            img.onload = function() {
+                currentImg = img;
+                if (img.naturalHeight > img.naturalWidth) {
+                    rotationAngle = 270;
+                } else {
+                    rotationAngle = 0;
+                }
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                updateCanvasDimensions();
+
+                step = 0;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+
+                let w = canvas.width;
+                let h = canvas.height;
+                let defaultSize = w * 0.055;
+
+                box1.size = defaultSize;
+                box2.size = defaultSize;
+                for(let i=0; i<4; i++) { corners[i].size = w * 0.06; }
+
+                tempX = w * 0.5;
+                tempY = h * 0.5;
+                tempAngle = 0;
+                tempSize = defaultSize;
+
+                welcomePanel.style.display = 'none';
+                canvas.style.display = 'block';
+                statusText.style.display = 'block';
+                statusText.innerText = "Étape 0 : Orientation et Cadrage";
+                
+                preCaptureTools.style.display = 'block';
+                colorChoicePanel.style.display = 'none';
+                tutorialPanel.style.display = 'none';
+                tutorialPanel2.style.display = 'none';
+                tutorialPanel3.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                sideColorDrawer.classList.remove('open');
+
+                redrawCanvas();
+            };
+            img.src = tempCanvas.toDataURL('image/jpeg', 0.98);
+        }
 
         let currentImg = null;
         let step = 1; 
@@ -780,15 +887,6 @@
                 case 'CARD': return { name: 'Carte de fidélité standard', val: '85x54 mm' };
                 default: return { name: type, val: '' };
             }
-        }
-
-        window.goToPhotoCapture = function() {
-            standard1Type = selectStandard1.value;
-            standard2Type = selectStandard2.value;
-            initialStandardPanel.style.display = 'none';
-            welcomePanel.style.display = 'block';
-            statusText.style.display = 'block';
-            statusText.innerText = "Étape 0 : Prise de vue";
         }
 
         fileInput.addEventListener('change', function(e) {
@@ -999,11 +1097,14 @@
             adjustPanel.style.display = 'none';
             btnDownload.style.display = 'none';
             btnRetry.style.display = 'none';
-            welcomePanel.style.display = 'none';
+            welcomePanel.style.display = 'block';
             initialStandardPanel.style.display = 'block';
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
             sideColorDrawer.classList.remove('open');
+            liveCameraContainer.style.display = 'none';
+            btnStartCamera.style.display = 'block';
+            btnCaptureFrame.style.display = 'none';
             fileInput.value = '';
             currentImg = null;
             holes = [];
@@ -1226,7 +1327,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v107.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v108.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1304,7 +1405,7 @@
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
 
-                // Ajout de l'axe X rouge de visée pour l'étalon 11 NW (15x15mm)
+                // Trait rouge matérialisant l'axe X pour l'étalon 11 NW (15x15mm)
                 ctx.strokeStyle = '#ff1744';
                 ctx.lineWidth = Math.max(2, canvas.width / 400);
                 ctx.beginPath();
@@ -1488,7 +1589,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.107) !";
+                statusText.innerText = "✅ Calage expert terminé (v.108) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
