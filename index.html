@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.118 - Assistant CAO Compact (Étalon 11 NW)</title>
+    <title>Acuitix V.119 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -413,7 +413,7 @@
             transform: translateY(-50%);
         }
         .cam-axis-x::after {
-            content: "AXE X UNIQUE - V118";
+            content: "AXE X UNIQUE - V119";
             position: absolute;
             right: 15px;
             top: -22px;
@@ -536,7 +536,7 @@
 </head>
 <body>
 
-    <h1>Acuitix V.118 - Assistant CAO</h1>
+    <h1>Acuitix V.119 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="camera-modal">
@@ -1181,7 +1181,7 @@
             let fontSize = Math.max(16, hiddenCanvas.width / 40);
             hiddenCtx.font = "bold " + fontSize + "px Arial";
             hiddenCtx.fillStyle = "red";
-            let labelText = "AXE X UNIQUE - V118";
+            let labelText = "AXE X UNIQUE - V119";
             let metrics = hiddenCtx.measureText(labelText);
             hiddenCtx.fillStyle = "rgba(0,0,0,0.7)";
             hiddenCtx.fillRect(hiddenCanvas.width - metrics.width - 35, lineY - fontSize - 12, metrics.width + 20, fontSize + 12);
@@ -1633,7 +1633,7 @@
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     btnDownload.href = url;
-                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v118.jpg';
+                    btnDownload.download = 'acuitix_etalon_' + standard1Type + '_' + standard2Type + '_v119.jpg';
                 }, 'image/jpeg', 0.98);
             }
         }
@@ -1887,7 +1887,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                statusText.innerText = "✅ Calage expert terminé (v.119) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -1898,7 +1898,7 @@
         }
 
         function prevStep() {
-            zoomLevel = 1.0; manualPanX = 0; manualNavY = 0;
+            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0; // Correction de la typo manualNavY -> manualPanY
             if (step > 1) {
                 step--;
                 if (step === 1) { tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size; }
