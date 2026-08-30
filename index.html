@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.107 - Assistant CAO Compact</title>
+    <title>Acuitix V.107 - Assistant CAO Compact (Étalon 11 NW)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -389,8 +389,8 @@
             
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
             <select id="select-standard-1" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="11" selected>Étalon 11 NW (Carré - 15x15 mm)</option>
+                <option value="2E">Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
                 <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
                 <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
                 <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
@@ -403,8 +403,8 @@
 
             <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
             <select id="select-standard-2" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="11" selected>Étalon 11 NW (Carré - 15x15 mm)</option>
+                <option value="2E">Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
                 <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
                 <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
                 <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
@@ -763,12 +763,12 @@
         let currentOpacity = 0.9;
         let isSelectingColorState = false;
 
-        let standard1Type = "2E";
-        let standard2Type = "2E";
+        let standard1Type = "11";
+        let standard2Type = "11";
 
         function getStandardInfo(type) {
             switch(type) {
-                case '11': return { name: 'Étalon 11 (Carré)', val: '10x10 mm' };
+                case '11': return { name: 'Étalon 11 NW (Carré)', val: '15x15 mm' };
                 case '2E': return { name: 'Pièce de 2 €', val: 'Ø 25.75 mm' };
                 case '1E': return { name: 'Pièce de 1 €', val: 'Ø 23.25 mm' };
                 case '0.50E': return { name: 'Pièce de 50 Centimes', val: 'Ø 24.25 mm' };
@@ -1303,6 +1303,14 @@
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
                 ctx.strokeRect(-size / 2, -size / 2, size, size);
+
+                // Ajout de l'axe X rouge de visée pour l'étalon 11 NW (15x15mm)
+                ctx.strokeStyle = '#ff1744';
+                ctx.lineWidth = Math.max(2, canvas.width / 400);
+                ctx.beginPath();
+                ctx.moveTo(-size / 2, 0);
+                ctx.lineTo(size / 2, 0);
+                ctx.stroke();
             } else if (type === 'CARD') {
                 let cardH = size;
                 let cardW = size * (85 / 54);
