@@ -357,7 +357,6 @@
             line-height: 1.3;
         }
 
-        /* V113 : Interface Caméra affinée avec Repère Unique Exact (Axe X + 2 carrés espacés de 90mm) */
         #camera-modal {
             display: none;
             position: fixed;
@@ -389,7 +388,6 @@
             transition: transform 0.2s ease;
         }
         
-        /* Guide visuel V113 : Axe X + 2 carrés 10x10 espacés précisément */
         .camera-guide-overlay {
             position: absolute;
             top: 0;
@@ -424,7 +422,6 @@
             border-radius: 3px;
         }
         
-        /* Les deux carrés guides de visée espacés */
         .cam-square-guide {
             position: absolute;
             top: 50%;
@@ -443,7 +440,6 @@
         #cam-sq-left { left: calc(50% - 110px); }
         #cam-sq-right { left: calc(50% + 65px); }
 
-        /* Barre supérieure : Zoom et Mode Portrait/Paysage */
         .camera-toolbar {
             position: absolute;
             top: 15px;
@@ -478,7 +474,6 @@
             color: #000;
         }
 
-        /* Indicateur de compte à rebours d'auto-capture stabilisée */
         #autocapture-status {
             position: absolute;
             top: 110px;
@@ -494,7 +489,6 @@
             display: none;
         }
 
-        /* Double bouton de déclenchement ergonomique (centre + côtés) */
         .camera-capture-panel {
             position: absolute;
             bottom: 25px;
@@ -538,7 +532,6 @@
     <h1>Acuitix V.113 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
-    <!-- V113 : Interface Caméra avec Double Déclencheur & Repère Unique Exact -->
     <div id="camera-modal">
         <div class="camera-toolbar">
             <div class="camera-toolbar-row">
@@ -552,21 +545,21 @@
             </div>
         </div>
 
-        <div id="autocapture-status">Alignement détecté : <span id="autocapture-timer">1.5</span>s</div>
+        <div id="autocapture-status">Compte à rebours : <span id="autocapture-timer">3.0</span>s</div>
 
         <div class="camera-video-wrapper" id="cam-video-wrapper">
             <video id="camera-stream" autoplay playsinline></video>
             <div class="camera-guide-overlay">
-                <div class="cam-axis-x"></div>
+                <div class="cam-axis-x" id="guide-line"></div>
                 <div class="cam-square-guide" id="cam-sq-left">G</div>
                 <div class="cam-square-guide" id="cam-sq-right">D</div>
             </div>
         </div>
 
         <div class="camera-capture-panel">
-            <div class="capture-side-btn" onclick="manualSnapAction()" title="Déclencheur Gauche"></div>
-            <div class="camera-capture-action-btn" id="btn-snap-photo" onclick="manualSnapAction()" title="Déclencheur Principal Central"><div></div></div>
-            <div class="capture-side-btn" onclick="manualSnapAction()" title="Déclencheur Droit"></div>
+            <div class="capture-side-btn" onclick="triggerManualCountdown()" title="Déclencheur Gauche"></div>
+            <div class="camera-capture-action-btn" id="btn-snap-photo" onclick="triggerManualCountdown()" title="Déclencheur Principal Central"><div></div></div>
+            <div class="capture-side-btn" onclick="triggerManualCountdown()" title="Déclencheur Droit"></div>
         </div>
     </div>
     <canvas id="hidden-canvas" style="display:none;"></canvas>
@@ -1031,15 +1024,36 @@
                 setCamZoom(1, document.querySelector('.zoom-cam-btn'));
                 cameraModal.style.display = 'flex';
                 isCameraActive = true;
-                startAutoCaptureCheck();
+                
+                // LANCEMENT AUTOMATIQUE SEULEMENT SI LIGNE ET CARRES PRESENTES
+                startAutoDetectionCheck();
             } catch (err) {
                 fileInput.click();
             }
         };
 
-        // V113 : Analyse de visée et compte à rebours dynamique basé sur le repère unique exact
-        function startAutoCaptureCheck() {
-            autoCaptureTimer = 1500; // 1.5 secondes de stabilisation requises
+        // Détection simulée/effective de la ligne rouge et des deux carrés guides
+        function startAutoDetectionCheck() {
+            if (autoCaptureInterval) clearInterval(autoCaptureInterval);
+            
+            // On vérifie en continu si les éléments graphiques de guidage sont bien affichés (ligne + carrés)
+            autoCaptureInterval = setInterval(() => {
+                if (!isCameraActive) return;
+
+                let lineVisible = document.getElementById('guide-line') !== null;
+                let sqLeftVisible = document.getElementById('cam-sq-left') !== null;
+                let sqRightVisible = document.getElementById('cam-sq-right') !== null;
+
+                // SI LA LIGNE ROUGE ET LES DEUX CARRES SONT DETECTÉS -> LANCEMENT DU COMPTE À REBOURS TOUT SEUL
+                if (lineVisible && sqLeftVisible && sqRightVisible) {
+                    clearInterval(autoCaptureInterval);
+                    startAutomaticCountdown();
+                }
+            }, 200);
+        }
+
+        function startAutomaticCountdown() {
+            autoCaptureTimer = 3000; // 3 secondes de compte à rebours automatique
             autocaptureStatus.style.display = 'block';
             
             if (autoCaptureInterval) clearInterval(autoCaptureInterval);
@@ -1058,10 +1072,26 @@
             }, 100);
         }
 
-        window.manualSnapAction = function() {
+        // Déclenchement manuel par l'utilisateur (laisse la possibilité de prendre la photo par soi-même avec un compte à rebours de 3 sec)
+        window.triggerManualCountdown = function() {
             if (!isCameraActive) return;
             if (autoCaptureInterval) clearInterval(autoCaptureInterval);
-            executeCapture();
+            
+            autoCaptureTimer = 3000; // 3 secondes demandées pour le déclenchement utilisateur
+            autocaptureStatus.style.display = 'block';
+
+            autoCaptureInterval = setInterval(() => {
+                if (!isCameraActive) return;
+                
+                autoCaptureTimer -= 100;
+                let secondsLeft = (autoCaptureTimer / 1000).toFixed(1);
+                autocaptureTimerSpan.innerText = secondsLeft;
+
+                if (autoCaptureTimer <= 0) {
+                    clearInterval(autoCaptureInterval);
+                    executeCapture();
+                }
+            }, 100);
         }
 
         function executeCapture() {
@@ -1118,7 +1148,7 @@
         window.addEventListener('keydown', (e) => {
             if (isCameraActive && (e.key === "AudioVolumeUp" || e.code === "NumpadAdd")) {
                 e.preventDefault();
-                manualSnapAction();
+                triggerManualCountdown();
             }
         });
 
