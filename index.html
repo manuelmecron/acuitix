@@ -1290,11 +1290,11 @@
                 manualPanY = 0;
                 let wCanvas = canvas.width;
                 let hCanvas = canvas.height;
-                let defaultSize = wCanvas * 0.055;
+                let defaultSize = wCanvas * 0.035;
                 box1.size = defaultSize;
                 box2.size = defaultSize;
                 for(let i=0; i<4; i++) {
-                    corners[i].size = wCanvas * 0.06;
+                    corners[i].size = wCanvas * 0.04;
                 }
                 xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
                 xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
@@ -1326,11 +1326,11 @@
                     manualPanY = 0;
                     let wCanvas = canvas.width;
                     let hCanvas = canvas.height;
-                    let defaultSize = wCanvas * 0.055;
+                    let defaultSize = wCanvas * 0.035;
                     box1.size = defaultSize;
                     box2.size = defaultSize;
                     for(let i=0; i<4; i++) {
-                        corners[i].size = wCanvas * 0.06;
+                        corners[i].size = wCanvas * 0.04;
                     }
                     xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
                     xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
@@ -1485,7 +1485,7 @@
             tempX = canvas.width * 0.5;
             tempY = canvas.height * 0.5;
             tempAngle = 0;
-            tempSize = canvas.width * 0.055;
+            tempSize = canvas.width * 0.035;
             updateUIState();
             redrawCanvas();
         }
@@ -1796,7 +1796,7 @@
             let text1 = "1. " + info1.name + " (" + info1.val + ")";
             let metrics1 = ctx.measureText(text1);
             let box1W = metrics1.width + (paddingH * 2);
-            let baseSize1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
+            let baseSize1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.035);
             let currentSizeForTwin1 = baseSize1 * 0.55;
             let box1H = fontSize + (paddingV * 3) + currentSizeForTwin1 + 6;
             let box1X = 10;
@@ -1818,7 +1818,7 @@
             let text2 = "2. " + info2.name + " (" + info2.val + ")";
             let metrics2 = ctx.measureText(text2);
             let box2W = metrics2.width + (paddingH * 2);
-            let baseSize2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.055);
+            let baseSize2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.035);
             let currentSizeForTwin2 = baseSize2 * 0.55;
             let box2H = fontSize + (paddingV * 3) + currentSizeForTwin2 + 6;
             let box2X = canvas.width - box2W - 10;
