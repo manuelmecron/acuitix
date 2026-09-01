@@ -498,40 +498,42 @@
     <div>
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
-        <div id="initial-standard-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
-            <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
-            
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
-            <select id="select-standard-1" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
-                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
-                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
-                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
-                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
-                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
-                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
-                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
-            </select>
+        <details id="initial-standard-panel" open>
+            <summary style="color: #ffc107; font-size: 0.9rem; font-weight: bold; cursor: pointer; outline: none; list-style: none;">📏 Étalonnage : Choix des 2 Étalons ▾</summary>
+            <div style="margin-top: 8px;">
+                <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
+                
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
+                <select id="select-standard-1" class="standard-select">
+                    <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
+                    <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                    <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                    <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                    <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                    <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                    <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                    <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                    <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                    <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
+                </select>
 
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
-            <select id="select-standard-2" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
-                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
-                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
-                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
-                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
-                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
-                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
-                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
-                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
-            </select>
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
+                <select id="select-standard-2" class="standard-select">
+                    <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
+                    <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                    <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                    <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                    <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                    <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                    <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                    <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                    <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                    <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
+                </select>
 
-            <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
-        </div>
+                <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
+            </div>
+        </details>
 
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
