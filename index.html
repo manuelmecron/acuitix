@@ -1639,7 +1639,7 @@
         window.askAddHole = function() {
             if (step === 7) {
                 if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
-                    holes.push({ x: tempX, y: tempY, radius: box1.size * 0.25 });
+                    holes.push({ x: tempX, y: tempY, radius: tempSize });
                     redrawCanvas();
                 }
             }
@@ -1787,48 +1787,38 @@
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    // Fond du cercle avec opacité très faible (0.05) pour visibilité Python/IA
                     ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
-                    ctx.lineWidth = Math.max(2.0, refW / 400); 
+                    ctx.lineWidth = Math.max(2.5, refW / 350);
                     ctx.beginPath();
-                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    ctx.restore();
                     
-                    // Centre parfaitement placé et fin (croix ultra-fine et précise)
+                    ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = 1;
-                    let cLen = Math.max(3, refW / 150);
+                    ctx.lineWidth = Math.max(2.0, refW / 400);
                     ctx.beginPath();
-                    ctx.moveTo(tempX - cLen, tempY);
-                    ctx.lineTo(tempX + cLen, tempY);
-                    ctx.moveTo(tempX, tempY - cLen);
-                    ctx.lineTo(tempX, tempY + cLen);
+                    ctx.arc(tempX, tempY, tempSize * 0.2, 0, Math.PI * 2);
                     ctx.stroke();
                     ctx.restore();
                 }
 
-                // PERÇAGES VALIDÉS ET FINAUX (appliqués partout, même validés)
+                // PERÇAGES VALIDÉS ET FINAUX
                 holes.forEach((h, idx) => {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    // Fond du cercle avec opacité très faible (0.05) pour visibilité Python/IA
                     ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
-                    ctx.lineWidth = Math.max(2.0, refW / 400);
+                    ctx.lineWidth = Math.max(2.5, refW / 350);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     
-                    // Centre parfaitement placé et fin (croix ultra-fine et précise)
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = 1;
-                    let cLen = Math.max(3, refW / 150);
+                    ctx.lineWidth = Math.max(2.0, refW / 400);
                     ctx.beginPath();
-                    ctx.moveTo(h.x - cLen, h.y);
-                    ctx.lineTo(h.x + cLen, h.y);
-                    ctx.moveTo(h.x, h.y - cLen);
-                    ctx.lineTo(h.x, h.y + cLen);
+                    ctx.arc(h.x, h.y, h.radius * 0.2, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#FFFFFF';
