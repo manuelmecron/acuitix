@@ -1727,7 +1727,9 @@
                 let rsz = step === 1 ? tempSize : box1.size;
                 let rang = step === 1 ? tempAngle : box1.angle;
                 drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
-                dessinerCroixCentre(rx, ry, elementColor);
+                if (standard1Type !== '11') {
+                    dessinerCroixCentre(rx, ry, elementColor);
+                }
             }
 
             if (step >= 2) {
@@ -1736,7 +1738,9 @@
                 let rsz2 = step === 2 ? tempSize : box2.size;
                 let rang2 = step === 2 ? tempAngle : box2.angle;
                 drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
-                dessinerCroixCentre(rx2, ry2, elementColor);
+                if (standard2Type !== '11') {
+                    dessinerCroixCentre(rx2, ry2, elementColor);
+                }
             }
 
             for (let i = 0; i < 4; i++) {
@@ -1828,9 +1832,22 @@
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(4, canvas.width / 350);
                 ctx.strokeRect(-half, -half, size, size);
+                ctx.beginPath();
+                ctx.moveTo(-half, -half);
+                ctx.lineTo(half, half);
+                ctx.moveTo(half, -half);
+                ctx.lineTo(-half, half);
+                ctx.stroke();
+
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(2.5, canvas.width / 450);
                 ctx.strokeRect(-half, -half, size, size);
+                ctx.beginPath();
+                ctx.moveTo(-half, -half);
+                ctx.lineTo(half, half);
+                ctx.moveTo(half, -half);
+                ctx.lineTo(-half, half);
+                ctx.stroke();
             } else if (type === 'CARD') {
                 let cardW = size;
                 let cardH = size * (54 / 85);
