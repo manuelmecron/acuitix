@@ -1699,7 +1699,7 @@
                 ctx.strokeStyle = elementColor;
                 ctx.fillStyle = elementColor;
                 ctx.globalAlpha = currentOpacity;
-                ctx.lineWidth = Math.max(1.5, canvas.width / 700); // Trait affiné ultra-précis
+                ctx.lineWidth = Math.max(1.5, canvas.width / 700);
                 let pw = canvas.width * 0.45;
                 let ph = canvas.height * 0.45;
                 ctx.strokeRect(canvas.width / 2 - pw / 2, canvas.height / 2 - ph / 2, pw, ph);
@@ -1709,7 +1709,7 @@
 
             if (step === 0 && !isForExport && !isSelectingColorState) {
                 ctx.save();
-                ctx.lineWidth = Math.max(2, canvas.width / 500); // Lignes axes X/Y affinées
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
 
                 ctx.save();
                 ctx.strokeStyle = '#FF0000';
@@ -1774,7 +1774,7 @@
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 700); // Contour général affiné
+                ctx.lineWidth = Math.max(1.5, refW / 700);
                 ctx.beginPath();
                 ctx.moveTo(corners[0].x, corners[0].y);
                 ctx.lineTo(corners[2].x, corners[2].y);
@@ -1783,33 +1783,47 @@
                 ctx.stroke();
                 ctx.restore();
 
+                // PERÇAGE EN COURS DE PLACEMENT (Étape 7 active)
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.3)';
-                    ctx.lineWidth = Math.max(1.5, refW / 700);
+                    // Fond du cercle avec opacité très faible (0.05)
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
+                    ctx.lineWidth = Math.max(2.5, refW / 350); // Trait fort extérieur
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
-                    dessinerCroixCentre(tempX, tempY, '#FF00FF');
+                    
+                    // Centre symbolisé par un cercle en trait fort (PAS de croix)
+                    ctx.save();
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.lineWidth = Math.max(2.0, refW / 400);
+                    ctx.beginPath();
+                    ctx.arc(tempX, tempY, box1.size * 0.05, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
                 }
 
+                // PERÇAGES VALIDÉS ET FINAUX (appliqués partout, même validés)
                 holes.forEach((h, idx) => {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.4)';
-                    ctx.lineWidth = Math.max(1.5, refW / 700);
+                    // Fond du cercle avec opacité très faible (0.05)
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
+                    ctx.lineWidth = Math.max(2.5, refW / 350); // Trait fort extérieur
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     
-                    ctx.fillStyle = '#FF00FF';
+                    // Centre symbolisé par un cercle en trait fort (PAS de croix)
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.lineWidth = Math.max(2.0, refW / 400);
                     ctx.beginPath();
-                    ctx.arc(h.x, h.y, 2, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.arc(h.x, h.y, h.radius * 0.2, 0, Math.PI * 2);
+                    ctx.stroke();
 
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
@@ -1860,7 +1874,7 @@
                 ctx.stroke();
 
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(1.0, canvas.width / 800); // Épaisseur affinée CAO
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.strokeRect(-half, -half, size, size);
                 ctx.beginPath();
                 ctx.moveTo(-half, -half);
@@ -1873,7 +1887,6 @@
                 let cardH = size * (54 / 85);
                 let radius = cardH * 0.15;
                 
-                // Ombre/contour noir
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
@@ -1884,7 +1897,6 @@
                 ctx.lineTo(0, cardH / 2);
                 ctx.stroke();
 
-                // Tracé coloré principal
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
@@ -1895,7 +1907,6 @@
                 ctx.lineTo(0, cardH / 2);
                 ctx.stroke();
 
-                // Point central et marquage du centre
                 ctx.fillStyle = color;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = 1;
@@ -1955,7 +1966,7 @@
 
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(1.0, canvas.width / 800); // Ligne fine de coin de repère
+            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
