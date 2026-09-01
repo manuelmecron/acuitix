@@ -652,13 +652,13 @@
                     <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Déplacement (mm)</div>
                     <div class="dpad-grid">
                         <div></div>
-                        <button onmousedown="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" ontouchend="stopAction()">⬆️</button>
+                        <button onmousedown="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" ontouchend="stopAction()">⬆️</button>
                         <div></div>
-                        <button onmousedown="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" ontouchend="stopAction()">⬅️</button>
+                        <button onmousedown="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" ontouchend="stopAction()">⬅️</button>
                         <button id="center-recenter-btn" onclick="handleCenterRecenterClick()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
-                        <button onmousedown="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" ontouchend="stopAction()">➡️</button>
+                        <button onmousedown="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" ontouchend="stopAction()">➡️</button>
                         <div></div>
-                        <button onmousedown="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" ontouchend="stopAction()">⬇️</button>
+                        <button onmousedown="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" ontouchend="stopAction()">⬇️</button>
                         <div></div>
                     </div>
                 </div>
