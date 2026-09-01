@@ -373,7 +373,7 @@
             text-align: center;
         }
 
-        /* --- STYLES EXCLUSIFS : Plein écran Live Caméra corrigé (object-fit: contain pour éviter le zoom) --- */
+        /* --- STYLES EXCLUSIFS : Plein écran Live Caméra restauré (object-fit: cover) --- */
         body.live-fullscreen-mode {
             margin: 0;
             padding: 0;
@@ -413,7 +413,7 @@
             width: 100% !important;
             height: 100% !important;
             max-height: none !important;
-            object-fit: contain !important; /* CORRECTION DU ZOOM : affichage complet sans rognage */
+            object-fit: cover !important; /* PLEIN ÉCRAN RESTAURÉ sans bandes noires */
             display: block !important;
         }
         body.live-fullscreen-mode #live-guide-canvas {
@@ -423,7 +423,6 @@
         body.live-fullscreen-mode #live-back-btn {
             display: flex !important;
         }
-        /* Note: #live-capture-buttons-container est géré dynamiquement en JS selon l'orientation pour éviter le clic en mode portrait */
         body.live-fullscreen-mode #camera-orientation-overlay {
             z-index: 100001;
         }
@@ -942,16 +941,32 @@
         window.startLiveCamera = async function() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { exact: "environment" }, zoom: 1.0 }
+                    video: { facingMode: { exact: "environment" }, zoom: 1 }
                 });
             } catch (err) {
                 try {
                     mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" }
+                        video: { facingMode: "environment", zoom: 1 }
                     });
                 } catch (err2) {
-                    alert("Impossible d'accéder à la caméra arrière : " + err2.message);
-                    return;
+                    try {
+                        mediaStream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: "environment" }
+                        });
+                    } catch (err3) {
+                        alert("Impossible d'accéder à la caméra arrière : " + err3.message);
+                        return;
+                    }
+                }
+            }
+
+            // Forcer explicitement le zoom x1 sur la piste vidéo si supporté par l'appareil
+            const videoTrack = mediaStream.getVideoTracks()[0];
+            if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities.zoom) {
+                    const targetZoom = Math.max(capabilities.zoom.min, 1);
+                    videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
                 }
             }
 
@@ -963,7 +978,6 @@
             videoElement.style.display = 'block';
             liveGuideCanvas.style.display = 'block';
             liveBackBtn.style.display = 'flex';
-            // Le conteneur de capture sera affiché ou masqué proprement par checkOrientationForLiveCamera()
             statusText.style.display = 'block';
             statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
 
@@ -1009,12 +1023,10 @@
             if (!isLiveCameraActive) return;
             const isPortrait = window.innerHeight > window.innerWidth;
             if (isPortrait) {
-                // Mode portrait : on grise l'écran et on MASQUE impérativement les boutons de capture pour bloquer l'action
                 cameraOrientationOverlay.style.display = 'flex';
                 liveCaptureButtonsContainer.style.display = 'none';
                 liveBackBtn.style.display = 'none';
             } else {
-                // Mode paysage : on enlève le grisé et on AFFICHE les boutons de capture
                 cameraOrientationOverlay.style.display = 'none';
                 liveCaptureButtonsContainer.style.display = 'block';
                 liveBackBtn.style.display = 'flex';
