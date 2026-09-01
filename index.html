@@ -603,9 +603,17 @@
                 <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
                 <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
+
+            <div class="tool-section-title" style="color: #ffc107; margin-top: 4px; margin-bottom:2px;">Navigation image (fin)</div>
+            <div class="safe-button-grid" style="margin-bottom: 4px;">
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, -2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -2), 40)" ontouchend="stopAction()">⬆️ Haut</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, 2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 2), 40)" ontouchend="stopAction()">⬇️ Bas</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(-2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-2, 0), 40)" ontouchend="stopAction()">⬅️ Gauche</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(2, 0), 40)" ontouchend="stopAction()">➡️ Droite</button>
+            </div>
             
             <button class="btn" style="margin-top: 4px;" onclick="goToXYAdjustment()">Valider ce cadrage ➡️</button>
-            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+            <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
         <!-- PAGE D'AJUSTEMENT STRUCTURÉE -->
@@ -669,7 +677,7 @@
 
             <button class="btn" style="margin-top: 6px;" onclick="goToColorSelectionFromXY()">Valider les axes X/Y ➡️</button>
             <button class="btn btn-secondary" style="margin-top: 4px;" onclick="goToPreCapture()">⬅️ Retour</button>
-            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+            <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
         <div id="color-choice-panel">
@@ -1101,6 +1109,32 @@
             welcomePanel.style.display = 'none';
             initialStandardPanel.style.display = 'block';
             statusText.style.display = 'none';
+        }
+
+        window.backToWelcome = function() {
+            stopAction();
+            stopLiveCameraAndReset();
+            canvas.style.display = 'none';
+            xyAdjustmentPanel.style.display = 'none';
+            preCaptureTools.style.display = 'none';
+            colorChoicePanel.style.display = 'none';
+            tutorialPanel.style.display = 'none';
+            tutorialPanel2.style.display = 'none';
+            tutorialPanel3.style.display = 'none';
+            generalToolsContainer.style.display = 'none';
+            adjustPanel.style.display = 'none';
+            btnDownload.style.display = 'none';
+            btnRetry.style.display = 'none';
+            initialStandardPanel.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.innerText = "Étape 0 : Source de l'image";
+            sideColorDrawer.style.display = 'none';
+            sideColorDrawer.classList.remove('open');
+            fileInputGallery.value = '';
+            currentImg = null;
+            holes = [];
+            step = 1;
         }
 
         window.startLiveCamera = async function() {
