@@ -1058,9 +1058,13 @@
             if (isSyncing) return;
             isSyncing = true;
             if (changedBox === 1) {
-                selectStandard2.value = selectStandard1.value;
+                if (selectStandard1.value === '11') {
+                    selectStandard2.value = '11';
+                }
             } else if (changedBox === 2) {
-                selectStandard1.value = selectStandard2.value;
+                if (selectStandard2.value === '11') {
+                    selectStandard1.value = '11';
+                }
             }
             isSyncing = false;
         }
