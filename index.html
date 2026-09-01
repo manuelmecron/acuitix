@@ -1806,20 +1806,12 @@
 
         function dessinerCroixCentre(x, y, col = elementColor) {
             ctx.save();
-            // Contour noir de contraste très fin (substitut anti-crénelage pour CAO)
+            ctx.fillStyle = col;
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(x - 8, y); ctx.lineTo(x + 8, y);
-            ctx.moveTo(x, y - 8); ctx.lineTo(x, y + 8);
-            ctx.stroke();
-
-            // Ligne fine principale
-            ctx.strokeStyle = col;
-            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-            ctx.beginPath();
-            ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y);
-            ctx.moveTo(x, y - 7); ctx.lineTo(x, y + 7);
+            ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.stroke();
             ctx.restore();
         }
@@ -1866,14 +1858,14 @@
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(0, 0);
+                ctx.moveTo(-radius, 0);
                 ctx.lineTo(radius, 0);
                 ctx.stroke();
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(0, 0);
+                ctx.moveTo(-radius, 0);
                 ctx.lineTo(radius, 0);
                 ctx.stroke();
             }
