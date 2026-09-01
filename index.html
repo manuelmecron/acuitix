@@ -499,9 +499,9 @@
         <details id="initial-standard-panel" open>
             <summary style="color: #ffc107; font-size: 0.9rem; font-weight: bold; cursor: pointer; outline: none; list-style: none;">📏 Étalonnage : Choix des 2 Étalons ▾</summary>
             <div style="margin-top: 8px;">
-                <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo[cite: 15] :</p>
+                <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
                 
-                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche)[cite: 15] :</label>
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
                 <select id="select-standard-1" class="standard-select">
                     <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                     <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -515,7 +515,7 @@
                     <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
                 </select>
 
-                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit)[cite: 15] :</label>
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
                 <select id="select-standard-2" class="standard-select">
                     <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                     <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -1031,21 +1031,10 @@
         function handleStandardChange(changedBox) {
             if (isSyncing) return;
             isSyncing = true;
-            const val1 = selectStandard1.value;
-            const val2 = selectStandard2.value;
-
             if (changedBox === 1) {
-                if (val1 === '11') {
-                    selectStandard2.value = '11';
-                } else if (val2 === '11') {
-                    selectStandard2.value = '2E';
-                }
+                selectStandard2.value = selectStandard1.value;
             } else if (changedBox === 2) {
-                if (val2 === '11') {
-                    selectStandard1.value = '11';
-                } else if (val1 === '11') {
-                    selectStandard1.value = '2E';
-                }
+                selectStandard1.value = selectStandard2.value;
             }
             isSyncing = false;
         }
@@ -1625,7 +1614,9 @@
         }
 
         window.askResetCurrentPos = function() {
-            resetCurrentPos();
+            triggerRecenterPrompt(() => {
+                resetCurrentPos();
+            });
         }
 
         function resetCurrentPos() {
