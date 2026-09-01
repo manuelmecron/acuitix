@@ -1785,27 +1785,30 @@
 
                 if (!isForExport && step === 7) {
                     ctx.save();
-                    ctx.strokeStyle = elementColor;
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.3)';
                     ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
                     ctx.stroke();
                     ctx.restore();
-                    dessinerCroixCentre(tempX, tempY, elementColor);
+                    dessinerCroixCentre(tempX, tempY, '#FF00FF');
                 }
 
                 holes.forEach((h, idx) => {
                     ctx.save();
-                    ctx.strokeStyle = '#FF0000';
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.4)';
                     ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                    ctx.fill();
                     ctx.stroke();
                     
-                    // Remplacement de la croix par un simple point au centre du perçage
-                    ctx.fillStyle = '#FF0000';
+                    ctx.fillStyle = '#FF00FF';
                     ctx.beginPath();
-                    ctx.arc(h.x, h.y, 1.5, 0, Math.PI * 2);
+                    ctx.arc(h.x, h.y, 2, 0, Math.PI * 2);
                     ctx.fill();
 
                     ctx.fillStyle = '#FFFFFF';
