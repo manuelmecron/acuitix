@@ -627,8 +627,8 @@
 
                 <div class="controls-right">
                     <div class="control-row">
-                        <button class="btn-info" onmousedown="startAction(() => adjustXYScale(getScaleStep()), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYScale(getScaleStep()), 50)" ontouchend="stopAction()">➕ Échelle +</button>
-                        <button class="btn-info" onmousedown="startAction(() => adjustXYScale(-getScaleStep()), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYScale(-getScaleStep()), 50)" ontouchend="stopAction()">➖ Échelle -</button>
+                        <button style="visibility: hidden; pointer-events: none;"></button>
+                        <button style="visibility: hidden; pointer-events: none;"></button>
                     </div>
                     <div class="control-row">
                         <button onmousedown="startAction(() => adjustXYAngle(-getAngleStep()), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAngle(-getAngleStep()), 70)" ontouchend="stopAction()">↺ Inclinaison -</button>
@@ -1214,24 +1214,6 @@
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
 
-            const w = tempCanvas.width;
-            const h = tempCanvas.height;
-
-            let currentYAxisX = (w / 2) + liveYAxisXOffset;
-            tempCtx.strokeStyle = '#00FF00';
-            tempCtx.lineWidth = Math.max(4, w / 200);
-            tempCtx.beginPath();
-            tempCtx.moveTo(currentYAxisX, 0);
-            tempCtx.lineTo(currentYAxisX, h);
-            tempCtx.stroke();
-
-            tempCtx.strokeStyle = '#FF0000';
-            tempCtx.lineWidth = Math.max(4, w / 200);
-            tempCtx.beginPath();
-            tempCtx.moveTo(0, h / 2);
-            tempCtx.lineTo(w, h / 2);
-            tempCtx.stroke();
-
             const img = new Image();
             img.onload = function() {
                 if (mediaStream) {
@@ -1626,14 +1608,14 @@
             let refW = canvas.width;
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            // Rendu des axes X et Y indépendants lors de l'étape 0 (Ajustement XY)
+            // Rendu des axes X (Rouge) et Y (Vert) indépendants lors de l'étape 0 (Ajustement XY)
             if (step === 0 && !isForExport) {
                 ctx.save();
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
 
-                // Axe X
+                // Axe X en ROUGE
                 ctx.save();
-                ctx.strokeStyle = elementColor;
+                ctx.strokeStyle = '#FF0000';
                 ctx.translate(xyAxisX.x, xyAxisX.y);
                 ctx.rotate((xyAxisX.angle * Math.PI) / 180);
                 ctx.beginPath();
@@ -1641,11 +1623,11 @@
                 ctx.lineTo(canvas.width * 2, 0);
                 ctx.stroke();
                 ctx.restore();
-                dessinerCroixCentre(xyAxisX.x, xyAxisX.y);
+                dessinerCroixCentre(xyAxisX.x, xyAxisX.y, '#FF0000');
 
-                // Axe Y
+                // Axe Y en VERT
                 ctx.save();
-                ctx.strokeStyle = elementColor;
+                ctx.strokeStyle = '#00FF00';
                 ctx.translate(xyAxisY.x, xyAxisY.y);
                 ctx.rotate((xyAxisY.angle * Math.PI) / 180);
                 ctx.beginPath();
@@ -1653,7 +1635,7 @@
                 ctx.lineTo(0, canvas.height * 2);
                 ctx.stroke();
                 ctx.restore();
-                dessinerCroixCentre(xyAxisY.x, xyAxisY.y);
+                dessinerCroixCentre(xyAxisY.x, xyAxisY.y, '#00FF00');
 
                 ctx.restore();
             }
@@ -1664,7 +1646,7 @@
                 let rsz = step === 1 ? tempSize : box1.size;
                 let rang = step === 1 ? tempAngle : box1.angle;
                 drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
-                dessinerCroixCentre(rx, ry);
+                dessinerCroixCentre(rx, ry, elementColor);
             }
 
             if (step >= 2) {
@@ -1673,7 +1655,7 @@
                 let rsz2 = step === 2 ? tempSize : box2.size;
                 let rang2 = step === 2 ? tempAngle : box2.angle;
                 drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
-                dessinerCroixCentre(rx2, ry2);
+                dessinerCroixCentre(rx2, ry2, elementColor);
             }
 
             for (let i = 0; i < 4; i++) {
@@ -1685,7 +1667,7 @@
                     let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
                     let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
                     drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
-                    dessinerCroixCentre(cx, cy);
+                    dessinerCroixCentre(cx, cy, elementColor);
                 }
             }
 
@@ -1712,7 +1694,7 @@
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
-                    dessinerCroixCentre(tempX, tempY);
+                    dessinerCroixCentre(tempX, tempY, elementColor);
                 }
 
                 holes.forEach((h, idx) => {
@@ -1794,7 +1776,7 @@
             ctx.restore();
         }
 
-        function dessinerCroixCentre(x, y) {
+        function dessinerCroixCentre(x, y, col = elementColor) {
             ctx.save();
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = Math.max(4, canvas.width / 250);
@@ -1803,7 +1785,7 @@
             ctx.moveTo(x, y - 8); ctx.lineTo(x, y + 8);
             ctx.stroke();
 
-            ctx.strokeStyle = elementColor;
+            ctx.strokeStyle = col;
             ctx.lineWidth = Math.max(2, canvas.width / 400);
             ctx.beginPath();
             ctx.moveTo(x - 6, y); ctx.lineTo(x + 6, y);
@@ -1996,7 +1978,7 @@
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
             if(btnPrev) btnPrev.style.display = (step >= 1) ? 'block' : 'none';
-            if(sideColorDrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
+            if(sideColordrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
