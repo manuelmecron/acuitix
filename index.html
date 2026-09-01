@@ -43,7 +43,7 @@
             margin: 2px auto;
             max-height: 38vh;
         }
-        canvas {
+        canvas, video {
             max-width: 100%;
             max-height: 100%;
             display: none;
@@ -355,6 +355,21 @@
             color: #fff;
             line-height: 1.3;
         }
+
+        /* Overlay d'avertissement orientation portrait pour la caméra live */
+        #camera-orientation-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(30, 30, 30, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -375,13 +390,22 @@
         <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖</button>
     </div>
 
-    <div class="box">
+    <div class="box" id="media-box">
+        <!-- Overlay d'avertissement paysage -->
+        <div id="camera-orientation-overlay">
+            <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐</div>
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">MODE PAYSAGE REQUIS</p>
+            <p style="color: #fff; font-size: 0.7rem; margin: 4px 0;">Veuillez basculer votre téléphone à l'horizontale pour voir le flux vidéo.</p>
+        </div>
+        
+        <!-- Flux vidéo live in-app -->
+        <video id="camera-stream" autoplay playsinline muted></video>
+        <!-- Canvas de travail CAO -->
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
-        <!-- Fichiers d'entrée séparés pour l'appareil photo et l'import galerie/disque -->
-        <input type="file" id="file-input-camera" accept="image/*" capture="environment" style="display: none;">
+        <!-- Input galerie/disque uniquement -->
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
         <!-- PAGE 1 : Choix des étalons -->
@@ -420,15 +444,15 @@
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
         </div>
 
-        <!-- PAGE 2 : Étape 0 (Prise de photo ou Import) -->
+        <!-- PAGE 2 : Étape 0 (Flux Caméra Live ou Import) -->
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
                 <div class="camera-badge">📱 🔄 📸</div>
                 <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin: 2px 0; text-transform: uppercase;">
-                    ⚠️ MODE PAYSAGE REQUIS POUR LA PHOTO
+                    ⚠️ MODE PAYSAGE REQUIS
                 </p>
                 <p style="color: #fff; font-size: 0.72rem; margin: 2px 0; line-height: 1.3;">
-                    Pivotez votre téléphone en <b>paysage (horizontal)</b> avant de lancer l'appareil photo afin de capturer l'objet entier et ses étalons.
+                    Pivotez votre téléphone en <b>paysage (horizontal)</b> pour activer le flux de la caméra arrière (Zoom X1).
                 </p>
             </div>
 
@@ -460,10 +484,16 @@
             <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
                 <div style="display: flex; gap: 4px;">
                     <button class="btn btn-secondary" onclick="backToStandards()" style="margin-top:0; padding:8px; flex:1;">⬅️ Retour</button>
-                    <label for="file-input-camera" class="btn" style="margin-top:0; padding:8px; flex:1;">📸 Appareil photo</label>
+                    <button class="btn" onclick="startLiveCamera()" style="margin-top:0; padding:8px; flex:1;">📸 Caméra Live (Arrière)</button>
                 </div>
                 <label for="file-input-gallery" class="btn btn-info" style="margin-top:0; padding:8px;">📁 Importer (Galerie / Disque)</label>
             </div>
+        </div>
+
+        <!-- Panneau de capture directe depuis le flux live -->
+        <div id="live-capture-panel" style="display: none; background: #333; padding: 6px; border-radius: 6px; margin-top: 4px;">
+            <button class="btn" style="background: #28a745; padding: 12px; margin-top:0;" onclick="captureLiveSnapshot()">📸 Capturer la photo</button>
+            <button class="btn btn-danger" style="margin-top: 4px; padding: 8px;" onclick="stopLiveCameraAndReset()">❌ Annuler / Quitter la caméra</button>
         </div>
 
         <div id="pre-capture-tools" class="adjust-panel">
@@ -699,12 +729,13 @@
     </div>
 
     <script>
-        const fileInputCamera = document.getElementById('file-input-camera');
         const fileInputGallery = document.getElementById('file-input-gallery');
+        const videoElement = document.getElementById('camera-stream');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const welcomePanel = document.getElementById('welcome-panel');
         const initialStandardPanel = document.getElementById('initial-standard-panel');
+        const liveCapturePanel = document.getElementById('live-capture-panel');
         const preCaptureTools = document.getElementById('pre-capture-tools');
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
@@ -719,6 +750,7 @@
         const holeActionPanel = document.getElementById('hole-action-panel');
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
+        const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
         // Synchronisation intelligente pour l'étalon 11
         let isSyncing = false;
@@ -747,6 +779,8 @@
         selectStandard2.addEventListener('change', () => handleStandardChange(2));
 
         let currentImg = null;
+        let mediaStream = null;
+        let isLiveCameraActive = false;
         let step = 1;
         let rotationAngle = 0;
         let imgOffsetX = 0;
@@ -802,6 +836,125 @@
             statusText.style.display = 'none';
         }
 
+        // Vérification et affichage du flux Caméra en direct In-App
+        window.startLiveCamera = async function() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { exact: "environment" }, zoom: 1.0 }
+                });
+            } catch (err) {
+                try {
+                    // Fallback si la caméra arrière exacte n'est pas disponible
+                    mediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" }
+                    });
+                } catch (err2) {
+                    alert("Impossible d'accéder à la caméra arrière : " + err2.message);
+                    return;
+                }
+            }
+
+            videoElement.srcObject = mediaStream;
+            isLiveCameraActive = true;
+            welcomePanel.style.display = 'none';
+            videoElement.style.display = 'block';
+            liveCapturePanel.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
+
+            checkOrientationForLiveCamera();
+            window.addEventListener('resize', checkOrientationForLiveCamera);
+            window.addEventListener('orientationchange', checkOrientationForLiveCamera);
+        }
+
+        function checkOrientationForLiveCamera() {
+            if (!isLiveCameraActive) return;
+            const isPortrait = window.innerHeight > window.innerWidth;
+            if (isPortrait) {
+                cameraOrientationOverlay.style.display = 'flex';
+                liveCapturePanel.style.display = 'none';
+            } else {
+                cameraOrientationOverlay.style.display = 'none';
+                liveCapturePanel.style.display = 'block';
+            }
+        }
+
+        window.stopLiveCameraAndReset = function() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            isLiveCameraActive = false;
+            window.removeEventListener('resize', checkOrientationForLiveCamera);
+            window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
+            videoElement.style.display = 'none';
+            liveCapturePanel.style.display = 'none';
+            cameraOrientationOverlay.style.display = 'none';
+            welcomePanel.style.display = 'block';
+            statusText.innerText = "Étape 0 : Source de l'image";
+        }
+
+        window.captureLiveSnapshot = function() {
+            if (!videoElement.videoWidth) return;
+
+            // Création d'un canvas temporaire pour extraire l'image du flux vidéo
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = videoElement.videoWidth;
+            tempCanvas.height = videoElement.videoHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
+
+            const img = new Image();
+            img.onload = function() {
+                // Arrêt du flux caméra
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+                isLiveCameraActive = false;
+                window.removeEventListener('resize', checkOrientationForLiveCamera);
+                window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
+                videoElement.style.display = 'none';
+                liveCapturePanel.style.display = 'none';
+                cameraOrientationOverlay.style.display = 'none';
+
+                currentImg = img;
+                rotationAngle = 0;
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                updateCanvasDimensions();
+                step = 0;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                let w = canvas.width;
+                let h = canvas.height;
+                let defaultSize = w * 0.055;
+                box1.size = defaultSize;
+                box2.size = defaultSize;
+                for(let i=0; i<4; i++) {
+                    corners[i].size = w * 0.06;
+                }
+                tempX = w * 0.5;
+                tempY = h * 0.5;
+                tempAngle = 0;
+                tempSize = defaultSize;
+
+                canvas.style.display = 'block';
+                statusText.innerText = "Étape 0 : Orientation et Cadrage";
+                preCaptureTools.style.display = 'block';
+                colorChoicePanel.style.display = 'none';
+                tutorialPanel.style.display = 'none';
+                tutorialPanel2.style.display = 'none';
+                tutorialPanel3.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                sideColorDrawer.classList.remove('open');
+                redrawCanvas();
+            };
+            img.src = tempCanvas.toDataURL('image/png');
+        }
+
+        // Importation d'image depuis la galerie ou le disque
         function handleImageFile(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -810,11 +963,7 @@
                 const img = new Image();
                 img.onload = function() {
                     currentImg = img;
-                    if (img.width < img.height) {
-                        rotationAngle = 90;
-                    } else {
-                        rotationAngle = 0;
-                    }
+                    rotationAngle = (img.width < img.height) ? 90 : 0;
                     imgOffsetX = 0;
                     imgOffsetY = 0;
                     updateCanvasDimensions();
@@ -852,7 +1001,6 @@
             reader.readAsDataURL(file);
         }
 
-        fileInputCamera.addEventListener('change', handleImageFile);
         fileInputGallery.addEventListener('change', handleImageFile);
 
         canvas.addEventListener('click', function(e) {
@@ -982,6 +1130,7 @@
 
         window.resetToWelcome = function() {
             stopAction();
+            stopLiveCameraAndReset();
             canvas.style.display = 'none';
             preCaptureTools.style.display = 'none';
             colorChoicePanel.style.display = 'none';
@@ -997,7 +1146,6 @@
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
             sideColorDrawer.classList.remove('open');
-            fileInputCamera.value = '';
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
