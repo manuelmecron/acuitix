@@ -1806,11 +1806,14 @@
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
+                    
+                    dessinerCroixCentre(h.x, h.y, '#FF0000');
+
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.textAlign = 'center';
+                    ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText('H' + (idx + 1), h.x, h.y);
+                    ctx.fillText('P' + (idx + 1), h.x + h.radius + 8, h.y - h.radius);
                     ctx.restore();
                 });
             }
