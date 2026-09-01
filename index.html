@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.107 - Assistant CAO Compact</title>
+    <title>Acuitix V.107 - Assistant CAO Compact[cite: 12]</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -422,7 +422,7 @@
             transform: scale(0.95);
         }
 
-        #recenter-modal {
+        #recenter-modal, #back-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -458,8 +458,18 @@
         </div>
     </div>
 
-    <h1>Acuitix V.107 - Assistant CAO</h1>
-    <div id="status-text">Étalonnage</div>
+    <div id="back-modal">
+        <div class="recenter-modal-content">
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Voulez-vous revenir à l'étape précédente ?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="confirmBack(true)">Oui</button>
+                <button class="btn btn-danger" style="margin-top: 0;" onclick="confirmBack(false)">Non</button>
+            </div>
+        </div>
+    </div>
+
+    <h1>Acuitix V.107 - Assistant CAO[cite: 12]</h1>
+    <div id="status-text">Étalonnage[cite: 12]</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
 
@@ -640,8 +650,8 @@
             </div>
 
             <div class="opacity-control-box">
-                <label for="xy-opacity-slider">Opacité traits : <span id="xy-opacity-val">90</span>%</label>
-                <input type="range" id="xy-opacity-slider" min="20" max="100" value="90" oninput="changerOpaciteXY(this.value)">
+                <label for="xy-opacity-slider">Opacité traits : <span id="xy-opacity-val">100</span>%</label>
+                <input type="range" id="xy-opacity-slider" min="20" max="100" value="100" oninput="changerOpaciteXY(this.value)">
             </div>
 
             <div class="gameboy-container">
@@ -764,8 +774,8 @@
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Alignement des échelles</h3>
             
             <div class="opacity-control-box" style="margin-top:4px; padding:4px;">
-                <label style="font-size: 0.65rem;">Opacité repères : 90%</label>
-                <input type="range" min="20" max="100" value="90" style="width:100%; cursor:pointer;" disabled>
+                <label style="font-size: 0.65rem;">Opacité repères : 100%</label>
+                <input type="range" min="20" max="100" value="100" style="width:100%; cursor:pointer;" disabled>
             </div>
 
             <div class="pickguards-gallery" style="margin-top:4px;">
@@ -803,8 +813,8 @@
 
         <div id="general-tools-container" style="display: none;">
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité repères : <span id="opacity-val">90</span>%</label>
-                <input type="range" id="opacity-slider" min="20" max="100" value="90" oninput="changerOpacite(this.value)">
+                <label for="opacity-slider">Opacité repères : <span id="opacity-val">100</span>%</label>
+                <input type="range" id="opacity-slider" min="20" max="100" value="100" oninput="changerOpacite(this.value)">
             </div>
 
             <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 4px; margin-bottom: 4px;">
@@ -902,6 +912,7 @@
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
         let pendingRecenterCallback = null;
+        let pendingBackCallback = null;
 
         window.triggerRecenterPrompt = function(callback) {
             pendingRecenterCallback = callback;
@@ -916,6 +927,21 @@
                 pendingRecenterCallback();
             }
             pendingRecenterCallback = null;
+        };
+
+        window.triggerBackPrompt = function(callback) {
+            pendingBackCallback = callback;
+            const modal = document.getElementById('back-modal');
+            if (modal) modal.style.display = 'flex';
+        };
+
+        window.confirmBack = function(yes) {
+            const modal = document.getElementById('back-modal');
+            if (modal) modal.style.display = 'none';
+            if (yes && typeof pendingBackCallback === 'function') {
+                pendingBackCallback();
+            }
+            pendingBackCallback = null;
         };
 
         window.handleCenterRecenterClick = function() {
@@ -1064,7 +1090,7 @@
         let manualPanY = 0;
         let actionInterval = null;
         let elementColor = "#00FFFF";
-        let currentOpacity = 0.9;
+        let currentOpacity = 1.0;
         let isSelectingColorState = false;
         let standard1Type = "2E";
         let standard2Type = "2E";
@@ -1899,9 +1925,9 @@
                 redrawCanvas();
                 return;
             }
-            if (confirm("Voulez-vous vraiment revenir en arrière ?")) {
+            triggerBackPrompt(() => {
                 prevStep();
-            }
+            });
         }
 
         window.validateStep = function() {
