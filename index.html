@@ -580,6 +580,34 @@
             </div>
         </div>
 
+        <div id="pre-capture-tools" class="adjust-panel">
+            <h3>📷 1. Orientation & Cadrage</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (cliquez directement pour déplacer).</p>
+            
+            <div class="pickguards-gallery" style="margin-bottom: 6px;">
+                <div class="pickguard-thumb valid">
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
+                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
+                    Bien cadrée
+                </div>
+                <div class="pickguard-thumb invalid">
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
+                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
+                    Coupée / Désaxée
+                </div>
+            </div>
+
+            <div class="safe-button-grid" style="margin-bottom: 4px;">
+                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
+                <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
+                <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
+            </div>
+            
+            <button class="btn" style="margin-top: 4px;" onclick="goToXYAdjustment()">Valider ce cadrage ➡️</button>
+            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
+        </div>
+
         <!-- PAGE D'AJUSTEMENT STRUCTURÉE -->
         <div id="xy-adjustment-panel" class="adjust-panel">
             <h3>📐 Ajustement et Calage</h3>
@@ -639,35 +667,8 @@
                 </div>
             </div>
 
-            <button class="btn" style="margin-top: 6px;" onclick="goToPreCaptureFromXY()">Valider les axes X/Y ➡️</button>
-            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
-        </div>
-
-        <div id="pre-capture-tools" class="adjust-panel">
-            <h3>📷 1. Orientation & Cadrage</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (cliquez directement pour déplacer).</p>
-            
-            <div class="pickguards-gallery" style="margin-bottom: 6px;">
-                <div class="pickguard-thumb valid">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
-                    <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                    Bien cadrée
-                </div>
-                <div class="pickguard-thumb invalid">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
-                    <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                    Coupée / Désaxée
-                </div>
-            </div>
-
-            <div class="safe-button-grid" style="margin-bottom: 4px;">
-                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
-                <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
-                <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
-                <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
-            </div>
-            
-            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Valider ce cadrage ➡️</button>
+            <button class="btn" style="margin-top: 6px;" onclick="goToColorSelectionFromXY()">Valider les axes X/Y ➡️</button>
+            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="goToPreCapture()">⬅️ Retour</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
@@ -683,7 +684,7 @@
             </div>
 
             <div class="nav-buttons" style="margin-top: 8px;">
-                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn btn-secondary" onclick="backToXYAdjustment()" style="margin-top:0;">⬅️ Retour</button>
                 <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
             </div>
         </div>
@@ -972,8 +973,18 @@
             redrawCanvas();
         }
 
-        window.goToXYAdjustment = function() {
+        window.goToPreCapture = function() {
             welcomePanel.style.display = 'none';
+            if (xyAdjustmentPanel) xyAdjustmentPanel.style.display = 'none';
+            preCaptureTools.style.display = 'block';
+            statusText.style.display = 'block';
+            statusText.innerText = "Étape 0 : Orientation et Cadrage";
+            canvas.style.display = 'block';
+            redrawCanvas();
+        }
+
+        window.goToXYAdjustment = function() {
+            preCaptureTools.style.display = 'none';
             xyAdjustmentPanel.style.display = 'block';
             statusText.style.display = 'block';
             statusText.innerText = "Ajustement et Calage";
@@ -981,10 +992,11 @@
             redrawCanvas();
         }
 
-        window.goToPreCaptureFromXY = function() {
+        window.goToColorSelectionFromXY = function() {
             xyAdjustmentPanel.style.display = 'none';
-            preCaptureTools.style.display = 'block';
-            statusText.innerText = "Étape 0 : Orientation et Cadrage";
+            colorChoicePanel.style.display = 'block';
+            statusText.innerText = "Choix de la couleur du tracé";
+            isSelectingColorState = true;
             redrawCanvas();
         }
 
@@ -1262,7 +1274,7 @@
                 tempAngle = 0;
                 tempSize = defaultSize;
 
-                goToXYAdjustment();
+                goToPreCapture();
             };
             img.src = tempCanvas.toDataURL('image/png');
         }
@@ -1298,7 +1310,7 @@
                     tempAngle = 0;
                     tempSize = defaultSize;
                     welcomePanel.style.display = 'none';
-                    goToXYAdjustment();
+                    goToPreCapture();
                 };
                 img.src = event.target.result;
             };
@@ -1366,8 +1378,16 @@
             redrawCanvas();
         }
 
-        window.backToPreCapture = function() {
+        window.backToXYAdjustment = function() {
             colorChoicePanel.style.display = 'none';
+            xyAdjustmentPanel.style.display = 'block';
+            statusText.innerText = "Ajustement et Calage";
+            isSelectingColorState = false;
+            redrawCanvas();
+        }
+
+        window.backToPreCapture = function() {
+            xyAdjustmentPanel.style.display = 'none';
             preCaptureTools.style.display = 'block';
             statusText.innerText = "Étape 0 : Orientation et Cadrage";
             isSelectingColorState = false;
@@ -1980,7 +2000,7 @@
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
             if(btnPrev) btnPrev.style.display = (step >= 1) ? 'block' : 'none';
-            if(sideColordrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
+            if(sideColorDrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
