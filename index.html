@@ -1054,7 +1054,6 @@
         }
 
         let isSyncing = false;
-        let isLinkedTo11 = false;
 
         function handleStandardChange(changedBox) {
             if (isSyncing) return;
@@ -1063,21 +1062,17 @@
             const val1 = selectStandard1.value;
             const val2 = selectStandard2.value;
 
-            if (isLinkedTo11) {
-                const changedVal = (changedBox === 1) ? val1 : val2;
-                if (changedVal !== '11') {
-                    selectStandard1.value = '2E';
-                    selectStandard2.value = '2E';
-                    isLinkedTo11 = false;
-                } else {
-                    selectStandard1.value = '11';
+            if (changedBox === 1) {
+                if (val1 === '11') {
                     selectStandard2.value = '11';
+                } else {
+                    selectStandard2.value = '2E';
                 }
             } else {
-                if (val1 === '11' || val2 === '11') {
+                if (val2 === '11') {
                     selectStandard1.value = '11';
-                    selectStandard2.value = '11';
-                    isLinkedTo11 = true;
+                } else {
+                    selectStandard1.value = '2E';
                 }
             }
 
