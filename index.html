@@ -1786,12 +1786,9 @@
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = elementColor;
-                    ctx.fillStyle = elementColor;
-                    ctx.globalAlpha = currentOpacity * 0.4;
                     ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.stroke();
                     ctx.restore();
                     dessinerCroixCentre(tempX, tempY, elementColor);
@@ -1800,11 +1797,9 @@
                 holes.forEach((h, idx) => {
                     ctx.save();
                     ctx.strokeStyle = '#FF0000';
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
                     ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.stroke();
                     
                     dessinerCroixCentre(h.x, h.y, '#FF0000');
@@ -1824,13 +1819,19 @@
 
         function dessinerCroixCentre(x, y, col = elementColor) {
             ctx.save();
-            ctx.fillStyle = col;
-            ctx.strokeStyle = '#000000';
+            ctx.strokeStyle = col;
             ctx.lineWidth = 1;
+            let len = 4;
             ctx.beginPath();
-            ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(x - len, y);
+            ctx.lineTo(x + len, y);
+            ctx.moveTo(x, y - len);
+            ctx.lineTo(x, y + len);
             ctx.stroke();
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         }
 
