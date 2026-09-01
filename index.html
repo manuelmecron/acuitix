@@ -929,12 +929,18 @@
             return force === 'fine' ? 0.1 : 1.0;
         }
 
+        // Axes X et Y indépendants pour l'étape 0
+        let xyAxisX = { x: 0, y: 0, angle: 0 };
+        let xyAxisY = { x: 0, y: 0, angle: 0 };
+
         window.adjustXYAxisPos = function(dx, dy) {
             const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
             if (activeAxis === 'X') {
-                tempX += dx;
+                xyAxisX.x += dx;
+                xyAxisX.y += dy;
             } else {
-                tempY += dy;
+                xyAxisY.x += dx;
+                xyAxisY.y += dy;
             }
             redrawCanvas();
         }
@@ -944,7 +950,13 @@
         }
 
         window.adjustXYAngle = function(deltaDeg) {
-            adjustAngle(deltaDeg);
+            const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
+            if (activeAxis === 'X') {
+                xyAxisX.angle += deltaDeg;
+            } else {
+                xyAxisY.angle += deltaDeg;
+            }
+            redrawCanvas();
         }
 
         window.changerOpaciteXY = function(val) {
@@ -1259,6 +1271,8 @@
                 for(let i=0; i<4; i++) {
                     corners[i].size = wCanvas * 0.06;
                 }
+                xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
+                xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
                 tempX = wCanvas * 0.5;
                 tempY = hCanvas * 0.5;
                 tempAngle = 0;
@@ -1285,16 +1299,18 @@
                     zoomLevel = 1.0;
                     manualPanX = 0;
                     manualPanY = 0;
-                    let w = canvas.width;
-                    let h = canvas.height;
-                    let defaultSize = w * 0.055;
+                    let wCanvas = canvas.width;
+                    let hCanvas = canvas.height;
+                    let defaultSize = wCanvas * 0.055;
                     box1.size = defaultSize;
                     box2.size = defaultSize;
                     for(let i=0; i<4; i++) {
-                        corners[i].size = w * 0.06;
+                        corners[i].size = wCanvas * 0.06;
                     }
-                    tempX = w * 0.5;
-                    tempY = h * 0.5;
+                    xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
+                    xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
+                    tempX = wCanvas * 0.5;
+                    tempY = hCanvas * 0.5;
                     tempAngle = 0;
                     tempSize = defaultSize;
                     welcomePanel.style.display = 'none';
@@ -1322,8 +1338,19 @@
                 imgY = clientClickY;
             }
             if (!isSelectingColorState) {
-                tempX = imgX;
-                tempY = imgY;
+                if (step === 0) {
+                    const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
+                    if (activeAxis === 'X') {
+                        xyAxisX.x = imgX;
+                        xyAxisX.y = imgY;
+                    } else {
+                        xyAxisY.x = imgX;
+                        xyAxisY.y = imgY;
+                    }
+                } else {
+                    tempX = imgX;
+                    tempY = imgY;
+                }
                 redrawCanvas();
             }
         });
@@ -1566,8 +1593,13 @@
         }
 
         function resetCurrentPos() {
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
+            if (step === 0) {
+                xyAxisX = { x: canvas.width * 0.5, y: canvas.height * 0.4, angle: 0 };
+                xyAxisY = { x: canvas.width * 0.5, y: canvas.height * 0.6, angle: 0 };
+            } else {
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+            }
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
@@ -1594,29 +1626,36 @@
             let refW = canvas.width;
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            // Rendu des axes mobiles lors de l'étape 0 (Ajustement XY)
+            // Rendu des axes X et Y indépendants lors de l'étape 0 (Ajustement XY)
             if (step === 0 && !isForExport) {
                 ctx.save();
-                ctx.strokeStyle = elementColor;
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
-                
-                ctx.translate(tempX, tempY);
-                ctx.rotate((tempAngle * Math.PI) / 180);
-
-                // Axe Y
-                ctx.beginPath();
-                ctx.moveTo(0, -canvas.height * 2);
-                ctx.lineTo(0, canvas.height * 2);
-                ctx.stroke();
 
                 // Axe X
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.translate(xyAxisX.x, xyAxisX.y);
+                ctx.rotate((xyAxisX.angle * Math.PI) / 180);
                 ctx.beginPath();
                 ctx.moveTo(-canvas.width * 2, 0);
                 ctx.lineTo(canvas.width * 2, 0);
                 ctx.stroke();
+                ctx.restore();
+                dessinerCroixCentre(xyAxisX.x, xyAxisX.y);
+
+                // Axe Y
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.translate(xyAxisY.x, xyAxisY.y);
+                ctx.rotate((xyAxisY.angle * Math.PI) / 180);
+                ctx.beginPath();
+                ctx.moveTo(0, -canvas.height * 2);
+                ctx.lineTo(0, canvas.height * 2);
+                ctx.stroke();
+                ctx.restore();
+                dessinerCroixCentre(xyAxisY.x, xyAxisY.y);
 
                 ctx.restore();
-                dessinerCroixCentre(tempX, tempY);
             }
 
             if (step >= 1) {
