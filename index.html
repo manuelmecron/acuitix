@@ -840,41 +840,18 @@
             statusText.style.display = 'none';
         }
 
-        // Vérification et affichage du flux Caméra en direct In-App avec plein écran et verrouillage paysage ciblés[cite: 3]
+        // Vérification et affichage du flux Caméra en direct In-App avec passage plein écran
         window.startLiveCamera = async function() {
             try {
-                // 1. Activer le plein écran natif de manière ciblée
-                const elem = document.documentElement;
-                if (elem.requestFullscreen) {
-                    await elem.requestFullscreen().catch(err => console.log("Plein écran refusé/indisponible :", err));
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen();
-                }
-
-                // 2. Verrouiller l'orientation en paysage de manière ciblée
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('landscape').catch(err => {
-                        console.log("Verrouillage paysage non supporté ou refusé :", err);
-                    });
-                }
-
                 mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: { exact: "environment" }, zoom: 1.0 }
                 });
             } catch (err) {
                 try {
-                    // Fallback si la caméra arrière exacte n'est pas disponible
                     mediaStream = await navigator.mediaDevices.getUserMedia({
                         video: { facingMode: "environment" }
                     });
                 } catch (err2) {
-                    // Nettoyage en cas d'échec d'accès à la caméra
-                    if (document.fullscreenElement || document.webkitFullscreenElement) {
-                        if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                    }
-                    if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
-                    
                     alert("Impossible d'accéder à la caméra arrière : " + err2.message);
                     return;
                 }
@@ -887,6 +864,19 @@
             liveCapturePanel.style.display = 'block';
             statusText.style.display = 'block';
             statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
+
+            // Passage direct du conteneur en plein écran au moment de la photo/live
+            const mediaBox = document.getElementById('media-box');
+            mediaBox.style.position = 'fixed';
+            mediaBox.style.top = '0';
+            mediaBox.style.left = '0';
+            mediaBox.style.width = '100vw';
+            mediaBox.style.height = '100vh';
+            mediaBox.style.maxHeight = 'none';
+            mediaBox.style.zIndex = '9999';
+            mediaBox.style.margin = '0';
+            mediaBox.style.borderRadius = '0';
+            videoElement.style.objectFit = 'cover';
 
             checkOrientationForLiveCamera();
             window.addEventListener('resize', checkOrientationForLiveCamera);
@@ -905,30 +895,32 @@
             }
         }
 
+        function resetMediaBoxStyle() {
+            const mediaBox = document.getElementById('media-box');
+            mediaBox.style.position = '';
+            mediaBox.style.top = '';
+            mediaBox.style.left = '';
+            mediaBox.style.width = '';
+            mediaBox.style.height = '';
+            mediaBox.style.maxHeight = '';
+            mediaBox.style.zIndex = '';
+            mediaBox.style.margin = '';
+            mediaBox.style.borderRadius = '';
+            videoElement.style.objectFit = '';
+        }
+
         window.stopLiveCameraAndReset = function() {
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
                 mediaStream = null;
             }
-
-            // Quitter le plein écran et déverrouiller l'orientation lors de la fermeture du mode caméra live[cite: 3]
-            if (document.fullscreenElement || document.webkitFullscreenElement) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().catch(err => console.log(err));
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-            if (screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-            }
-
             isLiveCameraActive = false;
             window.removeEventListener('resize', checkOrientationForLiveCamera);
             window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
             videoElement.style.display = 'none';
             liveCapturePanel.style.display = 'none';
             cameraOrientationOverlay.style.display = 'none';
+            resetMediaBoxStyle();
             welcomePanel.style.display = 'block';
             statusText.innerText = "Étape 0 : Source de l'image";
         }
@@ -936,7 +928,6 @@
         window.captureLiveSnapshot = function() {
             if (!videoElement.videoWidth) return;
 
-            // Création d'un canvas temporaire pour extraire l'image du flux vidéo
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = videoElement.videoWidth;
             tempCanvas.height = videoElement.videoHeight;
@@ -945,30 +936,19 @@
 
             const img = new Image();
             img.onload = function() {
-                // Arrêt du flux caméra
                 if (mediaStream) {
                     mediaStream.getTracks().forEach(track => track.stop());
                     mediaStream = null;
                 }
-
-                // Sortie du plein écran et déverrouillage de l'orientation dès la capture de la photo[cite: 3]
-                if (document.fullscreenElement || document.webkitFullscreenElement) {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(err => console.log(err));
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    }
-                }
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
-
                 isLiveCameraActive = false;
                 window.removeEventListener('resize', checkOrientationForLiveCamera);
                 window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
                 videoElement.style.display = 'none';
                 liveCapturePanel.style.display = 'none';
                 cameraOrientationOverlay.style.display = 'none';
+                
+                // Restauration de l'interface normale après la capture
+                resetMediaBoxStyle();
 
                 currentImg = img;
                 rotationAngle = 0;
