@@ -1126,6 +1126,22 @@
             }
         }
 
+        function getStandardMm(type) {
+            switch(type) {
+                case '11': return 10;
+                case '2E': return 25.75;
+                case '1E': return 23.25;
+                case '0.50E': return 24.25;
+                case '0.20E': return 22.25;
+                case '0.10E': return 19.75;
+                case '0.05E': return 21.25;
+                case '0.02E': return 18.75;
+                case '0.01E': return 16.25;
+                case 'CARD': return 85;
+                default: return 25.75;
+            }
+        }
+
         window.goToPhotoCapture = function() {
             standard1Type = selectStandard1.value;
             standard2Type = selectStandard2.value;
@@ -1229,14 +1245,14 @@
 
             let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
-            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
+            liveCtx.lineWidth = Math.max(2, w / 400);
             liveCtx.beginPath();
             liveCtx.moveTo(currentYAxisX, 0);
             liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
             liveCtx.strokeStyle = '#FF0000';
-            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
+            liveCtx.lineWidth = Math.max(2, w / 400);
             liveCtx.beginPath();
             liveCtx.moveTo(0, h / 2);
             liveCtx.lineTo(w, h / 2);
@@ -1787,11 +1803,9 @@
                 if (!isForExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
                     ctx.lineWidth = Math.max(2.5, refW / 350);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.stroke();
                     ctx.restore();
                     
@@ -1802,11 +1816,9 @@
                 holes.forEach((h, idx) => {
                     ctx.save();
                     ctx.strokeStyle = '#FF00FF';
-                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
                     ctx.lineWidth = Math.max(2.5, refW / 350);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.stroke();
                     ctx.restore();
 
@@ -2027,6 +2039,9 @@
                     tempAngle = corners[nextIdx - 1].angle;
                     tempSize = corners[nextIdx - 1].size;
                 } else if (step === 7) {
+                    let mmSize = getStandardMm(standard1Type);
+                    let pxPerMm = box1.size / mmSize;
+                    tempSize = 1.5 * pxPerMm; // Taille par défaut de 3mm de diamètre (1.5mm de rayon)
                     tempX = canvas.width * 0.5;
                     tempY = canvas.height * 0.5;
                 }
