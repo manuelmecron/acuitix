@@ -676,7 +676,7 @@
             </div>
 
             <button class="btn" style="margin-top: 6px;" onclick="goToColorSelectionFromXY()">Valider les axes X/Y ➡️</button>
-            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="goToPreCapture()">⬅️ Retour</button>
+            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="backToPreCapture()">⬅️ Retour</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
@@ -1788,7 +1788,7 @@
             ctx.globalAlpha = 1.0;
             ctx.restore();
 
-            if (step >= 1 && step <= 2 && !isForExport) {
+            if (step >= 1 && step <= 6 && !isForExport) {
                 drawOverlayInfoBoxes(refW);
             }
         }
@@ -1800,13 +1800,13 @@
             let paddingH = 8;
             let paddingV = 5;
             let fontSize = Math.max(10, refW / 32);
+            let previewSize = 35; // Taille fixe et compacte pour les miniatures des étalons
 
             let info1 = getStandardInfo(standard1Type);
             let text1 = "1. " + info1.name + " (" + info1.val + ")";
             let metrics1 = ctx.measureText(text1);
             let box1W = metrics1.width + (paddingH * 2);
-            let currentSizeForTwin1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
-            let box1H = fontSize + (paddingV * 3) + currentSizeForTwin1 + 10;
+            let box1H = fontSize + (paddingV * 3) + previewSize + 10;
             let box1X = 15;
             let box1Y = 15;
 
@@ -1819,15 +1819,14 @@
             ctx.fillStyle = elementColor;
             ctx.fillText(text1, box1X + paddingH, box1Y + paddingV);
             let shape1X = box1X + (box1W / 2);
-            let shape1Y = box1Y + paddingV + fontSize + 5 + (currentSizeForTwin1 / 2);
-            drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
+            let shape1Y = box1Y + paddingV + fontSize + 5 + (previewSize / 2);
+            drawStandardShape(shape1X, shape1Y, previewSize, 0, elementColor, standard1Type);
 
             let info2 = getStandardInfo(standard2Type);
             let text2 = "2. " + info2.name + " (" + info2.val + ")";
             let metrics2 = ctx.measureText(text2);
             let box2W = metrics2.width + (paddingH * 2);
-            let currentSizeForTwin2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.055);
-            let box2H = fontSize + (paddingV * 3) + currentSizeForTwin2 + 10;
+            let box2H = fontSize + (paddingV * 3) + previewSize + 10;
             let box2X = canvas.width - box2W - 15;
             let box2Y = 15;
 
@@ -1840,8 +1839,8 @@
             ctx.fillStyle = elementColor;
             ctx.fillText(text2, box2X + paddingH, box2Y + paddingV);
             let shape2X = box2X + (box2W / 2);
-            let shape2Y = box2Y + paddingV + fontSize + 5 + (currentSizeForTwin2 / 2);
-            drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
+            let shape2Y = box2Y + paddingV + fontSize + 5 + (previewSize / 2);
+            drawStandardShape(shape2X, shape2Y, previewSize, 0, elementColor, standard2Type);
 
             ctx.restore();
         }
