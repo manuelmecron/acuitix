@@ -673,7 +673,7 @@
             </div>
 
             <button class="btn" style="margin-top: 6px;" onclick="goToColorSelectionFromXY()">Valider les axes X/Y ➡️</button>
-            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="goToPreCapture()">⬅️ Retour</button>
+            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="backToPreCapture()">⬅️ Retour</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
@@ -1188,14 +1188,14 @@
 
             let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
-            liveCtx.lineWidth = Math.max(4, w / 200);
+            liveCtx.lineWidth = Math.max(1, w / 600);
             liveCtx.beginPath();
             liveCtx.moveTo(currentYAxisX, 0);
             liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
             liveCtx.strokeStyle = '#FF0000';
-            liveCtx.lineWidth = Math.max(4, w / 200);
+            liveCtx.lineWidth = Math.max(1, w / 600);
             liveCtx.beginPath();
             liveCtx.moveTo(0, h / 2);
             liveCtx.lineTo(w, h / 2);
@@ -1658,7 +1658,7 @@
                 ctx.strokeStyle = elementColor;
                 ctx.fillStyle = elementColor;
                 ctx.globalAlpha = currentOpacity;
-                ctx.lineWidth = Math.max(4, canvas.width / 250);
+                ctx.lineWidth = Math.max(1, canvas.width / 600);
                 let pw = canvas.width * 0.45;
                 let ph = canvas.height * 0.45;
                 ctx.strokeRect(canvas.width / 2 - pw / 2, canvas.height / 2 - ph / 2, pw, ph);
@@ -1668,7 +1668,7 @@
 
             if (step === 0 && !isForExport && !isSelectingColorState) {
                 ctx.save();
-                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.lineWidth = Math.max(1, canvas.width / 600);
 
                 ctx.save();
                 ctx.strokeStyle = '#FF0000';
@@ -1729,7 +1729,7 @@
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(3, refW / 350);
+                ctx.lineWidth = Math.max(1, refW / 600);
                 ctx.beginPath();
                 ctx.moveTo(corners[0].x, corners[0].y);
                 ctx.lineTo(corners[2].x, corners[2].y);
@@ -1743,7 +1743,7 @@
                     ctx.strokeStyle = elementColor;
                     ctx.fillStyle = elementColor;
                     ctx.globalAlpha = currentOpacity * 0.4;
-                    ctx.lineWidth = Math.max(2, refW / 400);
+                    ctx.lineWidth = Math.max(1, refW / 600);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
                     ctx.fill();
@@ -1756,7 +1756,7 @@
                     ctx.save();
                     ctx.strokeStyle = '#FF0000';
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    ctx.lineWidth = Math.max(3, refW / 350);
+                    ctx.lineWidth = Math.max(1, refW / 600);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
@@ -1777,14 +1777,14 @@
         function dessinerCroixCentre(x, y, col = elementColor) {
             ctx.save();
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(4, canvas.width / 250);
+            ctx.lineWidth = Math.max(2, canvas.width / 500);
             ctx.beginPath();
             ctx.moveTo(x - 8, y); ctx.lineTo(x + 8, y);
             ctx.moveTo(x, y - 8); ctx.lineTo(x, y + 8);
             ctx.stroke();
 
             ctx.strokeStyle = col;
-            ctx.lineWidth = Math.max(2, canvas.width / 400);
+            ctx.lineWidth = Math.max(1, canvas.width / 800);
             ctx.beginPath();
             ctx.moveTo(x - 6, y); ctx.lineTo(x + 6, y);
             ctx.moveTo(x, y - 6); ctx.lineTo(x, y + 6);
@@ -1800,30 +1800,30 @@
             if (type === '11') {
                 let half = size / 2;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
                 ctx.strokeRect(-half, -half, size, size);
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.lineWidth = Math.max(1, canvas.width / 800);
                 ctx.strokeRect(-half, -half, size, size);
             } else if (type === 'CARD') {
                 let cardW = size;
                 let cardH = size * (54 / 85);
                 let radius = cardH * 0.15;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.lineWidth = Math.max(1, canvas.width / 800);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
             } else {
                 let radius = size / 2;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(6, canvas.width / 200);
+                ctx.lineWidth = Math.max(2, canvas.width / 500);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                ctx.lineWidth = Math.max(1, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.stroke();
@@ -1854,7 +1854,7 @@
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(7, canvas.width / 220);
+            ctx.lineWidth = Math.max(2, canvas.width / 500);
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
@@ -1863,7 +1863,7 @@
 
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(3, canvas.width / 350);
+            ctx.lineWidth = Math.max(1, canvas.width / 800);
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
