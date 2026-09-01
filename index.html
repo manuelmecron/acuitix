@@ -808,10 +808,17 @@
             </div>
 
             <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 4px; margin-bottom: 4px;">
-                <div class="tool-section-title" style="color: #ffc107;">🔍 Zoom (Loupe)</div>
+                <div class="tool-section-title" style="color: #ffc107;">🔍 Zoom & Panoramique</div>
                 <div class="safe-button-grid">
                     <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
                     <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
+                </div>
+                <div class="tool-section-title" style="color: #ffc107; margin-top: 4px; margin-bottom:2px;">Déplacement panoramique image</div>
+                <div class="safe-button-grid" style="margin-bottom: 4px;">
+                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, 2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 2), 40)" ontouchend="stopAction()">⬆️ Haut</button>
+                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, -2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -2), 40)" ontouchend="stopAction()">⬇️ Bas</button>
+                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(2, 0), 40)" ontouchend="stopAction()">⬅️ Gauche</button>
+                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(-2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-2, 0), 40)" ontouchend="stopAction()">➡️ Droite</button>
                 </div>
                 <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
@@ -918,9 +925,7 @@
         };
 
         window.handleCenterRecenterClick2 = function() {
-            triggerRecenterPrompt(() => {
-                resetCurrentPos();
-            });
+            resetCurrentPos();
         };
 
         function getXYStep() {
@@ -1620,9 +1625,7 @@
         }
 
         window.askResetCurrentPos = function() {
-            triggerRecenterPrompt(() => {
-                resetCurrentPos();
-            });
+            resetCurrentPos();
         }
 
         function resetCurrentPos() {
@@ -1786,54 +1789,36 @@
 
         function drawOverlayInfoBoxes(refW) {
             ctx.save();
-            let fontSize = Math.max(8, refW / 42);
+            let fontSize = Math.max(7, refW / 55);
             ctx.font = 'bold ' + fontSize + 'px Arial';
             ctx.textBaseline = 'top';
-            let paddingH = 6;
-            let paddingV = 4;
 
             let info1 = getStandardInfo(standard1Type);
             let text1 = "1. " + info1.name + " (" + info1.val + ")";
             let metrics1 = ctx.measureText(text1);
-            let box1W = metrics1.width + (paddingH * 2);
             let baseSize1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.035);
-            let currentSizeForTwin1 = baseSize1 * 0.55;
-            let box1H = fontSize + (paddingV * 3) + currentSizeForTwin1 + 6;
-            let box1X = 10;
-            let box1Y = 10;
-
-            ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
-            ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(1.5, refW / 500);
-            ctx.fillRect(box1X, box1Y, box1W, box1H);
-            ctx.strokeRect(box1X, box1Y, box1W, box1H);
+            let currentSizeForTwin1 = baseSize1 * 0.45;
+            let box1X = 8;
+            let box1Y = 8;
 
             ctx.fillStyle = elementColor;
-            ctx.fillText(text1, box1X + paddingH, box1Y + paddingV);
-            let shape1X = box1X + (box1W / 2);
-            let shape1Y = box1Y + paddingV + fontSize + 3 + (currentSizeForTwin1 / 2);
+            ctx.fillText(text1, box1X, box1Y);
+            let shape1X = box1X + (metrics1.width / 2);
+            let shape1Y = box1Y + fontSize + 4 + (currentSizeForTwin1 / 2);
             drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
 
             let info2 = getStandardInfo(standard2Type);
             let text2 = "2. " + info2.name + " (" + info2.val + ")";
             let metrics2 = ctx.measureText(text2);
-            let box2W = metrics2.width + (paddingH * 2);
             let baseSize2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.035);
-            let currentSizeForTwin2 = baseSize2 * 0.55;
-            let box2H = fontSize + (paddingV * 3) + currentSizeForTwin2 + 6;
-            let box2X = canvas.width - box2W - 10;
-            let box2Y = 10;
-
-            ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
-            ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(1.5, refW / 500);
-            ctx.fillRect(box2X, box2Y, box2W, box2H);
-            ctx.strokeRect(box2X, box2Y, box2W, box2H);
+            let currentSizeForTwin2 = baseSize2 * 0.45;
+            let box2X = canvas.width - metrics2.width - 8;
+            let box2Y = 8;
 
             ctx.fillStyle = elementColor;
-            ctx.fillText(text2, box2X + paddingH, box2Y + paddingV);
-            let shape2X = box2X + (box2W / 2);
-            let shape2Y = box2Y + paddingV + fontSize + 3 + (currentSizeForTwin2 / 2);
+            ctx.fillText(text2, box2X, box2Y);
+            let shape2X = box2X + (metrics2.width / 2);
+            let shape2Y = box2Y + fontSize + 4 + (currentSizeForTwin2 / 2);
             drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
 
             ctx.restore();
