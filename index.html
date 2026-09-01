@@ -1066,6 +1066,25 @@
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
 
+            // Fixation invariable des axes X et Y sur l'instantané capturé au même endroit
+            const w = tempCanvas.width;
+            const h = tempCanvas.height;
+
+            let currentYAxisX = (w / 2) + liveYAxisXOffset;
+            tempCtx.strokeStyle = '#00FF00';
+            tempCtx.lineWidth = Math.max(4, w / 200);
+            tempCtx.beginPath();
+            tempCtx.moveTo(currentYAxisX, 0);
+            tempCtx.lineTo(currentYAxisX, h);
+            tempCtx.stroke();
+
+            tempCtx.strokeStyle = '#FF0000';
+            tempCtx.lineWidth = Math.max(4, w / 200);
+            tempCtx.beginPath();
+            tempCtx.moveTo(0, h / 2);
+            tempCtx.lineTo(w, h / 2);
+            tempCtx.stroke();
+
             const img = new Image();
             img.onload = function() {
                 if (mediaStream) {
@@ -1097,16 +1116,16 @@
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
-                let w = canvas.width;
-                let h = canvas.height;
-                let defaultSize = w * 0.055;
+                let wCanvas = canvas.width;
+                let hCanvas = canvas.height;
+                let defaultSize = wCanvas * 0.055;
                 box1.size = defaultSize;
                 box2.size = defaultSize;
                 for(let i=0; i<4; i++) {
-                    corners[i].size = w * 0.06;
+                    corners[i].size = wCanvas * 0.06;
                 }
-                tempX = w * 0.5;
-                tempY = h * 0.5;
+                tempX = wCanvas * 0.5;
+                tempY = hCanvas * 0.5;
                 tempAngle = 0;
                 tempSize = defaultSize;
 
