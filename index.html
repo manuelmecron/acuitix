@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.107 - Assistant CAO Compact</title>
+    <title>Acuitix V.107 - Assistant CAO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,7 +30,6 @@
             display: none;
         }
         
-        /* Correction : Agrandissement de la zone visuelle pour occuper un espace optimal sans tout écraser */
         .box {
             background: #2a2a2a;
             border: 2px solid #555;
@@ -42,7 +41,7 @@
             align-items: center;
             justify-content: center;
             margin: 2px auto;
-            max-height: 65vh; /* Augmenté de 38vh à 65vh pour un confort visuel type app native */
+            max-height: 65vh;
             width: 100%;
         }
         canvas, video {
@@ -53,7 +52,7 @@
             display: none;
             cursor: crosshair;
             touch-action: manipulation;
-            object-fit: contain; /* Préserve la résolution native tout en s'étirant proprement */
+            object-fit: contain;
         }
         
         #welcome-panel, #initial-standard-panel {
@@ -360,7 +359,6 @@
             line-height: 1.3;
         }
 
-        /* Overlay d'avertissement orientation portrait pour la caméra live */
         #camera-orientation-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -395,24 +393,19 @@
     </div>
 
     <div class="box" id="media-box">
-        <!-- Overlay d'avertissement paysage -->
         <div id="camera-orientation-overlay">
             <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐</div>
             <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">MODE PAYSAGE REQUIS</p>
             <p style="color: #fff; font-size: 0.7rem; margin: 4px 0;">Veuillez basculer votre téléphone à l'horizontale pour voir le flux vidéo.</p>
         </div>
         
-        <!-- Flux vidéo live in-app -->
         <video id="camera-stream" autoplay playsinline muted></video>
-        <!-- Canvas de travail CAO -->
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
-        <!-- Input galerie/disque uniquement -->
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
-        <!-- PAGE 1 : Choix des étalons -->
         <div id="initial-standard-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
@@ -448,7 +441,6 @@
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
         </div>
 
-        <!-- PAGE 2 : Étape 0 (Flux Caméra Live ou Import) -->
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
                 <div class="camera-badge">📱 🔄 📸</div>
@@ -494,7 +486,6 @@
             </div>
         </div>
 
-        <!-- Panneau de capture directe depuis le flux live -->
         <div id="live-capture-panel" style="display: none; background: #333; padding: 6px; border-radius: 6px; margin-top: 4px;">
             <button class="btn" style="background: #28a745; padding: 12px; margin-top:0;" onclick="captureLiveSnapshot()">📸 Capturer la photo</button>
             <button class="btn btn-danger" style="margin-top: 4px; padding: 8px;" onclick="stopLiveCameraAndReset()">❌ Annuler / Quitter la caméra</button>
@@ -755,8 +746,8 @@
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
+        const mainTitle = document.querySelector('h1');
 
-        // Synchronisation intelligente pour l'étalon 11
         let isSyncing = false;
         function handleStandardChange(changedBox) {
             if (isSyncing) return;
@@ -840,7 +831,6 @@
             statusText.style.display = 'none';
         }
 
-        // Vérification et affichage du flux Caméra en direct In-App avec passage plein écran
         window.startLiveCamera = async function() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -862,10 +852,11 @@
             welcomePanel.style.display = 'none';
             videoElement.style.display = 'block';
             liveCapturePanel.style.display = 'block';
-            statusText.style.display = 'block';
-            statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
+            
+            // Masquer le titre h1 et le statusText pour éliminer les bandes du haut
+            mainTitle.style.display = 'none';
+            statusText.style.display = 'none';
 
-            // Passage direct du conteneur en plein écran au moment de la photo/live
             const mediaBox = document.getElementById('media-box');
             mediaBox.style.position = 'fixed';
             mediaBox.style.top = '0';
@@ -921,6 +912,11 @@
             liveCapturePanel.style.display = 'none';
             cameraOrientationOverlay.style.display = 'none';
             resetMediaBoxStyle();
+            
+            // Restaurer le titre et le statusText
+            mainTitle.style.display = 'block';
+            statusText.style.display = 'block';
+
             welcomePanel.style.display = 'block';
             statusText.innerText = "Étape 0 : Source de l'image";
         }
@@ -947,8 +943,11 @@
                 liveCapturePanel.style.display = 'none';
                 cameraOrientationOverlay.style.display = 'none';
                 
-                // Restauration de l'interface normale après la capture
                 resetMediaBoxStyle();
+
+                // Restaurer le titre et le statusText
+                mainTitle.style.display = 'block';
+                statusText.style.display = 'block';
 
                 currentImg = img;
                 rotationAngle = 0;
@@ -986,7 +985,6 @@
             img.src = tempCanvas.toDataURL('image/png');
         }
 
-        // Importation d'image depuis la galerie ou le disque
         function handleImageFile(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1178,6 +1176,7 @@
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
             sideColorDrawer.classList.remove('open');
+            mainTitle.style.display = 'block';
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
