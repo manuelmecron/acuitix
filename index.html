@@ -1214,14 +1214,14 @@
 
             let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
-            liveCtx.lineWidth = Math.max(3, w / 250);
+            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
             liveCtx.beginPath();
             liveCtx.moveTo(currentYAxisX, 0);
             liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
             liveCtx.strokeStyle = '#FF0000';
-            liveCtx.lineWidth = Math.max(3, w / 250);
+            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
             liveCtx.beginPath();
             liveCtx.moveTo(0, h / 2);
             liveCtx.lineTo(w, h / 2);
@@ -1684,7 +1684,7 @@
                 ctx.strokeStyle = elementColor;
                 ctx.fillStyle = elementColor;
                 ctx.globalAlpha = currentOpacity;
-                ctx.lineWidth = Math.max(3, canvas.width / 250);
+                ctx.lineWidth = Math.max(1.5, canvas.width / 700); // Trait affiné ultra-précis
                 let pw = canvas.width * 0.45;
                 let ph = canvas.height * 0.45;
                 ctx.strokeRect(canvas.width / 2 - pw / 2, canvas.height / 2 - ph / 2, pw, ph);
@@ -1694,7 +1694,7 @@
 
             if (step === 0 && !isForExport && !isSelectingColorState) {
                 ctx.save();
-                ctx.lineWidth = Math.max(3, canvas.width / 250);
+                ctx.lineWidth = Math.max(2, canvas.width / 500); // Lignes axes X/Y affinées
 
                 ctx.save();
                 ctx.strokeStyle = '#FF0000';
@@ -1759,7 +1759,7 @@
             if (step >= 7) {
                 ctx.save();
                 ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(3, refW / 250);
+                ctx.lineWidth = Math.max(1.5, refW / 700); // Contour général affiné
                 ctx.beginPath();
                 ctx.moveTo(corners[0].x, corners[0].y);
                 ctx.lineTo(corners[2].x, corners[2].y);
@@ -1773,7 +1773,7 @@
                     ctx.strokeStyle = elementColor;
                     ctx.fillStyle = elementColor;
                     ctx.globalAlpha = currentOpacity * 0.4;
-                    ctx.lineWidth = Math.max(3, refW / 250);
+                    ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
                     ctx.fill();
@@ -1786,13 +1786,13 @@
                     ctx.save();
                     ctx.strokeStyle = '#FF0000';
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                    ctx.lineWidth = Math.max(3, refW / 250);
+                    ctx.lineWidth = Math.max(1.5, refW / 700);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     ctx.fillStyle = '#FFFFFF';
-                    ctx.font = 'bold ' + Math.max(12, refW / 30) + 'px Arial';
+                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('H' + (idx + 1), h.x, h.y);
@@ -1806,18 +1806,20 @@
 
         function dessinerCroixCentre(x, y, col = elementColor) {
             ctx.save();
+            // Contour noir de contraste très fin (substitut anti-crénelage pour CAO)
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(4, canvas.width / 350);
-            ctx.beginPath();
-            ctx.moveTo(x - 10, y); ctx.lineTo(x + 10, y);
-            ctx.moveTo(x, y - 10); ctx.lineTo(x, y + 10);
-            ctx.stroke();
-
-            ctx.strokeStyle = col;
-            ctx.lineWidth = Math.max(2.5, canvas.width / 450);
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
             ctx.beginPath();
             ctx.moveTo(x - 8, y); ctx.lineTo(x + 8, y);
             ctx.moveTo(x, y - 8); ctx.lineTo(x, y + 8);
+            ctx.stroke();
+
+            // Ligne fine principale
+            ctx.strokeStyle = col;
+            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+            ctx.beginPath();
+            ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y);
+            ctx.moveTo(x, y - 7); ctx.lineTo(x, y + 7);
             ctx.stroke();
             ctx.restore();
         }
@@ -1830,7 +1832,7 @@
             if (type === '11') {
                 let half = size / 2;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(4, canvas.width / 350);
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.strokeRect(-half, -half, size, size);
                 ctx.beginPath();
                 ctx.moveTo(-half, -half);
@@ -1840,7 +1842,7 @@
                 ctx.stroke();
 
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(2.5, canvas.width / 450);
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800); // Épaisseur affinée CAO
                 ctx.strokeRect(-half, -half, size, size);
                 ctx.beginPath();
                 ctx.moveTo(-half, -half);
@@ -1853,20 +1855,20 @@
                 let cardH = size * (54 / 85);
                 let radius = cardH * 0.15;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(4, canvas.width / 350);
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(2.5, canvas.width / 450);
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
             } else {
                 let radius = size / 2;
                 ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(4, canvas.width / 350);
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(2.5, canvas.width / 450);
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.stroke();
@@ -1897,7 +1899,7 @@
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(4, canvas.width / 350);
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
@@ -1906,7 +1908,7 @@
 
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(2.5, canvas.width / 450);
+            ctx.lineWidth = Math.max(1.0, canvas.width / 800); // Ligne fine de coin de repère
             ctx.beginPath();
             ctx.moveTo(dirX * size, 0);
             ctx.lineTo(0, 0);
@@ -1914,7 +1916,7 @@
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.arc(0, 0, size * 0.15, 0, Math.PI * 2);
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
             ctx.restore();
