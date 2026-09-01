@@ -887,6 +887,7 @@
         let rotationAngle = 0;
         let imgOffsetX = 0;
         let imgOffsetY = 0;
+        let currentScaleRatio = 1.0;
         let box1 = { x: 0, y: 0, size: 0, angle: 0 };
         let box2 = { x: 0, y: 0, size: 0, angle: 0 };
         let corners = [
@@ -1351,6 +1352,7 @@
                 h = currentImg.width;
             }
             let ratio = Math.min(maxW / w, maxH / h);
+            currentScaleRatio = ratio;
             canvas.width = w * ratio;
             canvas.height = h * ratio;
         }
@@ -1471,7 +1473,9 @@
             ctx.save();
             ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
             ctx.rotate((rotationAngle * Math.PI) / 180);
-            ctx.drawImage(currentImg, -currentImg.width / 2, -currentImg.height / 2, currentImg.width, currentImg.height);
+            let drawW = currentImg.width * currentScaleRatio;
+            let drawH = currentImg.height * currentScaleRatio;
+            ctx.drawImage(currentImg, -drawW / 2, -drawH / 2, drawW, drawH);
             ctx.restore();
 
             let refW = canvas.width;
