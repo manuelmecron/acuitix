@@ -852,8 +852,8 @@
 
                     <div class="controls-right">
                         <div class="control-row">
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
+                            <button class="btn-info" onmousedown="startAction(() => adjustSize(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(0.5), 60)" ontouchend="stopAction()">➕ Échelle +</button>
+                            <button class="btn-info" onmousedown="startAction(() => adjustSize(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-0.5), 60)" ontouchend="stopAction()">➖ Échelle -</button>
                         </div>
                         <div class="control-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -1795,13 +1795,7 @@
                     ctx.stroke();
                     ctx.restore();
                     
-                    ctx.save();
-                    ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = Math.max(2.0, refW / 400);
-                    ctx.beginPath();
-                    ctx.arc(tempX, tempY, tempSize * 0.2, 0, Math.PI * 2);
-                    ctx.stroke();
-                    ctx.restore();
+                    dessinerCroixCentre(tempX, tempY, '#FF00FF');
                 }
 
                 // PERÇAGES VALIDÉS ET FINAUX
@@ -1814,13 +1808,11 @@
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
-                    
-                    ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = Math.max(2.0, refW / 400);
-                    ctx.beginPath();
-                    ctx.arc(h.x, h.y, h.radius * 0.2, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.restore();
 
+                    dessinerCroixCentre(h.x, h.y, '#FF00FF');
+
+                    ctx.save();
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
                     ctx.textAlign = 'left';
