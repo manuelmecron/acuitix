@@ -652,7 +652,7 @@
                         <button onmousedown="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" ontouchend="stopAction()">⬆️</button>
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <button id="center-recenter-btn" onclick="handleCenterRecenterClick()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
+                        <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" ontouchend="stopAction()">➡️</button>
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" ontouchend="stopAction()">⬇️</button>
@@ -813,6 +813,7 @@
                     <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
                     <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
                 </div>
+                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
                 <div class="tool-section-title" style="color: #ffc107; margin-top: 4px; margin-bottom:2px;">Déplacement panoramique image</div>
                 <div class="safe-button-grid" style="margin-bottom: 4px;">
                     <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, 2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 2), 40)" ontouchend="stopAction()">⬆️ Haut</button>
@@ -820,7 +821,6 @@
                     <button class="btn-secondary" onmousedown="startAction(() => panCamera(2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(2, 0), 40)" ontouchend="stopAction()">⬅️ Gauche</button>
                     <button class="btn-secondary" onmousedown="startAction(() => panCamera(-2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-2, 0), 40)" ontouchend="stopAction()">➡️ Droite</button>
                 </div>
-                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
             <div class="adjust-panel" id="adjust-panel">
@@ -832,7 +832,7 @@
                             <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(-5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-5, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                            <button id="center-recenter-btn-2" onclick="handleCenterRecenterClick2()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
+                            <div></div>
                             <button onmousedown="startAction(() => moveTarget(5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(5, 0), 40)" ontouchend="stopAction()">➡️</button>
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, 5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 5), 40)" ontouchend="stopAction()">⬇️</button>
@@ -1771,47 +1771,6 @@
             }
 
             ctx.globalAlpha = 1.0;
-            ctx.restore();
-
-            if (step >= 1 && step <= 2 && !isForExport) {
-                drawOverlayInfoBoxes(refW);
-            }
-        }
-
-        function drawOverlayInfoBoxes(refW) {
-            ctx.save();
-            let fontSize = Math.max(7, refW / 55);
-            ctx.font = 'bold ' + fontSize + 'px Arial';
-            ctx.textBaseline = 'top';
-
-            let info1 = getStandardInfo(standard1Type);
-            let text1 = "1. " + info1.name + " (" + info1.val + ")";
-            let metrics1 = ctx.measureText(text1);
-            let baseSize1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.035);
-            let currentSizeForTwin1 = baseSize1 * 0.45;
-            let box1X = 8;
-            let box1Y = 8;
-
-            ctx.fillStyle = elementColor;
-            ctx.fillText(text1, box1X, box1Y);
-            let shape1X = box1X + (metrics1.width / 2);
-            let shape1Y = box1Y + fontSize + 4 + (currentSizeForTwin1 / 2);
-            drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
-
-            let info2 = getStandardInfo(standard2Type);
-            let text2 = "2. " + info2.name + " (" + info2.val + ")";
-            let metrics2 = ctx.measureText(text2);
-            let baseSize2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.035);
-            let currentSizeForTwin2 = baseSize2 * 0.45;
-            let box2X = canvas.width - metrics2.width - 8;
-            let box2Y = 8;
-
-            ctx.fillStyle = elementColor;
-            ctx.fillText(text2, box2X, box2Y);
-            let shape2X = box2X + (metrics2.width / 2);
-            let shape2Y = box2Y + fontSize + 4 + (currentSizeForTwin2 / 2);
-            drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
-
             ctx.restore();
         }
 
