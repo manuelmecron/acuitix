@@ -1440,7 +1440,7 @@
             tutorialPanel.style.display = 'none';
             colorChoicePanel.style.display = 'block';
             statusText.innerText = "Choix de la couleur du tracé";
-            isSelectingColorState = false;
+            isSelectingColorState = true;
             redrawCanvas();
         }
 
@@ -1664,8 +1664,22 @@
             let refW = canvas.width;
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
+            // Élément éphémère de prévisualisation pendant le choix de la couleur
+            if (isSelectingColorState && !isForExport) {
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.fillStyle = elementColor;
+                ctx.globalAlpha = currentOpacity;
+                ctx.lineWidth = Math.max(4, canvas.width / 250);
+                let pw = canvas.width * 0.45;
+                let ph = canvas.height * 0.45;
+                ctx.strokeRect(canvas.width / 2 - pw / 2, canvas.height / 2 - ph / 2, pw, ph);
+                dessinerCroixCentre(canvas.width / 2, canvas.height / 2, elementColor);
+                ctx.restore();
+            }
+
             // Rendu des axes X (Rouge) et Y (Vert) indépendants lors de l'étape 0 (Ajustement XY)
-            if (step === 0 && !isForExport) {
+            if (step === 0 && !isForExport && !isSelectingColorState) {
                 ctx.save();
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
 
