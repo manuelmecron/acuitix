@@ -172,30 +172,6 @@
             touch-action: manipulation;
         }
 
-        .camera-pan-container {
-            background: #262626;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 4px;
-            margin-bottom: 4px;
-        }
-        .camera-pan-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 4px;
-        }
-        .camera-pan-grid button {
-            padding: 10px 4px;
-            background: #495057;
-            color: white;
-            border: 1px solid #6c757d;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
         .gameboy-container {
             display: flex;
             justify-content: space-between;
@@ -373,7 +349,6 @@
             text-align: center;
         }
 
-        /* --- STYLES EXCLUSIFS : Plein écran Live Caméra restauré (object-fit: cover) --- */
         body.live-fullscreen-mode {
             margin: 0;
             padding: 0;
@@ -413,7 +388,7 @@
             width: 100% !important;
             height: 100% !important;
             max-height: none !important;
-            object-fit: cover !important; /* PLEIN ÉCRAN RESTAURÉ sans bandes noires */
+            object-fit: cover !important;
             display: block !important;
         }
         body.live-fullscreen-mode #live-guide-canvas {
@@ -451,35 +426,33 @@
 <body>
 
     <h1>Acuitix V.107 - Assistant CAO</h1>
-    <div id="status-text">Étalonnage[cite: 7]</div>
+    <div id="status-text">Étalonnage</div>
 
-    <!-- Bouton de retour en haut à gauche (Cercle avec flèche) en mode live -->
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
 
-    <!-- Boutons de capture circulaires de chaque côté (gauche et droite) en bas - cachés par défaut, affichés uniquement en paysage -->
     <div id="live-capture-buttons-container" style="display:none;">
         <button class="live-circle-capture-btn" style="position:fixed; bottom:25px; left:25px; z-index:100000;" onclick="captureLiveSnapshot()">📸</button>
         <button class="live-circle-capture-btn" style="position:fixed; bottom:25px; right:25px; z-index:100000;" onclick="captureLiveSnapshot()">📸</button>
     </div>
 
     <div id="side-color-drawer">
-        <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur[cite: 7]</div>
-        <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur[cite: 7]</h3>
-        <p style="font-size: 0.7rem; color: #ccc;">Modifiez le tracé instantanément :[cite: 7]</p>
+        <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
+        <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
+        <p style="font-size: 0.7rem; color: #ccc;">Modifiez le tracé instantanément :</p>
         <div class="color-palette">
-            <button class="color-choice-btn drawer-btn-cyan" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan[cite: 7]</button>
-            <button class="color-choice-btn drawer-btn-yellow" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune[cite: 7]</button>
-            <button class="color-choice-btn drawer-btn-magenta" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta[cite: 7]</button>
-            <button class="color-choice-btn drawer-btn-white" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc[cite: 7]</button>
+            <button class="color-choice-btn drawer-btn-cyan" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
+            <button class="color-choice-btn drawer-btn-yellow" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
+            <button class="color-choice-btn drawer-btn-magenta" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
+            <button class="color-choice-btn drawer-btn-white" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
         </div>
-        <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖[cite: 7]</button>
+        <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖</button>
     </div>
 
     <div class="box" id="media-box">
         <div id="camera-orientation-overlay">
-            <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐[cite: 7]</div>
-            <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">MODE PAYSAGE REQUIS[cite: 7]</p>
-            <p style="color: #fff; font-size: 0.7rem; margin: 4px 0;">Veuillez basculer votre téléphone à l'horizontale pour voir le flux vidéo.[cite: 7]</p>
+            <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐</div>
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">MODE PAYSAGE REQUIS</p>
+            <p style="color: #fff; font-size: 0.7rem; margin: 4px 0;">Veuillez basculer votre téléphone à l'horizontale pour voir le flux vidéo.</p>
         </div>
         
         <video id="camera-stream" autoplay playsinline muted></video>
@@ -491,90 +464,97 @@
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
         <div id="initial-standard-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons[cite: 7]</h3>
-            <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :[cite: 7]</p>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
+            <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
             
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :[cite: 7]</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
             <select id="select-standard-1" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)[cite: 7]</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)[cite: 7]</option>
-                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)[cite: 7]</option>
-                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)[cite: 7]</option>
-                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)[cite: 7]</option>
-                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)[cite: 7]</option>
-                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)[cite: 7]</option>
-                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)[cite: 7]</option>
-                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)[cite: 7]</option>
-                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)[cite: 7]</option>
+                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
+                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
-            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :[cite: 7]</label>
+            <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
             <select id="select-standard-2" class="standard-select">
-                <option value="11">Étalon 11 (Carré - 10x10 mm)[cite: 7]</option>
-                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)[cite: 7]</option>
-                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)[cite: 7]</option>
-                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)[cite: 7]</option>
-                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)[cite: 7]</option>
-                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)[cite: 7]</option>
-                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)[cite: 7]</option>
-                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)[cite: 7]</option>
-                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)[cite: 7]</option>
-                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)[cite: 7]</option>
+                <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
+                <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
+                <option value="1E">Pièce de 1 € (Cercle - Ø 23.25 mm)</option>
+                <option value="0.50E">Pièce de 50 Centimes (Cercle - Ø 24.25 mm)</option>
+                <option value="0.20E">Pièce de 20 Centimes (Cercle - Ø 22.25 mm)</option>
+                <option value="0.10E">Pièce de 10 Centimes (Cercle - Ø 19.75 mm)</option>
+                <option value="0.05E">Pièce de 5 Centimes (Cercle - Ø 21.25 mm)</option>
+                <option value="0.02E">Pièce de 2 Centimes (Cercle - Ø 18.75 mm)</option>
+                <option value="0.01E">Pièce de 1 Centime (Cercle - Ø 16.25 mm)</option>
+                <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
             </select>
 
-            <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️[cite: 7]</button>
+            <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
         </div>
 
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
-                <div class="camera-badge">📱 🔄 📸[cite: 7]</div>
+                <div class="camera-badge">📱 🔄 📸</div>
                 <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin: 2px 0; text-transform: uppercase;">
-                    ⚠️ MODE PAYSAGE REQUIS[cite: 7]
+                    ⚠️ MODE PAYSAGE REQUIS
                 </p>
                 <p style="color: #fff; font-size: 0.72rem; margin: 2px 0; line-height: 1.3;">
-                    Pivotez votre téléphone en <b>paysage (horizontal)</b> pour activer le flux de la caméra arrière (Zoom X1).[cite: 7]
+                    Pivotez votre téléphone en <b>paysage (horizontal)</b> pour activer le flux de la caméra arrière (Zoom X1).
                 </p>
             </div>
 
             <div class="photo-guide-frame">
                 <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0; text-transform: uppercase;">
-                    Attention : Prenez l'objet ENTIER ![cite: 7]
+                    Attention : Prenez l'objet ENTIER !
                 </p>
                 <p style="color: #fff; font-size: 0.75rem; margin: 2px 0;">
-                    Placez vos <b>2 étalons</b> choisis à gauche et à droite de l'objet.[cite: 7]
+                    Placez vos <b>2 étalons</b> choisis à gauche et à droite de l'objet.
                 </p>
                 
                 <div class="pickguards-gallery">
                     <div class="pickguard-thumb valid">
-                        <div class="thumb-status-icon" style="color: #28a745;">✅ Correct[cite: 7]</div>
+                        <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                         <svg viewBox="0 0 140 92"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                        Plaque droite[cite: 7]
+                        Plaque droite
                     </div>
                     <div class="pickguard-thumb invalid">
-                        <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur[cite: 7]</div>
+                        <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
                             <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
                         </svg>
-                        Plaque de biais[cite: 7]
+                        Plaque de biais
                     </div>
                 </div>
             </div>
 
-            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 0 : SOURCE DE L'IMAGE[cite: 7]</p>
+            <p style="color: #fff; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">📸 ÉTAPE 0 : SOURCE DE L'IMAGE</p>
             <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-secondary" onclick="backToStandards()" style="margin-top:0; padding:8px; flex:1;">⬅️ Retour[cite: 7]</button>
-                    <button class="btn" onclick="startLiveCamera()" style="margin-top:0; padding:8px; flex:1;">📸 Caméra Live (Arrière)[cite: 7]</button>
+                    <button class="btn btn-secondary" onclick="backToStandards()" style="margin-top:0; padding:8px; flex:1;">⬅️ Retour</button>
+                    <button class="btn" onclick="startLiveCamera()" style="margin-top:0; padding:8px; flex:1;">📸 Caméra Live (Arrière)</button>
                 </div>
-                <label for="file-input-gallery" class="btn btn-info" style="margin-top:0; padding:8px;">📁 Importer (Galerie / Disque)[cite: 7]</label>
+                <label for="file-input-gallery" class="btn btn-info" style="margin-top:0; padding:8px;">📁 Importer (Galerie / Disque)</label>
             </div>
         </div>
 
-        <!-- NOUVELLE PAGE D'AJUSTEMENT DES AXES X ET Y -->
+        <!-- PAGE D'AJUSTEMENT STRUCTURÉE -->
         <div id="xy-adjustment-panel" class="adjust-panel">
-            <h3>📐 Ajustement des Axes X et Y</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Sélectionnez l'axe, réglez la force et ajustez.</p>
+            <h3>📐 Ajustement et Calage</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Ajustez le zoom, sélectionnez l'axe et positionnez.</p>
             
+            <!-- 1. Zoom + / - juste en dessous de la photo -->
+            <div class="safe-button-grid" style="margin-bottom: 6px;">
+                <button class="btn-info" onmousedown="startAction(() => adjustZoom(0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(0.3), 100)" ontouchend="stopAction()">🔍+ Zoom</button>
+                <button class="btn-info" onmousedown="startAction(() => adjustZoom(-0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(-0.3), 100)" ontouchend="stopAction()">🔍- Zoom</button>
+            </div>
+
+            <!-- 2. Sélection de l'axe -->
             <div style="margin-bottom: 6px;">
                 <label style="font-size: 0.7rem; color: #ffc107; font-weight: bold;">Sélecteur d'Axe :</label>
                 <select id="active-xy-selector" class="standard-select">
@@ -591,20 +571,22 @@
                 </select>
             </div>
 
+            <!-- Réglage d'opacité fonctionnel -->
             <div class="opacity-control-box">
-                <label for="xy-opacity-slider">Opacité traits X & Y : <span id="xy-opacity-val">90</span>%</label>
+                <label for="xy-opacity-slider">Opacité traits : <span id="xy-opacity-val">90</span>%</label>
                 <input type="range" id="xy-opacity-slider" min="20" max="100" value="90" oninput="changerOpaciteXY(this.value)">
             </div>
 
             <div class="gameboy-container">
                 <div class="dpad-container">
-                    <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Axe / Déplacement</div>
+                    <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Déplacement (mm)</div>
                     <div class="dpad-grid">
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" ontouchend="stopAction()">⬆️</button>
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <div style="background:#2a2a2a; border-radius:4px;"></div>
+                        <!-- Centre avec confirmation en deux actions pour recentrer -->
+                        <button id="center-recenter-btn" onclick="handleCenterRecenterClick()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
                         <button onmousedown="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" ontouchend="stopAction()">➡️</button>
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, getXYStep()), 40)" ontouchend="stopAction()">⬇️</button>
@@ -618,23 +600,9 @@
                         <button class="btn-info" onmousedown="startAction(() => adjustXYScale(-getScaleStep()), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYScale(-getScaleStep()), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                     </div>
                     <div class="control-row">
-                        <button class="btn-info" onmousedown="startAction(() => adjustZoom(0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(0.3), 100)" ontouchend="stopAction()">🔍+ Loupe</button>
-                        <button class="btn-info" onmousedown="startAction(() => adjustZoom(-0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(-0.3), 100)" ontouchend="stopAction()">🔍- Loupe</button>
-                    </div>
-                    <div class="control-row">
                         <button onmousedown="startAction(() => adjustXYAngle(-getAngleStep()), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAngle(-getAngleStep()), 70)" ontouchend="stopAction()">↺ Inclinaison -</button>
                         <button onmousedown="startAction(() => adjustXYAngle(getAngleStep()), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAngle(getAngleStep()), 70)" ontouchend="stopAction()">↻ Inclinaison +</button>
                     </div>
-                </div>
-            </div>
-
-            <div class="camera-pan-container" style="margin-top: 4px;">
-                <div class="tool-section-title">🧭 Navigation image (Droite / Droite de l'écran)</div>
-                <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panImage(0, 5), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 5), 50)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button onmousedown="startAction(() => panImage(0, -5), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -5), 50)" ontouchend="stopAction()">⬇️ Bas</button>
-                    <button onmousedown="startAction(() => panImage(5, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(5, 0), 50)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button onmousedown="startAction(() => panImage(-5, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-5, 0), 50)" ontouchend="stopAction()">➡️ Droite</button>
                 </div>
             </div>
 
@@ -643,202 +611,182 @@
         </div>
 
         <div id="pre-capture-tools" class="adjust-panel">
-            <h3>📷 1. Orientation & Cadrage[cite: 7]</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (extrémités visibles).[cite: 7]</p>
+            <h3>📷 1. Orientation & Cadrage</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (cliquez directement pour déplacer).</p>
             
             <div class="pickguards-gallery" style="margin-bottom: 6px;">
                 <div class="pickguard-thumb valid">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <svg viewBox="0 0 140 92"><rect x="25" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                    Bien cadrée[cite: 7]
+                    Bien cadrée
                 </div>
                 <div class="pickguard-thumb invalid">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                     <svg viewBox="0 0 140 92"><rect x="-15" y="16" width="90" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
-                    Coupée / Désaxée[cite: 7]
-                </div>
-            </div>
-
-            <div class="camera-pan-container" style="margin-bottom: 4px;">
-                <div class="tool-section-title">🖼️ Déplacement de l'image[cite: 7]</div>
-                <div class="camera-pan-grid">
-                    <button onmousedown="startAction(() => panImage(0, 5), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, 5), 50)" ontouchend="stopAction()">⬆️ Haut[cite: 7]</button>
-                    <button onmousedown="startAction(() => panImage(0, -5), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(0, -5), 50)" ontouchend="stopAction()">⬇️ Bas[cite: 7]</button>
-                    <button onmousedown="startAction(() => panImage(5, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(5, 0), 50)" ontouchend="stopAction()">⬅️ Gauche[cite: 7]</button>
-                    <button onmousedown="startAction(() => panImage(-5, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panImage(-5, 0), 50)" ontouchend="stopAction()">➡️ Droite[cite: 7]</button>
+                    Coupée / Désaxée
                 </div>
             </div>
 
             <div class="safe-button-grid" style="margin-bottom: 4px;">
-                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)[cite: 7]</button>
-                <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer[cite: 7]</button>
-                <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom[cite: 7]</button>
-                <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom[cite: 7]</button>
+                <button class="btn-warning" onclick="rotateImage90()">🔄 Pivoter (90°)</button>
+                <button class="btn-secondary" onclick="resetCanvasAndTempPos()">🎯 Recentrer</button>
+                <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
             </div>
             
-            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Valider ce cadrage ➡️[cite: 7]</button>
-            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo[cite: 7]</button>
+            <button class="btn" style="margin-top: 4px;" onclick="goToColorSelection()">Valider ce cadrage ➡️</button>
+            <button class="btn btn-danger" style="margin-top: 4px;" onclick="resetToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
         <div id="color-choice-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">🎨 Choix de la couleur du tracé[cite: 7]</h3>
-            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur :[cite: 7]</p>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">🎨 Choix de la couleur du tracé</h3>
+            <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur :</p>
             
             <div class="color-palette">
-                <button class="color-choice-btn selected" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan[cite: 7]</button>
-                <button class="color-choice-btn" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune[cite: 7]</button>
-                <button class="color-choice-btn" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta[cite: 7]</button>
-                <button class="color-choice-btn" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc[cite: 7]</button>
+                <button class="color-choice-btn selected" style="background:#00FFFF; color:#000;" onclick="selectColorManual('#00FFFF', this)">Cyan</button>
+                <button class="color-choice-btn" style="background:#FFFF00; color:#000;" onclick="selectColorManual('#FFFF00', this)">Jaune</button>
+                <button class="color-choice-btn" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
+                <button class="color-choice-btn" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
             </div>
 
             <div class="nav-buttons" style="margin-top: 8px;">
-                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour[cite: 7]</button>
-                <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️[cite: 7]</button>
+                <button class="btn btn-secondary" onclick="backToPreCapture()" style="margin-top:0;">⬅️ Retour</button>
+                <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
             </div>
         </div>
 
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments[cite: 7]</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Le repère vert doit être parfaitement aligné et parallèle au modèle rouge :[cite: 7]
+                Le repère vert doit être parfaitement aligné et parallèle au modèle rouge :
             </p>
             
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Parfaitement axé[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Parfaitement axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Orientation correcte[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Orientation correcte</span>
                 </div>
 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Rotation (45°)[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Rotation (45°)</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <g transform="rotate(45, 60, 40)">
                             <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                         </g>
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Repère vert de biais[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Repère vert de biais</span>
                 </div>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0; padding:8px;">⬅️ Retour[cite: 7]</button>
-                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Centrage) ➡️[cite: 7]</button>
+                <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Centrage) ➡️</button>
             </div>
         </div>
 
         <div id="tutorial-panel-2">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments[cite: 7]</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Vérifiez la superposition exacte des contours extérieurs :[cite: 7]
+                Vérifiez la superposition exacte des contours extérieurs :
             </p>
 
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Élément bien axé[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Élément bien axé</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Superposition parfaite[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Superposition parfaite</span>
                 </div>
                 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Décalage[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Décalage</div>
                     <svg viewBox="0 0 120 80">
                         <rect x="20" y="15" width="80" height="50" fill="red" />
                         <rect x="35" y="24" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Élément vert décalé[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Élément vert décalé</span>
                 </div>
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="backToTutorialStep1()" style="margin-top:0; padding:8px;">⬅️ Retour[cite: 7]</button>
-                <button class="btn" onclick="goToTutorialStep3()" style="margin-top:0; padding:8px;">Suivant (Échelle) ➡️[cite: 7]</button>
+                <button class="btn btn-secondary" onclick="backToTutorialStep1()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="goToTutorialStep3()" style="margin-top:0; padding:8px;">Suivant (Échelle) ➡️</button>
             </div>
         </div>
 
         <div id="tutorial-panel-3">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Alignement des échelles[cite: 7]</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Alignement des échelles</h3>
             
             <div class="opacity-control-box" style="margin-top:4px; padding:4px;">
-                <label style="font-size: 0.65rem;">Opacité repères : 90%[cite: 7]</label>
+                <label style="font-size: 0.65rem;">Opacité repères : 90%</label>
                 <input type="range" min="20" max="100" value="90" style="width:100%; cursor:pointer;" disabled>
             </div>
 
             <div class="pickguards-gallery" style="margin-top:4px;">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <svg viewBox="0 0 40 40">
                         <rect x="-10" y="-10" width="60" height="60" fill="red" />
                         <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="5" />
                         <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords alignés[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords alignés</span>
                 </div>
                 
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur[cite: 7]</div>
+                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                     <svg viewBox="0 0 40 40">
                         <rect x="5" y="5" width="45" height="45" fill="red" />
                         <rect x="-2" y="-2" width="55" height="55" fill="none" stroke="#00FF00" stroke-width="5" />
                         <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Imprécis[cite: 7]</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Imprécis</span>
                 </div>
             </div>
 
             <div class="tip-box">
                 💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élément "à raz" l'objet à détourer<br><br>
-                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python.[cite: 7]
+                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python.
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="backToTutorialStep2()" style="margin-top:0; padding:8px;">⬅️ Retour[cite: 7]</button>
-                <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">OK, j'ai compris ➡️[cite: 7]</button>
+                <button class="btn btn-secondary" onclick="backToTutorialStep2()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
+                <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">OK, j'ai compris ➡️</button>
             </div>
         </div>
 
         <div id="general-tools-container" style="display: none;">
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité repères : <span id="opacity-val">90</span>%[cite: 7]</label>
+                <label for="opacity-slider">Opacité repères : <span id="opacity-val">90</span>%</label>
                 <input type="range" id="opacity-slider" min="20" max="100" value="90" oninput="changerOpacite(this.value)">
             </div>
 
             <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 4px; margin-bottom: 4px;">
-                <div class="tool-section-title" style="color: #ffc107;">🔍 Zoom (Loupe)[cite: 7]</div>
+                <div class="tool-section-title" style="color: #ffc107;">🔍 Zoom (Loupe)</div>
                 <div class="safe-button-grid">
-                    <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom[cite: 7]</button>
-                    <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom[cite: 7]</button>
+                    <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
+                    <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
                 </div>
-                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément[cite: 7]</button>
+                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
             </div>
 
             <div class="adjust-panel" id="adjust-panel">
-                <div class="camera-pan-container">
-                    <div class="tool-section-title">🔍 Panoramique de la vue[cite: 7]</div>
-                    <div class="camera-pan-grid">
-                        <button onmousedown="startAction(() => panCamera(0, 40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 40), 50)" ontouchend="stopAction()">⬆️ Haut[cite: 7]</button>
-                        <button onmousedown="startAction(() => panCamera(0, -40), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -40), 50)" ontouchend="stopAction()">⬇️ Bas[cite: 7]</button>
-                        <button onmousedown="startAction(() => panCamera(40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(40, 0), 50)" ontouchend="stopAction()">⬅️ Gauche[cite: 7]</button>
-                        <button onmousedown="startAction(() => panCamera(-40, 0), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-40, 0), 50)" ontouchend="stopAction()">➡️ Droite[cite: 7]</button>
-                    </div>
-                </div>
-
                 <div class="gameboy-container">
                     <div class="dpad-container">
-                        <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Ajustement[cite: 7]</div>
+                        <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Ajustement</div>
                         <div class="dpad-grid">
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(-5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-5, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                            <div style="background:#2a2a2a; border-radius:4px;"></div>
+                            <button id="center-recenter-btn-2" onclick="handleCenterRecenterClick2()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
                             <button onmousedown="startAction(() => moveTarget(5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(5, 0), 40)" ontouchend="stopAction()">➡️</button>
                             <div></div>
                             <button onmousedown="startAction(() => moveTarget(0, 5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 5), 40)" ontouchend="stopAction()">⬇️</button>
@@ -848,30 +796,30 @@
 
                     <div class="controls-right">
                         <div class="control-row">
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +[cite: 7]</button>
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -[cite: 7]</button>
+                            <button class="btn-info" onmousedown="startAction(() => adjustSize(2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(2), 50)" ontouchend="stopAction()">➕ Échelle +</button>
+                            <button class="btn-info" onmousedown="startAction(() => adjustSize(-2), 50)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-2), 50)" ontouchend="stopAction()">➖ Échelle -</button>
                         </div>
                         <div class="control-row">
-                            <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°[cite: 7]</button>
-                            <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°[cite: 7]</button>
+                            <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
+                            <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
                         </div>
                     </div>
                 </div>
 
                 <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
-                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="askAddHole()">✅ Ajouter ce perçage[cite: 7]</button>
-                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Supprimer dernier perçage[cite: 7]</button>
+                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Supprimer dernier perçage</button>
                 </div>
 
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; padding: 10px;">⬅️ Retour[cite: 7]</button>
-                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape[cite: 7]</button>
+                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; padding: 10px;">⬅️ Retour</button>
+                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape</button>
                 </div>
             </div>
         </div>
 
-        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive[cite: 7]</a>
-        <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer[cite: 7]</button>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive</a>
+        <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer</button>
     </div>
 
     <script>
@@ -883,7 +831,6 @@
         const liveCtx = liveGuideCanvas.getContext('2d');
         let liveAnimFrameId = null;
 
-        // Variables pour le déplacement de l'axe Y live
         let isDraggingYAxis = false;
         let liveYAxisXOffset = 0;
 
@@ -908,26 +855,61 @@
         const selectStandard2 = document.getElementById('select-standard-2');
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
-        // Fonctions utilitaires de force pour la page d'ajustement X/Y
+        let recenterStep = 0;
+        window.handleCenterRecenterClick = function() {
+            const btn = document.getElementById('center-recenter-btn');
+            if (!btn) return;
+            if (recenterStep === 0) {
+                recenterStep = 1;
+                btn.style.background = '#dc3545';
+                btn.style.color = '#fff';
+                btn.innerText = '⚠️?';
+            } else {
+                recenterStep = 0;
+                btn.style.background = '#444';
+                btn.style.color = '#ffc107';
+                btn.innerText = '🎯';
+                resetCurrentPos();
+            }
+        };
+
+        let recenterStep2 = 0;
+        window.handleCenterRecenterClick2 = function() {
+            const btn = document.getElementById('center-recenter-btn-2');
+            if (!btn) return;
+            if (recenterStep2 === 0) {
+                recenterStep2 = 1;
+                btn.style.background = '#dc3545';
+                btn.style.color = '#fff';
+                btn.innerText = '⚠️?';
+            } else {
+                recenterStep2 = 0;
+                btn.style.background = '#444';
+                btn.style.color = '#ffc107';
+                btn.innerText = '🎯';
+                resetCurrentPos();
+            }
+        };
+
         function getXYStep() {
-            const force = document.getElementById('xy-force-selector').value;
+            const force = document.getElementById('xy-force-selector')?.value || 'coarse';
             return force === 'fine' ? 1 : 5;
         }
         function getScaleStep() {
-            const force = document.getElementById('xy-force-selector').value;
+            const force = document.getElementById('xy-force-selector')?.value || 'coarse';
             return force === 'fine' ? 1 : 3;
         }
         function getAngleStep() {
-            const force = document.getElementById('xy-force-selector').value;
+            const force = document.getElementById('xy-force-selector')?.value || 'coarse';
             return force === 'fine' ? 0.1 : 1.0;
         }
 
         window.adjustXYAxisPos = function(dx, dy) {
-            const activeAxis = document.getElementById('active-xy-selector').value;
+            const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
             if (activeAxis === 'X') {
-                tempY += dy;
-            } else {
                 tempX += dx;
+            } else {
+                tempY += dy;
             }
             redrawCanvas();
         }
@@ -942,7 +924,12 @@
 
         window.changerOpaciteXY = function(val) {
             currentOpacity = val / 100;
-            document.getElementById('xy-opacity-val').innerText = val;
+            const valEl = document.getElementById('xy-opacity-val');
+            if (valEl) valEl.innerText = val;
+            const sliderGen = document.getElementById('opacity-slider');
+            if (sliderGen) sliderGen.value = val;
+            const valGen = document.getElementById('opacity-val');
+            if (valGen) valGen.innerText = val;
             redrawCanvas();
         }
 
@@ -950,7 +937,7 @@
             welcomePanel.style.display = 'none';
             xyAdjustmentPanel.style.display = 'block';
             statusText.style.display = 'block';
-            statusText.innerText = "Ajustement des axes X et Y";
+            statusText.innerText = "Ajustement et Calage";
             canvas.style.display = 'block';
             redrawCanvas();
         }
@@ -962,7 +949,6 @@
             redrawCanvas();
         }
 
-        // Écouteurs pour le déplacement intuitif de l'axe Y par glisser/toucher
         liveGuideCanvas.addEventListener('pointerdown', (e) => {
             isDraggingYAxis = true;
             updateYAxisPosition(e);
@@ -1088,7 +1074,6 @@
                 }
             }
 
-            // Forcer explicitement le zoom x1 sur la piste vidéo si supporté par l'appareil
             const videoTrack = mediaStream.getVideoTracks()[0];
             if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
                 const capabilities = videoTrack.getCapabilities();
@@ -1127,7 +1112,6 @@
             const w = liveGuideCanvas.width;
             const h = liveGuideCanvas.height;
 
-            // Axe Y en Vert (Ligne verticale parfaitement droite déplaçable)
             let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
             liveCtx.lineWidth = Math.max(4, w / 200);
@@ -1136,7 +1120,6 @@
             liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
-            // Axe X en Rouge (Ligne horizontale de référence)
             liveCtx.strokeStyle = '#FF0000';
             liveCtx.lineWidth = Math.max(4, w / 200);
             liveCtx.beginPath();
@@ -1194,7 +1177,6 @@
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
 
-            // Fixation invariable des axes X et Y sur l'instantané capturé au même endroit
             const w = tempCanvas.width;
             const h = tempCanvas.height;
 
@@ -1314,11 +1296,9 @@
                 imgX = clientClickX;
                 imgY = clientClickY;
             }
-            if (!isSelectingColorState && step >= 1 && step <= 7) {
+            if (!isSelectingColorState) {
                 tempX = imgX;
                 tempY = imgY;
-                manualPanX = 0;
-                manualPanY = 0;
                 redrawCanvas();
             }
         });
@@ -1508,22 +1488,14 @@
             redrawCanvas();
         }
 
-        window.panImage = function(dx, dy) {
-            imgOffsetX += dx;
-            imgOffsetY += dy;
-            redrawCanvas();
-        }
-
         window.adjustZoom = function(delta) {
             zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
             redrawCanvas();
         }
 
         window.adjustAngle = function(deltaDeg) {
-            if (step >= 1 && step <= 6) {
-                tempAngle += deltaDeg;
-                redrawCanvas();
-            }
+            tempAngle += deltaDeg;
+            redrawCanvas();
         }
 
         window.adjustSize = function(deltaSize) {
@@ -1533,7 +1505,12 @@
 
         window.changerOpacite = function(val) {
             currentOpacity = val / 100;
-            document.getElementById('opacity-val').innerText = val;
+            const valEl = document.getElementById('opacity-val');
+            if (valEl) valEl.innerText = val;
+            const sliderXY = document.getElementById('xy-opacity-slider');
+            if (sliderXY) sliderXY.value = val;
+            const valXY = document.getElementById('xy-opacity-val');
+            if (valXY) valXY.innerText = val;
             redrawCanvas();
         }
 
@@ -1927,15 +1904,15 @@
         function updateUIState() {
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
-            btnPrev.style.display = (step >= 1) ? 'block' : 'none';
-            sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
+            if(btnPrev) btnPrev.style.display = (step >= 1) ? 'block' : 'none';
+            if(sideColorDrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
-                btnVal.innerText = "Terminer et Générer";
+                if(btnVal) btnVal.innerText = "Terminer et Générer";
             } else {
                 holeActionPanel.style.display = 'none';
-                btnVal.innerText = "Valider l'étape";
+                if(btnVal) btnVal.innerText = "Valider l'étape";
             }
 
             const descriptions = [
