@@ -1802,7 +1802,11 @@
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.stroke();
                     
-                    dessinerCroixCentre(h.x, h.y, '#FF0000');
+                    // Remplacement de la croix par un simple point au centre du perçage
+                    ctx.fillStyle = '#FF0000';
+                    ctx.beginPath();
+                    ctx.arc(h.x, h.y, 1.5, 0, Math.PI * 2);
+                    ctx.fill();
 
                     ctx.fillStyle = '#FFFFFF';
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
