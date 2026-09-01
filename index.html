@@ -1917,15 +1917,15 @@
 
         window.askPrevStep = function() {
             stopAction();
-            if (step === 1) {
-                generalToolsContainer.style.display = 'none';
-                adjustPanel.style.display = 'none';
-                tutorialPanel3.style.display = 'block';
-                statusText.innerText = "Consigne : Alignement de l'échelle";
-                redrawCanvas();
-                return;
-            }
             triggerBackPrompt(() => {
+                if (step === 1) {
+                    generalToolsContainer.style.display = 'none';
+                    adjustPanel.style.display = 'none';
+                    tutorialPanel3.style.display = 'block';
+                    statusText.innerText = "Consigne : Alignement de l'échelle";
+                    redrawCanvas();
+                    return;
+                }
                 prevStep();
             });
         }
