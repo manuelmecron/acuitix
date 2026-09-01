@@ -448,7 +448,6 @@
 </head>
 <body>
 
-    <!-- Modale de recentrage -->
     <div id="recenter-modal">
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Voulez-vous recentrer l'élément ?</p>
@@ -459,7 +458,6 @@
         </div>
     </div>
 
-    <!-- Modale de retour -->
     <div id="back-modal">
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Voulez-vous revenir à l'étape précédente ?</p>
@@ -480,7 +478,6 @@
         <button class="live-circle-capture-btn" style="position:fixed; bottom:25px; right:25px; z-index:100000;" onclick="captureLiveSnapshot()">📸</button>
     </div>
 
-    <!-- Tiroir couleur latéral -->
     <div id="side-color-drawer">
         <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
         <h3 style="color: #ffc107; font-size: 0.85rem; margin-top:0;">Changer la couleur</h3>
@@ -494,7 +491,6 @@
         <button class="btn btn-secondary" style="margin-top: 15px; padding: 8px; font-size: 0.75rem;" onclick="toggleColorDrawer()">Fermer ✖</button>
     </div>
 
-    <!-- Zone d'affichage média (Flux vidéo / Canvas) -->
     <div class="box" id="media-box">
         <div id="camera-orientation-overlay">
             <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐</div>
@@ -510,7 +506,6 @@
     <div>
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
-        <!-- Panneau initial : Choix des étalons -->
         <details id="initial-standard-panel" open>
             <summary style="color: #ffc107; font-size: 0.9rem; font-weight: bold; cursor: pointer; outline: none; list-style: none;">📏 Étalonnage : Choix des 2 Étalons ▾</summary>
             <div style="margin-top: 8px;">
@@ -548,7 +543,6 @@
             </div>
         </details>
 
-        <!-- Panneau d'accueil (Source image / Caméra) -->
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
                 <div class="camera-badge">📱 🔄 📸</div>
@@ -594,7 +588,6 @@
             </div>
         </div>
 
-        <!-- Panneau Pré-capture & Cadrage -->
         <div id="pre-capture-tools" class="adjust-panel">
             <h3>📷 1. Orientation & Cadrage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Positionnez l'image (cliquez directement pour déplacer).</p>
@@ -631,7 +624,6 @@
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- Panneau d'ajustement X/Y -->
         <div id="xy-adjustment-panel" class="adjust-panel">
             <h3>📐 Ajustement et Calage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Ajustez le zoom, sélectionnez l'axe et positionnez.</p>
@@ -695,7 +687,6 @@
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- Panneau de choix de couleur -->
         <div id="color-choice-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">🎨 Choix de la couleur du tracé</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez la couleur :</p>
@@ -713,9 +704,8 @@
             </div>
         </div>
 
-        <!-- Tutoriel 1 -->
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne : Orientation des éléments</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
                 Le repère vert doit être parfaitement aligné et parallèle au modèle rouge :
             </p>
@@ -748,9 +738,8 @@
             </div>
         </div>
 
-        <!-- Tutoriel 2 -->
         <div id="tutorial-panel-2">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne : Centrage des éléments</h3>
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
             <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
                 Vérifiez la superposition exacte des contours extérieurs :
             </p>
@@ -781,7 +770,6 @@
             </div>
         </div>
 
-        <!-- Tutoriel 3 -->
         <div id="tutorial-panel-3">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Alignement des échelles</h3>
             
@@ -823,7 +811,6 @@
             </div>
         </div>
 
-        <!-- Conteneur des outils généraux et contrôles de positionnement / perçages -->
         <div id="general-tools-container" style="display: none;">
             <div class="opacity-control-box">
                 <label for="opacity-slider">Opacité repères : <span id="opacity-val">100</span>%</label>
@@ -875,7 +862,6 @@
                     </div>
                 </div>
 
-                <!-- Menu de gestion des perçages (Étape 7) -->
                 <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
                     <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
                     <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Supprimer dernier perçage</button>
@@ -892,7 +878,6 @@
         <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer</button>
     </div>
 
-    <!-- Script JavaScript structuré et propre -->
     <script>
         const fileInputGallery = document.getElementById('file-input-gallery');
         const videoElement = document.getElementById('camera-stream');
@@ -1125,6 +1110,22 @@
         let standard1Type = "2E";
         let standard2Type = "2E";
 
+        function getStandardInfo(type) {
+            switch(type) {
+                case '11': return { name: 'Étalon 11 (Carré)', val: '10x10 mm' };
+                case '2E': return { name: 'Pièce de 2 €', val: 'Ø 25.75 mm' };
+                case '1E': return { name: 'Pièce de 1 €', val: 'Ø 23.25 mm' };
+                case '0.50E': return { name: 'Pièce de 50 Centimes', val: 'Ø 24.25 mm' };
+                case '0.20E': return { name: 'Pièce de 20 Centimes', val: 'Ø 22.25 mm' };
+                case '0.10E': return { name: 'Pièce de 10 Centimes', val: 'Ø 19.75 mm' };
+                case '0.05E': return { name: 'Pièce de 5 Centimes', val: 'Ø 21.25 mm' };
+                case '0.02E': return { name: 'Pièce de 2 Centimes', val: 'Ø 18.75 mm' };
+                case '0.01E': return { name: 'Pièce de 1 Centime', val: 'Ø 16.25 mm' };
+                case 'CARD': return { name: 'Carte de fidélité', val: '85x54 mm' };
+                default: return { name: 'Standard', val: '10 mm' };
+            }
+        }
+
         window.goToPhotoCapture = function() {
             standard1Type = selectStandard1.value;
             standard2Type = selectStandard2.value;
@@ -1228,14 +1229,14 @@
 
             let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
-            liveCtx.lineWidth = Math.max(2, w / 400);
+            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
             liveCtx.beginPath();
             liveCtx.moveTo(currentYAxisX, 0);
             liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
             liveCtx.strokeStyle = '#FF0000';
-            liveCtx.lineWidth = Math.max(2, w / 400);
+            liveCtx.lineWidth = Math.max(2, w / 400); // Lignes affinées
             liveCtx.beginPath();
             liveCtx.moveTo(0, h / 2);
             liveCtx.lineTo(w, h / 2);
@@ -1673,36 +1674,6 @@
             redrawCanvas();
         }
 
-        /* --- FONCTION DE RENDU PROPRE DES PERÇAGES --- */
-        function drawHole(x, y, radius, refW, isCurrent = false, label = "") {
-            ctx.save();
-            ctx.strokeStyle = '#FF00FF';
-            ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
-            ctx.lineWidth = Math.max(2.5, refW / 350);
-            
-            // Cercle extérieur du perçage
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Centre du perçage (cercle central propre, sans croix)
-            ctx.lineWidth = Math.max(2.0, refW / 400);
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 0.2, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Étiquette textuelle pour les perçages validés (ex: P1, P2...)
-            if (label) {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(label, x + radius + 8, y - radius);
-            }
-            ctx.restore();
-        }
-
         function redrawCanvas(isForExport = false) {
             if (!currentImg) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1812,14 +1783,60 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // Affichage du perçage en cours de placement (Étape 7 active)
+                // PERÇAGE EN COURS DE PLACEMENT (Étape 7 active)
                 if (!isForExport && step === 7) {
-                    drawHole(tempX, tempY, box1.size * 0.25, refW, true);
+                    ctx.save();
+                    ctx.strokeStyle = '#FF00FF';
+                    // Fond du cercle avec opacité très faible (0.05) pour visibilité Python/IA
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
+                    ctx.lineWidth = Math.max(2.0, refW / 400); 
+                    ctx.beginPath();
+                    ctx.arc(tempX, tempY, box1.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Centre parfaitement placé et fin (croix ultra-fine et précise)
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.lineWidth = 1;
+                    let cLen = Math.max(3, refW / 150);
+                    ctx.beginPath();
+                    ctx.moveTo(tempX - cLen, tempY);
+                    ctx.lineTo(tempX + cLen, tempY);
+                    ctx.moveTo(tempX, tempY - cLen);
+                    ctx.lineTo(tempX, tempY + cLen);
+                    ctx.stroke();
+                    ctx.restore();
                 }
 
-                // Affichage des perçages validés et finaux
+                // PERÇAGES VALIDÉS ET FINAUX (appliqués partout, même validés)
                 holes.forEach((h, idx) => {
-                    drawHole(h.x, h.y, h.radius, refW, false, 'P' + (idx + 1));
+                    ctx.save();
+                    ctx.strokeStyle = '#FF00FF';
+                    // Fond du cercle avec opacité très faible (0.05) pour visibilité Python/IA
+                    ctx.fillStyle = 'rgba(255, 0, 255, 0.05)';
+                    ctx.lineWidth = Math.max(2.0, refW / 400);
+                    ctx.beginPath();
+                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Centre parfaitement placé et fin (croix ultra-fine et précise)
+                    ctx.strokeStyle = '#FF00FF';
+                    ctx.lineWidth = 1;
+                    let cLen = Math.max(3, refW / 150);
+                    ctx.beginPath();
+                    ctx.moveTo(h.x - cLen, h.y);
+                    ctx.lineTo(h.x + cLen, h.y);
+                    ctx.moveTo(h.x, h.y - cLen);
+                    ctx.lineTo(h.x, h.y + cLen);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('P' + (idx + 1), h.x + h.radius + 8, h.y - h.radius);
+                    ctx.restore();
                 });
             }
 
