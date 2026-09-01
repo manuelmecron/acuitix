@@ -373,7 +373,7 @@
             text-align: center;
         }
 
-        /* --- STYLES EXCLUSIFS : Plein écran Live Caméra et Axes (X Rouge / Y Vert) --- */
+        /* --- STYLES EXCLUSIFS : Plein écran Live Caméra, Boutons ronds et Axes (X Rouge / Y Vert déplaçable) --- */
         body.live-fullscreen-mode {
             margin: 0;
             padding: 0;
@@ -394,7 +394,7 @@
             left: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
-            height: 100dvh !important; /* Plein écran dynamique mobile anti-barre Chrome */
+            height: 100dvh !important;
             max-height: none !important;
             margin: 0 !important;
             border: none !important;
@@ -413,24 +413,41 @@
             width: 100% !important;
             height: 100% !important;
             max-height: none !important;
-            object-fit: cover !important; /* Remplit tout l'écran sans déformer */
+            object-fit: cover !important;
             display: block !important;
         }
-        body.live-fullscreen-mode #live-capture-panel {
-            position: fixed !important;
-            bottom: 25px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            z-index: 100000;
-            width: 90%;
-            max-width: 380px;
-            background: rgba(0, 0, 0, 0.75);
-            padding: 8px;
-            border-radius: 8px;
+        body.live-fullscreen-mode #live-guide-canvas {
+            cursor: ew-resize !important;
+            pointer-events: auto !important;
+        }
+        body.live-fullscreen-mode #live-back-btn {
+            display: flex !important;
+        }
+        body.live-fullscreen-mode #live-capture-buttons-container {
             display: block !important;
         }
         body.live-fullscreen-mode #camera-orientation-overlay {
             z-index: 100001;
+        }
+
+        .live-circle-capture-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #28a745;
+            border: 3px solid #fff;
+            color: white;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .live-circle-capture-btn:active {
+            background: #1e7e34;
+            transform: scale(0.95);
         }
     </style>
 </head>
@@ -438,6 +455,15 @@
 
     <h1>Acuitix V.107 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
+
+    <!-- Bouton de retour en haut à gauche (Cercle avec flèche) en mode live -->
+    <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
+
+    <!-- Boutons de capture circulaires de chaque côté (gauche et droite) en bas -->
+    <div id="live-capture-buttons-container" style="display:none;">
+        <button class="live-circle-capture-btn" style="position:fixed; bottom:25px; left:25px; z-index:100000;" onclick="captureLiveSnapshot()">📸</button>
+        <button class="live-circle-capture-btn" style="position:fixed; bottom:25px; right:25px; z-index:100000;" onclick="captureLiveSnapshot()">📸</button>
+    </div>
 
     <div id="side-color-drawer">
         <div class="drawer-handle" onclick="toggleColorDrawer()">🎨 Couleur</div>
@@ -453,25 +479,20 @@
     </div>
 
     <div class="box" id="media-box">
-        <!-- Overlay d'avertissement paysage -->
         <div id="camera-orientation-overlay">
             <div style="font-size: 2rem; margin-bottom: 4px;">📱 🔄 📐</div>
             <p style="color: #ffc107; font-weight: bold; font-size: 0.85rem; margin: 2px 0;">MODE PAYSAGE REQUIS</p>
             <p style="color: #fff; font-size: 0.7rem; margin: 4px 0;">Veuillez basculer votre téléphone à l'horizontale pour voir le flux vidéo.</p>
         </div>
         
-        <!-- Flux vidéo live in-app -->
         <video id="camera-stream" autoplay playsinline muted></video>
-        <!-- Canvas de guidage en direct (Axe X Rouge / Axe Y Vert) -->
-        <canvas id="live-guide-canvas" style="display: none; pointer-events: none;"></canvas>
-        <!-- Canvas de travail CAO principal -->
+        <canvas id="live-guide-canvas" style="display: none;"></canvas>
         <canvas id="canvas"></canvas>
     </div>
 
     <div>
         <input type="file" id="file-input-gallery" accept="image/*" style="display: none;">
 
-        <!-- PAGE 1 : Choix des étalons -->
         <div id="initial-standard-panel">
             <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">📏 Étalonnage : Choix des 2 Étalons</h3>
             <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
@@ -507,7 +528,6 @@
             <button class="btn" style="margin-top: 8px;" onclick="goToPhotoCapture()">Valider les étalons ➡️</button>
         </div>
 
-        <!-- PAGE 2 : Étape 0 (Flux Caméra Live ou Import) -->
         <div id="welcome-panel">
             <div class="photo-guide-frame" style="border: 2px solid #ffc107; background: rgba(255,193,7,0.1);">
                 <div class="camera-badge">📱 🔄 📸</div>
@@ -551,12 +571,6 @@
                 </div>
                 <label for="file-input-gallery" class="btn btn-info" style="margin-top:0; padding:8px;">📁 Importer (Galerie / Disque)</label>
             </div>
-        </div>
-
-        <!-- Panneau de capture directe depuis le flux live -->
-        <div id="live-capture-panel" style="display: none; background: #333; padding: 6px; border-radius: 6px; margin-top: 4px;">
-            <button class="btn" style="background: #28a745; padding: 12px; margin-top:0;" onclick="captureLiveSnapshot()">📸 Capturer la photo</button>
-            <button class="btn btn-danger" style="margin-top: 4px; padding: 8px;" onclick="stopLiveCameraAndReset()">❌ Annuler / Quitter la caméra</button>
         </div>
 
         <div id="pre-capture-tools" class="adjust-panel">
@@ -800,9 +814,14 @@
         const liveCtx = liveGuideCanvas.getContext('2d');
         let liveAnimFrameId = null;
 
+        // Variables pour le déplacement de l'axe Y live
+        let isDraggingYAxis = false;
+        let liveYAxisXOffset = 0;
+
         const welcomePanel = document.getElementById('welcome-panel');
         const initialStandardPanel = document.getElementById('initial-standard-panel');
-        const liveCapturePanel = document.getElementById('live-capture-panel');
+        const liveBackBtn = document.getElementById('live-back-btn');
+        const liveCaptureButtonsContainer = document.getElementById('live-capture-buttons-container');
         const preCaptureTools = document.getElementById('pre-capture-tools');
         const colorChoicePanel = document.getElementById('color-choice-panel');
         const tutorialPanel = document.getElementById('tutorial-panel');
@@ -819,7 +838,26 @@
         const selectStandard2 = document.getElementById('select-standard-2');
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
-        // Synchronisation intelligente pour l'étalon 11
+        // Écouteurs pour le déplacement intuitif de l'axe Y par glisser/toucher
+        liveGuideCanvas.addEventListener('pointerdown', (e) => {
+            isDraggingYAxis = true;
+            updateYAxisPosition(e);
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!isDraggingYAxis) return;
+            updateYAxisPosition(e);
+        });
+        window.addEventListener('pointerup', () => {
+            isDraggingYAxis = false;
+        });
+
+        function updateYAxisPosition(e) {
+            const rect = liveGuideCanvas.getBoundingClientRect();
+            const scaleX = liveGuideCanvas.width / rect.width;
+            const clientX = (e.clientX - rect.left) * scaleX;
+            liveYAxisXOffset = clientX - (liveGuideCanvas.width / 2);
+        }
+
         let isSyncing = false;
         function handleStandardChange(changedBox) {
             if (isSyncing) return;
@@ -903,7 +941,6 @@
             statusText.style.display = 'none';
         }
 
-        // --- Flux Caméra Live : Active le mode plein écran et les axes X/Y ---
         window.startLiveCamera = async function() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -923,12 +960,12 @@
             videoElement.srcObject = mediaStream;
             isLiveCameraActive = true;
             
-            // Activation du mode plein écran global uniquement pendant la prise de vue
             document.body.classList.add('live-fullscreen-mode');
             welcomePanel.style.display = 'none';
             videoElement.style.display = 'block';
             liveGuideCanvas.style.display = 'block';
-            liveCapturePanel.style.display = 'block';
+            liveBackBtn.style.display = 'flex';
+            liveCaptureButtonsContainer.style.display = 'block';
             statusText.style.display = 'block';
             statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
 
@@ -936,7 +973,6 @@
             window.addEventListener('resize', checkOrientationForLiveCamera);
             window.addEventListener('orientationchange', checkOrientationForLiveCamera);
 
-            // Lancement de la boucle de rendu des axes X (Rouge) et Y (Vert)
             startLiveGuidesLoop();
         }
 
@@ -951,12 +987,13 @@
             const w = liveGuideCanvas.width;
             const h = liveGuideCanvas.height;
 
-            // Axe Y en Vert (Ligne verticale de référence)
+            // Axe Y en Vert (Ligne verticale parfaitement droite déplaçable)
+            let currentYAxisX = (w / 2) + liveYAxisXOffset;
             liveCtx.strokeStyle = '#00FF00';
             liveCtx.lineWidth = Math.max(4, w / 200);
             liveCtx.beginPath();
-            liveCtx.moveTo(w / 2, 0);
-            liveCtx.lineTo(w / 2, h);
+            liveCtx.moveTo(currentYAxisX, 0);
+            liveCtx.lineTo(currentYAxisX, h);
             liveCtx.stroke();
 
             // Axe X en Rouge (Ligne horizontale de référence)
@@ -975,10 +1012,12 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             if (isPortrait) {
                 cameraOrientationOverlay.style.display = 'flex';
-                liveCapturePanel.style.display = 'none';
+                liveCaptureButtonsContainer.style.display = 'none';
+                liveBackBtn.style.display = 'none';
             } else {
                 cameraOrientationOverlay.style.display = 'none';
-                liveCapturePanel.style.display = 'block';
+                liveCaptureButtonsContainer.style.display = 'block';
+                liveBackBtn.style.display = 'flex';
             }
         }
 
@@ -989,7 +1028,6 @@
             }
             isLiveCameraActive = false;
             
-            // Désactivation du mode plein écran et arrêt de la boucle d'axes
             document.body.classList.remove('live-fullscreen-mode');
             if (liveAnimFrameId) {
                 cancelAnimationFrame(liveAnimFrameId);
@@ -1000,7 +1038,8 @@
             window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
             videoElement.style.display = 'none';
             liveGuideCanvas.style.display = 'none';
-            liveCapturePanel.style.display = 'none';
+            liveBackBtn.style.display = 'none';
+            liveCaptureButtonsContainer.style.display = 'none';
             cameraOrientationOverlay.style.display = 'none';
             welcomePanel.style.display = 'block';
             statusText.innerText = "Étape 0 : Source de l'image";
@@ -1023,7 +1062,6 @@
                 }
                 isLiveCameraActive = false;
                 
-                // Nettoyage immédiat du plein écran live à la capture
                 document.body.classList.remove('live-fullscreen-mode');
                 if (liveAnimFrameId) {
                     cancelAnimationFrame(liveAnimFrameId);
@@ -1034,7 +1072,8 @@
                 window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
                 videoElement.style.display = 'none';
                 liveGuideCanvas.style.display = 'none';
-                liveCapturePanel.style.display = 'none';
+                liveBackBtn.style.display = 'none';
+                liveCaptureButtonsContainer.style.display = 'none';
                 cameraOrientationOverlay.style.display = 'none';
 
                 currentImg = img;
@@ -1073,7 +1112,6 @@
             img.src = tempCanvas.toDataURL('image/png');
         }
 
-        // Importation d'image depuis la galerie ou le disque
         function handleImageFile(e) {
             const file = e.target.files[0];
             if (!file) return;
