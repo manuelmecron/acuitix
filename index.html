@@ -421,9 +421,44 @@
             background: #1e7e34;
             transform: scale(0.95);
         }
+
+        /* Modal de confirmation de recentrage en plein milieu */
+        #recenter-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100002;
+        }
+        .recenter-modal-content {
+            background: #2a2a2a;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            max-width: 280px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Modal Recentrer -->
+    <div id="recenter-modal">
+        <div class="recenter-modal-content">
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Voulez vous recentrer la vue ?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="confirmRecenter(true)">Oui</button>
+                <button class="btn btn-danger" style="margin-top: 0;" onclick="confirmRecenter(false)">Non</button>
+            </div>
+        </div>
+    </div>
 
     <h1>Acuitix V.107 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
@@ -548,13 +583,11 @@
             <h3>📐 Ajustement et Calage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Ajustez le zoom, sélectionnez l'axe et positionnez.</p>
             
-            <!-- 1. Zoom + / - juste en dessous de la photo -->
             <div class="safe-button-grid" style="margin-bottom: 6px;">
                 <button class="btn-info" onmousedown="startAction(() => adjustZoom(0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(0.3), 100)" ontouchend="stopAction()">🔍+ Zoom</button>
                 <button class="btn-info" onmousedown="startAction(() => adjustZoom(-0.3), 100)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustZoom(-0.3), 100)" ontouchend="stopAction()">🔍- Zoom</button>
             </div>
 
-            <!-- 2. Sélection de l'axe -->
             <div style="margin-bottom: 6px;">
                 <label style="font-size: 0.7rem; color: #ffc107; font-weight: bold;">Sélecteur d'Axe :</label>
                 <select id="active-xy-selector" class="standard-select">
@@ -571,7 +604,6 @@
                 </select>
             </div>
 
-            <!-- Réglage d'opacité fonctionnel -->
             <div class="opacity-control-box">
                 <label for="xy-opacity-slider">Opacité traits : <span id="xy-opacity-val">90</span>%</label>
                 <input type="range" id="xy-opacity-slider" min="20" max="100" value="90" oninput="changerOpaciteXY(this.value)">
@@ -585,7 +617,6 @@
                         <button onmousedown="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(0, -getXYStep()), 40)" ontouchend="stopAction()">⬆️</button>
                         <div></div>
                         <button onmousedown="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(-getXYStep(), 0), 40)" ontouchend="stopAction()">⬅️</button>
-                        <!-- Centre avec confirmation en deux actions pour recentrer -->
                         <button id="center-recenter-btn" onclick="handleCenterRecenterClick()" title="Recentrer" style="background:#444; color:#ffc107; border:none; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">🎯</button>
                         <button onmousedown="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustXYAxisPos(getXYStep(), 0), 40)" ontouchend="stopAction()">➡️</button>
                         <div></div>
@@ -855,40 +886,34 @@
         const selectStandard2 = document.getElementById('select-standard-2');
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
-        let recenterStep = 0;
-        window.handleCenterRecenterClick = function() {
-            const btn = document.getElementById('center-recenter-btn');
-            if (!btn) return;
-            if (recenterStep === 0) {
-                recenterStep = 1;
-                btn.style.background = '#dc3545';
-                btn.style.color = '#fff';
-                btn.innerText = '⚠️?';
-            } else {
-                recenterStep = 0;
-                btn.style.background = '#444';
-                btn.style.color = '#ffc107';
-                btn.innerText = '🎯';
-                resetCurrentPos();
-            }
+        // Gestion de la modale de confirmation pour le recentrage
+        let pendingRecenterCallback = null;
+
+        window.triggerRecenterPrompt = function(callback) {
+            pendingRecenterCallback = callback;
+            const modal = document.getElementById('recenter-modal');
+            if (modal) modal.style.display = 'flex';
         };
 
-        let recenterStep2 = 0;
-        window.handleCenterRecenterClick2 = function() {
-            const btn = document.getElementById('center-recenter-btn-2');
-            if (!btn) return;
-            if (recenterStep2 === 0) {
-                recenterStep2 = 1;
-                btn.style.background = '#dc3545';
-                btn.style.color = '#fff';
-                btn.innerText = '⚠️?';
-            } else {
-                recenterStep2 = 0;
-                btn.style.background = '#444';
-                btn.style.color = '#ffc107';
-                btn.innerText = '🎯';
-                resetCurrentPos();
+        window.confirmRecenter = function(yes) {
+            const modal = document.getElementById('recenter-modal');
+            if (modal) modal.style.display = 'none';
+            if (yes && typeof pendingRecenterCallback === 'function') {
+                pendingRecenterCallback();
             }
+            pendingRecenterCallback = null;
+        };
+
+        window.handleCenterRecenterClick = function() {
+            triggerRecenterPrompt(() => {
+                resetCurrentPos();
+            });
+        };
+
+        window.handleCenterRecenterClick2 = function() {
+            triggerRecenterPrompt(() => {
+                resetCurrentPos();
+            });
         };
 
         function getXYStep() {
@@ -996,7 +1021,7 @@
         let currentImg = null;
         let mediaStream = null;
         let isLiveCameraActive = false;
-        let step = 1;
+        let step = 0;
         let rotationAngle = 0;
         let imgOffsetX = 0;
         let imgOffsetY = 0;
@@ -1453,14 +1478,16 @@
         }
 
         window.resetCanvasAndTempPos = function() {
-            imgOffsetX = 0;
-            imgOffsetY = 0;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            redrawCanvas();
+            triggerRecenterPrompt(() => {
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                redrawCanvas();
+            });
         }
 
         window.startAction = function(actionFn, speedMs) {
@@ -1533,9 +1560,9 @@
         }
 
         window.askResetCurrentPos = function() {
-            if (confirm("Recentrez l'élément ?")) {
+            triggerRecenterPrompt(() => {
                 resetCurrentPos();
-            }
+            });
         }
 
         function resetCurrentPos() {
@@ -1566,6 +1593,31 @@
 
             let refW = canvas.width;
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
+
+            // Rendu des axes mobiles lors de l'étape 0 (Ajustement XY)
+            if (step === 0 && !isForExport) {
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.lineWidth = Math.max(3, canvas.width / 300);
+                
+                ctx.translate(tempX, tempY);
+                ctx.rotate((tempAngle * Math.PI) / 180);
+
+                // Axe Y
+                ctx.beginPath();
+                ctx.moveTo(0, -canvas.height * 2);
+                ctx.lineTo(0, canvas.height * 2);
+                ctx.stroke();
+
+                // Axe X
+                ctx.beginPath();
+                ctx.moveTo(-canvas.width * 2, 0);
+                ctx.lineTo(canvas.width * 2, 0);
+                ctx.stroke();
+
+                ctx.restore();
+                dessinerCroixCentre(tempX, tempY);
+            }
 
             if (step >= 1) {
                 let rx = step === 1 ? tempX : box1.x;
