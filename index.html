@@ -422,7 +422,6 @@
             transform: scale(0.95);
         }
 
-        /* Modal de confirmation de recentrage en plein milieu */
         #recenter-modal {
             position: fixed;
             top: 0;
@@ -449,7 +448,6 @@
 </head>
 <body>
 
-    <!-- Modal Recentrer -->
     <div id="recenter-modal">
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Voulez vous recentrer la vue ?</p>
@@ -501,9 +499,9 @@
         <details id="initial-standard-panel" open>
             <summary style="color: #ffc107; font-size: 0.9rem; font-weight: bold; cursor: pointer; outline: none; list-style: none;">📏 Étalonnage : Choix des 2 Étalons ▾</summary>
             <div style="margin-top: 8px;">
-                <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo :</p>
+                <p style="font-size: 0.72rem; color: #ddd; margin: 2px 0 6px 0;">Sélectionnez l'étalonnage à gauche et à droite pour la future photo[cite: 15] :</p>
                 
-                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche) :</label>
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon principal (Gauche)[cite: 15] :</label>
                 <select id="select-standard-1" class="standard-select">
                     <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                     <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -517,7 +515,7 @@
                     <option value="CARD">Carte de fidélité standard (Rectangle arrondi - 85x54 mm)</option>
                 </select>
 
-                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit) :</label>
+                <label style="font-size:0.7rem; color:#ffc107; font-weight:bold;">Étalon secondaire (Droit)[cite: 15] :</label>
                 <select id="select-standard-2" class="standard-select">
                     <option value="11">Étalon 11 (Carré - 10x10 mm)</option>
                     <option value="2E" selected>Pièce de 2 € (Cercle - Ø 25.75 mm)</option>
@@ -616,7 +614,6 @@
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
-        <!-- PAGE D'AJUSTEMENT STRUCTURÉE -->
         <div id="xy-adjustment-panel" class="adjust-panel">
             <h3>📐 Ajustement et Calage</h3>
             <p style="font-size: 0.75rem; color: #ddd; margin: 2px 0 4px 0;">Ajustez le zoom, sélectionnez l'axe et positionnez.</p>
@@ -676,7 +673,7 @@
             </div>
 
             <button class="btn" style="margin-top: 6px;" onclick="goToColorSelectionFromXY()">Valider les axes X/Y ➡️</button>
-            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="backToPreCapture()">⬅️ Retour</button>
+            <button class="btn btn-secondary" style="margin-top: 4px;" onclick="goToPreCapture()">⬅️ Retour</button>
             <button class="btn btn-danger" style="margin-top: 4px;" onclick="backToWelcome()">🔄 Reprendre une photo</button>
         </div>
 
@@ -897,7 +894,6 @@
         const selectStandard2 = document.getElementById('select-standard-2');
         const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
 
-        // Gestion de la modale de confirmation pour le recentrage
         let pendingRecenterCallback = null;
 
         window.triggerRecenterPrompt = function(callback) {
@@ -940,7 +936,6 @@
             return force === 'fine' ? 0.1 : 1.0;
         }
 
-        // Axes X et Y indépendants pour l'étape 0
         let xyAxisX = { x: 0, y: 0, angle: 0 };
         let xyAxisY = { x: 0, y: 0, angle: 0 };
 
@@ -1664,7 +1659,6 @@
             let refW = canvas.width;
             ctx.globalAlpha = isForExport ? 1.0 : currentOpacity;
 
-            // Élément éphémère de prévisualisation pendant le choix de la couleur
             if (isSelectingColorState && !isForExport) {
                 ctx.save();
                 ctx.strokeStyle = elementColor;
@@ -1678,12 +1672,10 @@
                 ctx.restore();
             }
 
-            // Rendu des axes X (Rouge) et Y (Vert) indépendants lors de l'étape 0 (Ajustement XY)
             if (step === 0 && !isForExport && !isSelectingColorState) {
                 ctx.save();
                 ctx.lineWidth = Math.max(3, canvas.width / 300);
 
-                // Axe X en ROUGE
                 ctx.save();
                 ctx.strokeStyle = '#FF0000';
                 ctx.translate(xyAxisX.x, xyAxisX.y);
@@ -1695,7 +1687,6 @@
                 ctx.restore();
                 dessinerCroixCentre(xyAxisX.x, xyAxisX.y, '#FF0000');
 
-                // Axe Y en VERT
                 ctx.save();
                 ctx.strokeStyle = '#00FF00';
                 ctx.translate(xyAxisY.x, xyAxisY.y);
@@ -1788,59 +1779,62 @@
             ctx.globalAlpha = 1.0;
             ctx.restore();
 
-            if (step >= 1 && step <= 6 && !isForExport) {
+            if (step >= 1 && step <= 2 && !isForExport) {
                 drawOverlayInfoBoxes(refW);
             }
         }
 
         function drawOverlayInfoBoxes(refW) {
             ctx.save();
-            ctx.font = 'bold ' + Math.max(10, refW / 32) + 'px Arial';
+            let fontSize = Math.max(8, refW / 42);
+            ctx.font = 'bold ' + fontSize + 'px Arial';
             ctx.textBaseline = 'top';
-            let paddingH = 8;
-            let paddingV = 5;
-            let fontSize = Math.max(10, refW / 32);
-            let previewSize = 35; // Taille fixe et compacte pour les miniatures des étalons
+            let paddingH = 6;
+            let paddingV = 4;
 
             let info1 = getStandardInfo(standard1Type);
             let text1 = "1. " + info1.name + " (" + info1.val + ")";
             let metrics1 = ctx.measureText(text1);
             let box1W = metrics1.width + (paddingH * 2);
-            let box1H = fontSize + (paddingV * 3) + previewSize + 10;
-            let box1X = 15;
-            let box1Y = 15;
+            let baseSize1 = (step === 1) ? tempSize : (step > 1 ? box1.size : refW * 0.055);
+            let currentSizeForTwin1 = baseSize1 * 0.55;
+            let box1H = fontSize + (paddingV * 3) + currentSizeForTwin1 + 6;
+            let box1X = 10;
+            let box1Y = 10;
 
             ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
             ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(2, refW / 400);
+            ctx.lineWidth = Math.max(1.5, refW / 500);
             ctx.fillRect(box1X, box1Y, box1W, box1H);
             ctx.strokeRect(box1X, box1Y, box1W, box1H);
 
             ctx.fillStyle = elementColor;
             ctx.fillText(text1, box1X + paddingH, box1Y + paddingV);
             let shape1X = box1X + (box1W / 2);
-            let shape1Y = box1Y + paddingV + fontSize + 5 + (previewSize / 2);
-            drawStandardShape(shape1X, shape1Y, previewSize, 0, elementColor, standard1Type);
+            let shape1Y = box1Y + paddingV + fontSize + 3 + (currentSizeForTwin1 / 2);
+            drawStandardShape(shape1X, shape1Y, currentSizeForTwin1, 0, elementColor, standard1Type);
 
             let info2 = getStandardInfo(standard2Type);
             let text2 = "2. " + info2.name + " (" + info2.val + ")";
             let metrics2 = ctx.measureText(text2);
             let box2W = metrics2.width + (paddingH * 2);
-            let box2H = fontSize + (paddingV * 3) + previewSize + 10;
-            let box2X = canvas.width - box2W - 15;
-            let box2Y = 15;
+            let baseSize2 = (step === 2) ? tempSize : (step > 2 ? box2.size : refW * 0.055);
+            let currentSizeForTwin2 = baseSize2 * 0.55;
+            let box2H = fontSize + (paddingV * 3) + currentSizeForTwin2 + 6;
+            let box2X = canvas.width - box2W - 10;
+            let box2Y = 10;
 
             ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
             ctx.strokeStyle = elementColor;
-            ctx.lineWidth = Math.max(2, refW / 400);
+            ctx.lineWidth = Math.max(1.5, refW / 500);
             ctx.fillRect(box2X, box2Y, box2W, box2H);
             ctx.strokeRect(box2X, box2Y, box2W, box2H);
 
             ctx.fillStyle = elementColor;
             ctx.fillText(text2, box2X + paddingH, box2Y + paddingV);
             let shape2X = box2X + (box2W / 2);
-            let shape2Y = box2Y + paddingV + fontSize + 5 + (previewSize / 2);
-            drawStandardShape(shape2X, shape2Y, previewSize, 0, elementColor, standard2Type);
+            let shape2Y = box2Y + paddingV + fontSize + 3 + (currentSizeForTwin2 / 2);
+            drawStandardShape(shape2X, shape2Y, currentSizeForTwin2, 0, elementColor, standard2Type);
 
             ctx.restore();
         }
