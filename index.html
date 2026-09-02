@@ -571,7 +571,7 @@
                     <div class="pickguard-thumb invalid">
                         <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                         <svg viewBox="0 0 140 92">
-                            <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></g>
+                            <g transform="rotate(15, 70, 46)"><rect x="15" y="16" width="110" height="60" rx="8" stroke="#ffc107" fill="rgba(255,193,7,0.1)" stroke-width="2" /></svg>
                         </svg>
                         Plaque de biais
                     </div>
@@ -863,8 +863,8 @@
                 </div>
 
                 <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
-                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="askAddHole()">✅ Ajouter ce perçage</button>
-                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Supprimer dernier perçage</button>
+                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="addHole()">✅ Poser un perçage ici</button>
+                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Annuler le dernier perçage</button>
                 </div>
 
                 <div class="nav-buttons">
@@ -874,7 +874,7 @@
             </div>
         </div>
 
-        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image définitive</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image definitiva</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer</button>
     </div>
 
@@ -1652,21 +1652,17 @@
             redrawCanvas();
         }
 
-        window.askAddHole = function() {
+        window.addHole = function() {
             if (step === 7) {
-                if (confirm("Confirmez-vous l'ajout de ce perçage à cet emplacement ?")) {
-                    holes.push({ x: tempX, y: tempY, radius: tempSize });
-                    redrawCanvas();
-                }
+                holes.push({ x: tempX, y: tempY, radius: tempSize });
+                redrawCanvas();
             }
         }
 
         window.removeLastHole = function() {
             if (step === 7 && holes.length > 0) {
-                if (confirm("Voulez-vous supprimer le dernier perçage ajouté ?")) {
-                    holes.pop();
-                    redrawCanvas();
-                }
+                holes.pop();
+                redrawCanvas();
             }
         }
 
@@ -1799,37 +1795,48 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // PERÇAGE EN COURS DE PLACEMENT (Étape 7 active)
-                if (!isForExport && step === 7) {
+                // PERÇAGE EN COURS (SI ÉTAPE 7)
+                if (step === 7 && !isForExport) {
                     ctx.save();
-                    ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = Math.max(2.5, refW / 350);
+                    ctx.strokeStyle = elementColor;
+                    ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
                     ctx.stroke();
+
+                    // Croix au centre du perçage
+                    let len = tempSize * 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(tempX - len, tempY);
+                    ctx.lineTo(tempX + len, tempY);
+                    ctx.moveTo(tempX, tempY - len);
+                    ctx.lineTo(tempX, tempY + len);
+                    ctx.stroke();
                     ctx.restore();
-                    
-                    dessinerCroixCentre(tempX, tempY, '#FF00FF');
                 }
 
-                // PERÇAGES VALIDÉS ET FINAUX
-                holes.forEach((h, idx) => {
+                // PERÇAGES DÉJÀ POSÉS
+                holes.forEach((h, index) => {
                     ctx.save();
-                    ctx.strokeStyle = '#FF00FF';
-                    ctx.lineWidth = Math.max(2.5, refW / 350);
+                    ctx.strokeStyle = elementColor;
+                    ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.stroke();
-                    ctx.restore();
 
-                    dessinerCroixCentre(h.x, h.y, '#FF00FF');
+                    // Croix au centre
+                    let len = h.radius * 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(h.x - len, h.y);
+                    ctx.lineTo(h.x + len, h.y);
+                    ctx.moveTo(h.x, h.y - len);
+                    ctx.lineTo(h.x, h.y + len);
+                    ctx.stroke();
 
-                    ctx.save();
-                    ctx.fillStyle = '#FFFFFF';
+                    // Numéro du perçage
+                    ctx.fillStyle = elementColor;
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('P' + (idx + 1), h.x + h.radius + 8, h.y - h.radius);
+                    ctx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
                     ctx.restore();
                 });
             }
