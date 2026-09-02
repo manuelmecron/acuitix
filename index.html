@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.112 - Assistant CAO Compact</title>
+    <title>Acuitix V.113 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -388,7 +388,7 @@
             width: 100% !important;
             height: 100% !important;
             max-height: none !important;
-            object-fit: cover !important;
+            object-fit: contain !important;
             display: block !important;
         }
         body.live-fullscreen-mode #live-guide-canvas {
@@ -479,7 +479,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.112 - Assistant CAO</h1>
+    <h1>Acuitix V.113 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1433,8 +1433,8 @@
             let clientClickY = (e.clientY - rect.top) * scaleY;
             let imgX, imgY;
             if (zoomLevel !== 1.0) {
-                imgX = (clientClickX - rect.width / 2 * scaleX) / zoomLevel + tempX - manualPanX;
-                imgY = (clientClickY - rect.height / 2 * scaleY) / zoomLevel + tempY - manualPanY;
+                imgX = (clientClickX - rect.width / 2) / zoomLevel + tempX - manualPanX;
+                imgY = (clientClickY - rect.height / 2) / zoomLevel + tempY - manualPanY;
             } else {
                 imgX = clientClickX;
                 imgY = clientClickY;
@@ -1593,20 +1593,32 @@
             step = 1;
         }
 
-        function updateCanvasDimensions() {
+        function updateCanvasDimensions(isForExport = false) {
             if (!currentImg) return;
-            const maxW = 460;
-            const maxH = window.innerHeight * 0.65;
-            let w = currentImg.width;
-            let h = currentImg.height;
-            if (rotationAngle === 90 || rotationAngle === 270) {
-                w = currentImg.height;
-                h = currentImg.width;
+            if (isForExport) {
+                let w = currentImg.width;
+                let h = currentImg.height;
+                if (rotationAngle === 90 || rotationAngle === 270) {
+                    w = currentImg.height;
+                    h = currentImg.width;
+                }
+                currentScaleRatio = 1.0;
+                canvas.width = w;
+                canvas.height = h;
+            } else {
+                const maxW = 460;
+                const maxH = window.innerHeight * 0.65;
+                let w = currentImg.width;
+                let h = currentImg.height;
+                if (rotationAngle === 90 || rotationAngle === 270) {
+                    w = currentImg.height;
+                    h = currentImg.width;
+                }
+                let ratio = Math.min(maxW / w, maxH / h);
+                currentScaleRatio = ratio;
+                canvas.width = w * ratio;
+                canvas.height = h * ratio;
             }
-            let ratio = Math.min(maxW / w, maxH / h);
-            currentScaleRatio = ratio;
-            canvas.width = w * ratio;
-            canvas.height = h * ratio;
         }
 
         window.rotateImage90 = function() {
@@ -1758,6 +1770,16 @@
 
         function redrawCanvas(isForExport = false) {
             if (!currentImg) return;
+            
+            let exportRatio = 1.0;
+            if (isForExport) {
+                exportRatio = currentImg.width / canvas.width;
+                if (rotationAngle === 90 || rotationAngle === 270) {
+                    exportRatio = currentImg.height / canvas.width;
+                }
+                updateCanvasDimensions(true);
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             if (!isForExport && zoomLevel !== 1.0) {
@@ -1766,7 +1788,7 @@
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
             ctx.save();
-            ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
+            ctx.translate(canvas.width / 2 + (imgOffsetX * exportRatio), canvas.height / 2 + (imgOffsetY * exportRatio));
             ctx.rotate((rotationAngle * Math.PI) / 180);
             let drawW = currentImg.width * currentScaleRatio;
             let drawH = currentImg.height * currentScaleRatio;
@@ -1795,33 +1817,33 @@
 
                 ctx.save();
                 ctx.strokeStyle = '#FF0000';
-                ctx.translate(xyAxisX.x, xyAxisX.y);
+                ctx.translate(xyAxisX.x * exportRatio, xyAxisX.y * exportRatio);
                 ctx.rotate((xyAxisX.angle * Math.PI) / 180);
                 ctx.beginPath();
                 ctx.moveTo(-canvas.width * 2, 0);
                 ctx.lineTo(canvas.width * 2, 0);
                 ctx.stroke();
                 ctx.restore();
-                dessinerCroixCentre(xyAxisX.x, xyAxisX.y, '#FF0000');
+                dessinerCroixCentre(xyAxisX.x * exportRatio, xyAxisX.y * exportRatio, '#FF0000');
 
                 ctx.save();
                 ctx.strokeStyle = '#00FF00';
-                ctx.translate(xyAxisY.x, xyAxisY.y);
+                ctx.translate(xyAxisY.x * exportRatio, xyAxisY.y * exportRatio);
                 ctx.rotate((xyAxisY.angle * Math.PI) / 180);
                 ctx.beginPath();
                 ctx.moveTo(0, -canvas.height * 2);
                 ctx.lineTo(0, canvas.height * 2);
                 ctx.stroke();
                 ctx.restore();
-                dessinerCroixCentre(xyAxisY.x, xyAxisY.y, '#00FF00');
+                dessinerCroixCentre(xyAxisY.x * exportRatio, xyAxisY.y * exportRatio, '#00FF00');
 
                 ctx.restore();
             }
 
             if (step >= 1) {
-                let rx = step === 1 ? tempX : box1.x;
-                let ry = step === 1 ? tempY : box1.y;
-                let rsz = step === 1 ? tempSize : box1.size;
+                let rx = (step === 1 ? tempX : box1.x) * exportRatio;
+                let ry = (step === 1 ? tempY : box1.y) * exportRatio;
+                let rsz = (step === 1 ? tempSize : box1.size) * exportRatio;
                 let rang = step === 1 ? tempAngle : box1.angle;
                 drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
                 if (standard1Type !== '11') {
@@ -1830,9 +1852,9 @@
             }
 
             if (step >= 2) {
-                let rx2 = step === 2 ? tempX : box2.x;
-                let ry2 = step === 2 ? tempY : box2.y;
-                let rsz2 = step === 2 ? tempSize : box2.size;
+                let rx2 = (step === 2 ? tempX : box2.x) * exportRatio;
+                let ry2 = (step === 2 ? tempY : box2.y) * exportRatio;
+                let rsz2 = (step === 2 ? tempSize : box2.size) * exportRatio;
                 let rang2 = step === 2 ? tempAngle : box2.angle;
                 drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
                 if (standard2Type !== '11') {
@@ -1844,9 +1866,9 @@
                 let isActive = (step === i + 3 && !isForExport);
                 let isPassed = (step > i + 3 || isForExport);
                 if (isPassed || isActive) {
-                    let cx = (step === i + 3 && !isForExport) ? tempX : corners[i].x;
-                    let cy = (step === i + 3 && !isForExport) ? tempY : corners[i].y;
-                    let csize = (step === i + 3 && !isForExport) ? tempSize : corners[i].size;
+                    let cx = ((step === i + 3 && !isForExport) ? tempX : corners[i].x) * exportRatio;
+                    let cy = ((step === i + 3 && !isForExport) ? tempY : corners[i].y) * exportRatio;
+                    let csize = ((step === i + 3 && !isForExport) ? tempSize : corners[i].size) * exportRatio;
                     let cangle = (step === i + 3 && !isForExport) ? tempAngle : corners[i].angle;
                     drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
                     dessinerCroixCentre(cx, cy, elementColor);
@@ -1858,10 +1880,10 @@
                 ctx.strokeStyle = elementColor;
                 ctx.lineWidth = Math.max(1.5, refW / 700);
                 ctx.beginPath();
-                ctx.moveTo(corners[0].x, corners[0].y);
-                ctx.lineTo(corners[2].x, corners[2].y);
-                ctx.moveTo(corners[1].x, corners[1].y);
-                ctx.lineTo(corners[3].x, corners[3].y);
+                ctx.moveTo(corners[0].x * exportRatio, corners[0].y * exportRatio);
+                ctx.lineTo(corners[2].x * exportRatio, corners[2].y * exportRatio);
+                ctx.moveTo(corners[1].x * exportRatio, corners[1].y * exportRatio);
+                ctx.lineTo(corners[3].x * exportRatio, corners[3].y * exportRatio);
                 ctx.stroke();
                 ctx.restore();
 
@@ -1871,16 +1893,16 @@
                     ctx.strokeStyle = elementColor;
                     ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
-                    ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
+                    ctx.arc(tempX * exportRatio, tempY * exportRatio, tempSize * exportRatio, 0, Math.PI * 2);
                     ctx.stroke();
 
                     // Croix au centre du perçage
-                    let len = tempSize * 0.4;
+                    let len = tempSize * exportRatio * 0.4;
                     ctx.beginPath();
-                    ctx.moveTo(tempX - len, tempY);
-                    ctx.lineTo(tempX + len, tempY);
-                    ctx.moveTo(tempX, tempY - len);
-                    ctx.lineTo(tempX, tempY + len);
+                    ctx.moveTo(tempX * exportRatio - len, tempY * exportRatio);
+                    ctx.lineTo(tempX * exportRatio + len, tempY * exportRatio);
+                    ctx.moveTo(tempX * exportRatio, tempY * exportRatio - len);
+                    ctx.lineTo(tempX * exportRatio, tempY * exportRatio + len);
                     ctx.stroke();
                     ctx.restore();
                 }
@@ -1891,28 +1913,28 @@
                     ctx.strokeStyle = elementColor;
                     ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
-                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                    ctx.arc(h.x * exportRatio, h.y * exportRatio, h.radius * exportRatio, 0, Math.PI * 2);
                     ctx.stroke();
 
                     // Croix au centre
-                    let len = h.radius * 0.4;
+                    let len = h.radius * exportRatio * 0.4;
                     ctx.beginPath();
-                    ctx.moveTo(h.x - len, h.y);
-                    ctx.lineTo(h.x + len, h.y);
-                    ctx.moveTo(h.x, h.y - len);
-                    ctx.lineTo(h.x, h.y + len);
+                    ctx.moveTo(h.x * exportRatio - len, h.y * exportRatio);
+                    ctx.lineTo(h.x * exportRatio + len, h.y * exportRatio);
+                    ctx.moveTo(h.x * exportRatio, h.y * exportRatio - len);
+                    ctx.lineTo(h.x * exportRatio, h.y * exportRatio + len);
                     ctx.stroke();
 
                     // Numéro du perçage
                     ctx.fillStyle = elementColor;
                     ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
+                    ctx.fillText('P' + (index + 1), (h.x + h.radius) * exportRatio + 4, (h.y - h.radius) * exportRatio - 4);
                     ctx.restore();
                 });
             }
 
             if (step === 8 || (step === 9 && hasTremlBlock)) {
-                drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
+                drawSustainRectangle(tempX * exportRatio, tempY * exportRatio, sustainLength * exportRatio, sustainWidth * exportRatio, tempAngle, elementColor);
             }
 
             ctx.globalAlpha = 1.0;
@@ -2172,7 +2194,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.112) !";
+                statusText.innerText = "✅ Calage expert terminé (v.113) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2244,11 +2266,11 @@
         btnDownload.addEventListener('click', function() {
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
-            const link = document.getElementById('a');
             const a = document.createElement('a');
-            a.download = 'Acuitix_V112_Resultat.png';
+            a.download = 'Acuitix_V113_Resultat.png';
             a.href = dataURL;
             a.click();
+            updateCanvasDimensions(false);
             redrawCanvas(false);
         });
     </script>
