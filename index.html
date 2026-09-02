@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.109 - Assistant CAO Compact</title>
+    <title>Acuitix V.110 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -473,13 +473,13 @@
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Choisissez une option</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleFinishChoice('generate')">Générer</button>
-                <button class="btn btn-info" style="margin-top: 0;" onclick="handleFinishChoice('treml')">TREML</button>
+                <button class="btn btn-info" style="margin-top: 0;" onclick="handleFinishChoice('treml')">Bloc sustain</button>
                 <button class="btn btn-secondary" style="margin-top: 0;" onclick="handleFinishChoice('back')">Retour</button>
             </div>
         </div>
     </div>
 
-    <h1>Acuitix V.109 - Assistant CAO</h1>
+    <h1>Acuitix V.110 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -862,9 +862,19 @@
                     </div>
 
                     <div class="controls-right">
-                        <div class="control-row">
+                        <div class="control-row" id="scale-controls-standard">
                             <button class="btn-info" onmousedown="startAction(() => adjustSize(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(0.5), 60)" ontouchend="stopAction()">➕ Échelle +</button>
                             <button class="btn-info" onmousedown="startAction(() => adjustSize(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-0.5), 60)" ontouchend="stopAction()">➖ Échelle -</button>
+                        </div>
+                        <div id="scale-controls-sustain" style="display:none; flex-direction:column; gap:4px;">
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustLength(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(0.5), 60)" ontouchend="stopAction()">➕ Longueur +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustLength(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(-0.5), 60)" ontouchend="stopAction()">➖ Longueur -</button>
+                            </div>
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustWidth(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(0.5), 60)" ontouchend="stopAction()">➕ Largeur +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
+                            </div>
                         </div>
                         <div class="control-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
@@ -1111,6 +1121,7 @@
         ];
         let holes = [];
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
+        let sustainLength = 0, sustainWidth = 0;
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1652,6 +1663,16 @@
             redrawCanvas();
         }
 
+        window.adjustLength = function(delta) {
+            sustainLength = Math.max(2, sustainLength + delta);
+            redrawCanvas();
+        }
+
+        window.adjustWidth = function(delta) {
+            sustainWidth = Math.max(2, sustainWidth + delta);
+            redrawCanvas();
+        }
+
         window.changerOpacite = function(val) {
             currentOpacity = val / 100;
             const valEl = document.getElementById('opacity-val');
@@ -1697,14 +1718,13 @@
             redrawCanvas();
         }
 
-        function drawTremlRectangle(x, y, size, angleDeg, color) {
+        function drawSustainRectangle(x, y, lengthVal, widthVal, angleDeg, color) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
 
-            // Hauteur supérieure à la largeur pour aligner la longueur sur l'axe Y
-            let w = size;
-            let h = size * 1.8;
+            let w = widthVal;
+            let h = lengthVal;
             let halfW = w / 2;
             let halfH = h / 2;
 
@@ -1887,7 +1907,7 @@
             }
 
             if (step === 8) {
-                drawTremlRectangle(tempX, tempY, tempSize, tempAngle, elementColor);
+                drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
             }
 
             ctx.globalAlpha = 1.0;
@@ -2038,7 +2058,7 @@
 
         window.askValidateStep = function() {
             stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement Rectangle TREML"];
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
@@ -2065,10 +2085,17 @@
                 validateStep();
             } else if (choice === 'treml') {
                 step = 8;
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                tempAngle = 0; // Strictement parallèle à l'axe Y
-                tempSize = canvas.width * 0.08;
+                // Placement automatique au centre de la zone de contour de l'objet
+                if (corners && corners.length === 4) {
+                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                } else {
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                }
+                tempAngle = 0; // Alignement sur l'axe
+                sustainLength = canvas.width * 0.14;
+                sustainWidth = canvas.width * 0.08;
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
@@ -2138,7 +2165,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.109) !";
+                statusText.innerText = "✅ Calage expert terminé (v.110) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2170,8 +2197,19 @@
         function updateUIState() {
             let btnVal = document.getElementById('btn-validate-step');
             let btnPrev = document.getElementById('btn-prev-step');
+            let scaleStd = document.getElementById('scale-controls-standard');
+            let scaleSustain = document.getElementById('scale-controls-sustain');
+
             if(btnPrev) btnPrev.style.display = (step >= 1) ? 'block' : 'none';
             if(sideColorDrawer) sideColorDrawer.style.display = (step >= 1) ? 'block' : 'none';
+
+            if (step === 8) {
+                if(scaleStd) scaleStd.style.display = 'none';
+                if(scaleSustain) scaleSustain.style.display = 'flex';
+            } else {
+                if(scaleStd) scaleStd.style.display = 'flex';
+                if(scaleSustain) scaleSustain.style.display = 'none';
+            }
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
@@ -2190,7 +2228,7 @@
                 "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
                 "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)",
                 "Optionnel : Ajout de perçages",
-                "TREML : Positionnement du rectangle"
+                "Positionnement du bloc sustain"
             ];
             statusText.innerText = descriptions[step] || "Étape en cours";
         }
@@ -2200,7 +2238,7 @@
             const dataURL = canvas.toDataURL('image/png');
             const link = document.getElementById('a');
             const a = document.createElement('a');
-            a.download = 'Acuitix_V109_Resultat.png';
+            a.download = 'Acuitix_V110_Resultat.png';
             a.href = dataURL;
             a.click();
             redrawCanvas(false);
