@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.108 - Assistant CAO Compact</title>
+    <title>Acuitix V.109 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -479,7 +479,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.108 - Assistant CAO</h1>
+    <h1>Acuitix V.109 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1697,6 +1697,40 @@
             redrawCanvas();
         }
 
+        function drawTremlRectangle(x, y, size, angleDeg, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+
+            // Hauteur supérieure à la largeur pour aligner la longueur sur l'axe Y
+            let w = size;
+            let h = size * 1.8;
+            let halfW = w / 2;
+            let halfH = h / 2;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+
+            // Rectangle
+            ctx.strokeRect(-halfW, -halfH, w, h);
+
+            // Diagonales
+            ctx.beginPath();
+            ctx.moveTo(-halfW, -halfH);
+            ctx.lineTo(halfW, halfH);
+            ctx.moveTo(halfW, -halfH);
+            ctx.lineTo(-halfW, halfH);
+            ctx.stroke();
+
+            // Point au centre
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(0, 0, Math.max(2, canvas.width / 300), 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
         function redrawCanvas(isForExport = false) {
             if (!currentImg) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1852,6 +1886,10 @@
                 });
             }
 
+            if (step === 8) {
+                drawTremlRectangle(tempX, tempY, tempSize, tempAngle, elementColor);
+            }
+
             ctx.globalAlpha = 1.0;
             ctx.restore();
         }
@@ -2000,7 +2038,7 @@
 
         window.askValidateStep = function() {
             stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement Rectangle TREML"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
@@ -2026,7 +2064,16 @@
             if (choice === 'generate') {
                 validateStep();
             } else if (choice === 'treml') {
-                alert("Mode TREML : continuation de la modélisation pré-CAO.");
+                step = 8;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                tempAngle = 0; // Strictement parallèle à l'axe Y
+                tempSize = canvas.width * 0.08;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
             } else if (choice === 'back') {
                 // Reste sur l'étape actuelle sans valider
             }
@@ -2086,12 +2133,12 @@
                     tempY = canvas.height * 0.5;
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 7) {
-                step = 8;
+            } else if (step === 7 || step === 8) {
+                step = 9;
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.108) !";
+                statusText.innerText = "✅ Calage expert terminé (v.109) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2103,7 +2150,9 @@
 
         function prevStep() {
             zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            if (step > 1) {
+            if (step === 8) {
+                step = 7;
+            } else if (step > 1) {
                 step--;
                 if (step === 1) {
                     tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
@@ -2140,7 +2189,8 @@
                 "Étape 4 / 6 : Coin 2 / 4 (Haut-Droit)",
                 "Étape 5 / 6 : Coin 3 / 4 (Bas-Droit)",
                 "Étape 6 / 6 : Coin 4 / 4 (Bas-Gauche)",
-                "Optionnel : Ajout de perçages"
+                "Optionnel : Ajout de perçages",
+                "TREML : Positionnement du rectangle"
             ];
             statusText.innerText = descriptions[step] || "Étape en cours";
         }
@@ -2148,10 +2198,11 @@
         btnDownload.addEventListener('click', function() {
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = 'Acuitix_V108_Resultat.png';
-            link.href = dataURL;
-            link.click();
+            const link = document.getElementById('a');
+            const a = document.createElement('a');
+            a.download = 'Acuitix_V109_Resultat.png';
+            a.href = dataURL;
+            a.click();
             redrawCanvas(false);
         });
     </script>
