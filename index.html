@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.116 - Assistant CAO Compact</title>
+    <title>Acuitix V.117 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.116 - Assistant CAO</h1>
+    <h1>Acuitix V.117 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1969,15 +1969,15 @@
                 });
             }
 
-            if (step === 8 || (step === 9 && hasTremlBlock) || isForFinalExport) {
+            if (step >= 8 || isForFinalExport) {
                 if (!isForFinalExport && step === 8) {
                     drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
-                } else if (isForFinalExport && hasTremlBlock) {
+                } else if (hasTremlBlock) {
                     drawSustainRectangle(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor);
                 }
             }
 
-            if (step === 9 || isForFinalExport) {
+            if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
                     drawSpring(s.p1, s.p2, s.width, elementColor);
                 });
@@ -2219,7 +2219,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.116) !";
+            statusText.innerText = "✅ Calage expert terminé (v.117) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2284,7 +2284,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.116) !";
+                statusText.innerText = "✅ Calage expert terminé (v.117) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2305,7 +2305,7 @@
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.116) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.117) !";
                     btnDownload.style.display = 'block';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
@@ -2394,66 +2394,48 @@
         }
 
         function updateUIState() {
-            let btnVal = document.getElementById('btn-validate-step');
-            let btnPrev = document.getElementById('btn-prev-step');
-            let scaleStd = document.getElementById('scale-controls-standard');
-            let scaleSustain = document.getElementById('scale-controls-sustain');
-            let scaleSpring = document.getElementById('scale-controls-spring');
-            let angleControlsRow = document.getElementById('angle-controls-row');
-            let dpadContainerBox = document.getElementById('dpad-container-box');
+            const scaleControlsStandard = document.getElementById('scale-controls-standard');
+            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
+            const scaleControlsSpring = document.getElementById('scale-controls-spring');
+            const angleControlsRow = document.getElementById('angle-controls-row');
+            const dpadContainerBox = document.getElementById('dpad-container-box');
 
-            if (holeActionPanel) holeActionPanel.style.display = 'none';
-            if (scaleStd) scaleStd.style.display = 'none';
-            if (scaleSustain) scaleSustain.style.display = 'none';
-            if (scaleSpring) scaleSpring.style.display = 'none';
+            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
+            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
+            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
             if (angleControlsRow) angleControlsRow.style.display = 'flex';
             if (dpadContainerBox) dpadContainerBox.style.display = 'flex';
+            if (holeActionPanel) holeActionPanel.style.display = 'none';
 
             if (step === 1) {
                 statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Étalon G";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 2) {
                 statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Étalon D";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 3) {
                 statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Coin HG";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 4) {
                 statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Coin HD";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 5) {
                 statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Coin BD";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 6) {
                 statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
-                if (scaleStd) scaleStd.style.display = 'flex';
-                btnVal.innerText = "Valider Coin BG";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 7) {
-                statusText.innerText = "Étape 7 : Ajout des perçages";
+                statusText.innerText = "Étape optionnelle : Ajout des perçages";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
                 if (holeActionPanel) holeActionPanel.style.display = 'block';
-                if (scaleStd) scaleStd.style.display = 'flex';
-                if (angleControlsRow) angleControlsRow.style.display = 'none';
-                btnVal.innerText = "Terminer les perçages";
             } else if (step === 8) {
-                statusText.innerText = "Étape 8 : Positionnement bloc sustain";
-                if (scaleSustain) scaleSustain.style.display = 'flex';
-                btnVal.innerText = "Valider bloc sustain";
+                statusText.innerText = "Calage du bloc sustain (TREML)";
+                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
             } else if (step === 9) {
-                if (springPhase === 0) {
-                    statusText.innerText = "Étape 9 : Positionner ancrage 1 du ressort (" + (springs.length + 1) + "/4)";
-                } else if (springPhase === 1) {
-                    statusText.innerText = "Étape 9 : Positionner ancrage 2 du ressort (" + (springs.length + 1) + "/4)";
-                } else if (springPhase === 2) {
-                    statusText.innerText = "Étape 9 : Ajuster largeur du ressort (" + (springs.length + 1) + "/4)";
-                    if (scaleSpring) scaleSpring.style.display = 'flex';
-                    if (dpadContainerBox) dpadContainerBox.style.display = 'none';
-                }
-                btnVal.innerText = "Valider l'élément";
+                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
+                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
+                if (angleControlsRow) angleControlsRow.style.display = 'none';
             }
         }
 
@@ -2461,7 +2443,7 @@
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'acuitix-final-export.png';
+            link.download = 'Acuitix_Definitif.png';
             link.href = dataURL;
             link.click();
             redrawCanvas(false);
