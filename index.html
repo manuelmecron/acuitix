@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.111 - Assistant CAO Compact</title>
+    <title>Acuitix V.112 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -479,7 +479,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.111 - Assistant CAO</h1>
+    <h1>Acuitix V.112 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -895,7 +895,7 @@
             </div>
         </div>
 
-        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image definitiva</a>
+        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image definitive</a>
         <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer</button>
     </div>
 
@@ -1122,6 +1122,7 @@
         let holes = [];
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let sustainLength = 0, sustainWidth = 0;
+        let hasTremlBlock = false;
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1202,6 +1203,7 @@
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
+            hasTremlBlock = false;
             step = 1;
         }
 
@@ -1375,6 +1377,7 @@
                 tempY = hCanvas * 0.5;
                 tempAngle = 0;
                 tempSize = defaultSize;
+                hasTremlBlock = false;
 
                 goToPreCapture();
             };
@@ -1411,6 +1414,7 @@
                     tempY = hCanvas * 0.5;
                     tempAngle = 0;
                     tempSize = defaultSize;
+                    hasTremlBlock = false;
                     welcomePanel.style.display = 'none';
                     goToPreCapture();
                 };
@@ -1585,6 +1589,7 @@
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
+            hasTremlBlock = false;
             step = 1;
         }
 
@@ -1906,7 +1911,7 @@
                 });
             }
 
-            if (step === 8) {
+            if (step === 8 || (step === 9 && hasTremlBlock)) {
                 drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
             }
 
@@ -2082,9 +2087,11 @@
             if (modal) modal.style.display = 'none';
             
             if (choice === 'generate') {
+                hasTremlBlock = false;
                 validateStep();
             } else if (choice === 'treml') {
                 step = 8;
+                hasTremlBlock = true;
                 // Placement automatique au centre de la zone de contour de l'objet
                 if (corners && corners.length === 4) {
                     tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
@@ -2165,7 +2172,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.111) !";
+                statusText.innerText = "✅ Calage expert terminé (v.112) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2179,6 +2186,7 @@
             zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             if (step === 8) {
                 step = 7;
+                hasTremlBlock = false;
             } else if (step > 1) {
                 step--;
                 if (step === 1) {
@@ -2238,7 +2246,7 @@
             const dataURL = canvas.toDataURL('image/png');
             const link = document.getElementById('a');
             const a = document.createElement('a');
-            a.download = 'Acuitix_V111_Resultat.png';
+            a.download = 'Acuitix_V112_Resultat.png';
             a.href = dataURL;
             a.click();
             redrawCanvas(false);
