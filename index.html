@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.107 - Assistant CAO Compact</title>
+    <title>Acuitix V.108 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -422,7 +422,7 @@
             transform: scale(0.95);
         }
 
-        #recenter-modal, #back-modal {
+        #recenter-modal, #back-modal, #finish-menu-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -468,7 +468,18 @@
         </div>
     </div>
 
-    <h1>Acuitix V.107 - Assistant CAO</h1>
+    <div id="finish-menu-modal">
+        <div class="recenter-modal-content">
+            <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Choisissez une option</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleFinishChoice('generate')">Générer</button>
+                <button class="btn btn-info" style="margin-top: 0;" onclick="handleFinishChoice('treml')">TREML</button>
+                <button class="btn btn-secondary" style="margin-top: 0;" onclick="handleFinishChoice('back')">Retour</button>
+            </div>
+        </div>
+    </div>
+
+    <h1>Acuitix V.108 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1994,8 +2005,30 @@
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
             }
-            if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+            if (step === 7) {
+                showFinishMenu();
+            } else {
+                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+                    validateStep();
+                }
+            }
+        }
+
+        window.showFinishMenu = function() {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        window.handleFinishChoice = function(choice) {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'none';
+            
+            if (choice === 'generate') {
                 validateStep();
+            } else if (choice === 'treml') {
+                alert("Mode TREML : continuation de la modélisation pré-CAO.");
+            } else if (choice === 'back') {
+                // Reste sur l'étape actuelle sans valider
             }
         }
 
@@ -2058,7 +2091,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.107) !";
+                statusText.innerText = "✅ Calage expert terminé (v.108) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2093,7 +2126,7 @@
 
             if (step === 7) {
                 holeActionPanel.style.display = 'block';
-                if(btnVal) btnVal.innerText = "Terminer et Générer";
+                if(btnVal) btnVal.innerText = "Terminé";
             } else {
                 holeActionPanel.style.display = 'none';
                 if(btnVal) btnVal.innerText = "Valider l'étape";
@@ -2116,7 +2149,7 @@
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V107_Resultat.png';
+            link.download = 'Acuitix_V108_Resultat.png';
             link.href = dataURL;
             link.click();
             redrawCanvas(false);
