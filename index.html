@@ -1483,20 +1483,6 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
-                } else if (step === 9) {
-                    if (springPhase === 0) {
-                        currentSpring.p1 = { x: imgX, y: imgY };
-                        springPhase = 1;
-                        tempX = imgX + 30;
-                        tempY = imgY;
-                    } else if (springPhase === 1) {
-                        currentSpring.p2 = { x: imgX, y: imgY };
-                        springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                        const countEl = document.getElementById('spring-count-display');
-                        if (countEl) countEl.innerText = springs.length;
-                        const modal = document.getElementById('spring-finish-modal');
-                        if (modal) modal.style.display = 'flex';
-                    }
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -1829,6 +1815,7 @@
             let halfH = lengthVal / 2;
             let leftEdgeX = -halfW;
 
+            // Perçage Central (PBAVC) strictement aligné au centre géométrique (Y=0) par rapport au bloc sustain
             let centralX = leftEdgeX + dist14Px + latPx;
             let centralY = 0;
 
@@ -1851,16 +1838,19 @@
             ctx.lineTo(-halfW, halfH);
             ctx.stroke();
 
+            // Perçage Central (PBAVC) indissociable du milieu du bloc
             ctx.beginPath();
             ctx.arc(centralX, centralY, radius, 0, Math.PI * 2);
             ctx.stroke();
             dessinerCroixCentreLocal(centralX, centralY, color);
 
+            // Perçage Supérieur (PBAVS) modifiable en écartement Y, bouge latéralement avec X
             ctx.beginPath();
             ctx.arc(superiorX, superiorY, radius, 0, Math.PI * 2);
             ctx.stroke();
             dessinerCroixCentreLocal(superiorX, superiorY, color);
 
+            // Perçage Inférieur (PBAVI) modifiable en écartement Y, bouge latéralement avec X
             ctx.beginPath();
             ctx.arc(inferiorX, inferiorY, radius, 0, Math.PI * 2);
             ctx.stroke();
@@ -2094,7 +2084,7 @@
                 }
             }
 
-            // Étape 9 : Traçage des ressorts (avant PBAV, comme dans l'index 107)
+            // Étape des ressorts (maintenant avant le PBAV)
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
                     drawSpring(s.p1, s.p2, s.width, elementColor);
@@ -2121,7 +2111,7 @@
                 }
             }
 
-            // Étape 10 : Ajout perçages PBAV (après les ressorts)
+            // Étape PBAV (maintenant après les ressorts)
             if (step >= 10 || isForFinalExport) {
                 if (!isForFinalExport && step === 10) {
                     drawPbavGroup(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor, pbavSpread, pbavLateral, true);
@@ -2218,196 +2208,139 @@
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.moveTo(-radius, 0);
                 ctx.lineTo(radius, 0);
+                ctx.moveTo(0, -radius);
+                ctx.lineTo(0, radius);
                 ctx.stroke();
+
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 ctx.moveTo(-radius, 0);
                 ctx.lineTo(radius, 0);
+                ctx.moveTo(0, -radius);
+                ctx.lineTo(0, radius);
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
             }
             ctx.restore();
         }
 
-        function strokeRoundedRect(x, y, width, height, radius) {
+        function strokeRoundedRect(x, y, w, h, r) {
             ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
             ctx.closePath();
             ctx.stroke();
         }
 
-        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
+        function drawCornerMarker(x, y, size, angleDeg, color, index) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
-            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
-            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
+            let radius = size / 2;
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = Math.max(2.5, canvas.width / 500);
             ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.moveTo(-radius, 0);
+            ctx.lineTo(radius, 0);
+            ctx.moveTo(0, -radius);
+            ctx.lineTo(0, radius);
             ctx.stroke();
 
             ctx.strokeStyle = color;
-            ctx.fillStyle = color;
             ctx.lineWidth = Math.max(1.0, canvas.width / 800);
             ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.moveTo(-radius, 0);
+            ctx.lineTo(radius, 0);
+            ctx.moveTo(0, -radius);
+            ctx.lineTo(0, radius);
             ctx.stroke();
 
-            ctx.beginPath();
-            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.font = 'bold ' + Math.max(10, canvas.width / 35) + 'px Arial';
+            let label = 'Coin ' + (index + 1);
+            if (index === 0) label = 'HG';
+            else if (index === 1) label = 'HD';
+            else if (index === 2) label = 'BG';
+            else if (index === 3) label = 'BD';
+            ctx.fillText(label, radius + 4, -radius - 4);
+
             ctx.restore();
         }
 
-        window.askValidateStep = function() {
-            stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Ajout perçages PBAV"];
-            let label = stepNames[step] || "cette étape";
-            if (step === 7 && holes.length === 0) {
-                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
-            }
-            if (step === 7) {
-                showFinishMenu();
-            } else {
-                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
-                    validateStep();
-                }
-            }
-        }
+        function updateUIState() {
+            const btnPrev = document.getElementById('btn-prev-step');
+            const btnValidate = document.getElementById('btn-validate-step');
+            const scaleStandard = document.getElementById('scale-controls-standard');
+            const scaleSustain = document.getElementById('scale-controls-sustain');
+            const scalePbav = document.getElementById('scale-controls-pbav');
+            const scaleSpring = document.getElementById('scale-controls-spring');
 
-        window.showFinishMenu = function() {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'flex';
-        }
+            scaleStandard.style.display = 'none';
+            scaleSustain.style.display = 'none';
+            scalePbav.style.display = 'none';
+            scaleSpring.style.display = 'none';
+            holeActionPanel.style.display = 'none';
 
-        window.handleFinishChoice = function(choice) {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'none';
-            
-            if (choice === 'generate') {
-                hasTremlBlock = false;
-                validateStep();
-            } else if (choice === 'treml') {
-                step = 8;
-                hasTremlBlock = true;
-                if (corners && corners.length === 4) {
-                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
-                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
-                } else {
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                }
-                tempAngle = 0;
-                sustainLength = canvas.width * 0.14;
-                sustainWidth = canvas.width * 0.08;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                updateUIState();
-                redrawCanvas();
-            } else if (choice === 'back') {
-            }
-        }
-
-        window.handleSpringChoice = function(choice) {
-            const modal = document.getElementById('spring-finish-modal');
-            if (modal) modal.style.display = 'none';
-            if (choice === 'add') {
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                springPhase = 0;
-                tempX = canvas.width * 0.4;
-                tempY = canvas.height * 0.5;
-                updateUIState();
-                redrawCanvas();
-            } else {
-                finishSpringTracing();
-            }
-        }
-
-        function finishSpringTracing() {
-            step = 10;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            updateUIState();
-            redrawCanvas();
-        }
-
-        window.validateStep = function() {
             if (step === 1) {
-                box1.x = tempX; box1.y = tempY; box1.size = tempSize; box1.angle = tempAngle;
-                step = 2;
-                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
-                tempX = canvas.width * 0.7; tempY = canvas.height * 0.5; tempAngle = 0; tempSize = box1.size;
+                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
+                scaleStandard.style.display = 'flex';
+                btnPrev.style.display = 'none';
+                btnValidate.innerText = "Valider l'étalon G";
             } else if (step === 2) {
-                box2.x = tempX; box2.y = tempY; box2.size = tempSize; box2.angle = tempAngle;
-                step = 3;
-                statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
-                tempX = canvas.width * 0.3; tempY = canvas.height * 0.3; tempAngle = 0; tempSize = canvas.width * 0.04;
-            } else if (step === 3) {
-                corners[0].x = tempX; corners[0].y = tempY; corners[0].size = tempSize; corners[0].angle = tempAngle;
-                step = 4;
-                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
-                tempX = canvas.width * 0.7; tempY = canvas.height * 0.3;
-            } else if (step === 4) {
-                corners[1].x = tempX; corners[1].y = tempY; corners[1].size = tempSize; corners[1].angle = tempAngle;
-                step = 5;
-                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
-                tempX = canvas.width * 0.7; tempY = canvas.height * 0.7;
-            } else if (step === 5) {
-                corners[2].x = tempX; corners[2].y = tempY; corners[2].size = tempSize; corners[2].angle = tempAngle;
-                step = 6;
-                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
-                tempX = canvas.width * 0.3; tempY = canvas.height * 0.7;
-            } else if (step === 6) {
-                corners[3].x = tempX; corners[3].y = tempY; corners[3].size = tempSize; corners[3].angle = tempAngle;
-                step = 7;
-                statusText.innerText = "Étape optionnelle : Perçages";
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.015;
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+                scaleStandard.style.display = 'flex';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Valider l'étalon D";
+            } else if (step >= 3 && step <= 6) {
+                let cornerNames = ["Haut-Gauche (HG)", "Haut-Droit (HD)", "Bas-Gauche (BG)", "Bas-Droit (BD)"];
+                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + cornerNames[step - 3];
+                scaleStandard.style.display = 'flex';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Valider ce coin";
+            } else if (step === 7) {
+                statusText.innerText = "Étape 7 : Perçages de la plaque";
+                scaleStandard.style.display = 'flex';
+                holeActionPanel.style.display = 'block';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Terminer les perçages ➡️";
             } else if (step === 8) {
-                sustainX = tempX; sustainY = tempY; sustainAngle = tempAngle;
-                step = 9;
-                statusText.innerText = "Traçage des ressorts tremolo";
-                springPhase = 0;
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                tempX = canvas.width * 0.4; tempY = canvas.height * 0.5;
+                statusText.innerText = "Étape 8 : Bloc Sustain (Tremolo)";
+                scaleSustain.style.display = 'flex';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Valider le Sustain ➡️";
             } else if (step === 9) {
-                step = 10;
-                statusText.innerText = "Ajout perçages PBAV";
-                tempX = sustainX; tempY = sustainY; tempAngle = sustainAngle;
+                statusText.innerText = "Étape 9 : Ressorts du Tremolo";
+                scaleSpring.style.display = 'flex';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Valider le ressort ➡️";
             } else if (step === 10) {
-                generateFinalResult();
-                return;
-            } else {
-                generateFinalResult();
-                return;
+                statusText.innerText = "Étape 10 : Calage PBAV";
+                scalePbav.style.display = 'flex';
+                btnPrev.style.display = 'block';
+                btnValidate.innerText = "Terminer le calage 🎉";
             }
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            updateUIState();
-            redrawCanvas();
         }
 
         window.askPrevStep = function() {
-            stopAction();
             triggerBackPrompt(() => {
                 prevStep();
             });
@@ -2415,70 +2348,171 @@
 
         function prevStep() {
             if (step > 1) {
-                if (step === 8) {
-                    step = 7;
-                    statusText.innerText = "Étape optionnelle : Perçages";
-                } else if (step === 9) {
-                    step = 8;
-                    statusText.innerText = "Positionnement bloc sustain";
-                } else if (step === 10) {
-                    step = 9;
-                    statusText.innerText = "Traçage des ressorts tremolo";
-                } else {
-                    step--;
-                    const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
-                    statusText.innerText = "Étape " + step + " / 6 : " + (stepNames[step] || "");
+                if (step === 9) {
+                    if (springPhase > 0) {
+                        springPhase--;
+                        if (springPhase === 0) currentSpring.p1 = null;
+                        redrawCanvas();
+                        return;
+                    } else if (springs.length > 0) {
+                        springs.pop();
+                        springPhase = 2;
+                        let lastS = springs[springs.length - 1];
+                        if (lastS) {
+                            currentSpring.p1 = lastS.p1;
+                            currentSpring.p2 = lastS.p2;
+                            currentSpring.width = lastS.width;
+                        }
+                        redrawCanvas();
+                        return;
+                    }
                 }
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
+                step--;
+                if (step === 1) {
+                    tempX = box1.x; tempY = box1.y; tempSize = box1.size; tempAngle = box1.angle;
+                } else if (step === 2) {
+                    tempX = box2.x; tempY = box2.y; tempSize = box2.size; tempAngle = box2.angle;
+                } else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    tempX = corners[idx].x; tempY = corners[idx].y; tempSize = corners[idx].size; tempAngle = corners[idx].angle;
+                } else if (step === 7) {
+                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.035; tempAngle = 0;
+                } else if (step === 8) {
+                    tempX = sustainX; tempY = sustainY; sustainLength = 40; sustainWidth = 10; tempAngle = sustainAngle;
+                } else if (step === 9) {
+                    springPhase = springs.length > 0 ? 2 : 0;
+                }
                 updateUIState();
                 redrawCanvas();
             }
         }
 
-        function updateUIState() {
-            if (step === 7) {
-                holeActionPanel.style.display = 'block';
-            } else {
-                holeActionPanel.style.display = 'none';
-            }
+        window.askValidateStep = function() {
+            validateStep();
+        }
 
-            const scaleStd = document.getElementById('scale-controls-standard');
-            const scaleSustain = document.getElementById('scale-controls-sustain');
-            const scalePbav = document.getElementById('scale-controls-pbav');
-            const scaleSpring = document.getElementById('scale-controls-spring');
-
-            if (scaleStd) scaleStd.style.display = 'none';
-            if (scaleSustain) scaleSustain.style.display = 'none';
-            if (scalePbav) scalePbav.style.display = 'none';
-            if (scaleSpring) scaleSpring.style.display = 'none';
-
-            if (step === 8) {
-                if (scaleSustain) scaleSustain.style.display = 'flex';
+        function validateStep() {
+            if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.size = tempSize; box1.angle = tempAngle;
+                step = 2;
+                tempX = canvas.width * 0.6; tempY = canvas.height * 0.5; tempAngle = box1.angle;
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.size = tempSize; box2.angle = tempAngle;
+                step = 3;
+                tempX = canvas.width * 0.3; tempY = canvas.height * 0.3; tempAngle = box1.angle;
+            } else if (step >= 3 && step <= 6) {
+                let idx = step - 3;
+                corners[idx].x = tempX; corners[idx].y = tempY; corners[idx].size = tempSize; corners[idx].angle = tempAngle;
+                step++;
+                if (step <= 6) {
+                    let nextDefaults = [
+                        {x: canvas.width * 0.7, y: canvas.height * 0.3},
+                        {x: canvas.width * 0.3, y: canvas.height * 0.7},
+                        {x: canvas.width * 0.7, y: canvas.height * 0.7}
+                    ];
+                    tempX = nextDefaults[idx].x;
+                    tempY = nextDefaults[idx].y;
+                } else {
+                    step = 7;
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                    tempSize = canvas.width * 0.015;
+                }
+            } else if (step === 7) {
+                step = 8;
+                sustainLength = 40;
+                sustainWidth = 10;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                tempAngle = box1.angle;
+            } else if (step === 8) {
+                sustainX = tempX;
+                sustainY = tempY;
+                sustainAngle = tempAngle;
+                hasTremlBlock = true;
+                step = 9;
+                springPhase = 0;
+                currentSpring = { p1: null, p2: null, width: 20 };
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
             } else if (step === 9) {
-                if (scaleSpring) scaleSpring.style.display = 'flex';
+                if (springPhase === 0) {
+                    currentSpring.p1 = { x: tempX, y: tempY };
+                    springPhase = 1;
+                    redrawCanvas();
+                    return;
+                } else if (springPhase === 1) {
+                    currentSpring.p2 = { x: tempX, y: tempY };
+                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
+                    
+                    const modal = document.getElementById('spring-finish-modal');
+                    const countSpan = document.getElementById('spring-count-display');
+                    if (countSpan) countSpan.innerText = springs.length;
+                    if (modal) modal.style.display = 'flex';
+                    return;
+                }
             } else if (step === 10) {
-                if (scalePbav) scalePbav.style.display = 'flex';
+                finishCalibration();
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        window.handleSpringChoice = function(choice) {
+            const modal = document.getElementById('spring-finish-modal');
+            if (modal) modal.style.display = 'none';
+
+            if (choice === 'add') {
+                springPhase = 0;
+                currentSpring = { p1: null, p2: null, width: 20 };
+                redrawCanvas();
             } else {
-                if (scaleStd) scaleStd.style.display = 'flex';
+                step = 10;
+                pbavSpread = 10.50;
+                pbavLateral = 0;
+                updateUIState();
+                redrawCanvas();
             }
         }
 
-        function generateFinalResult() {
+        window.handleFinishChoice = function(choice) {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'none';
+            if (choice === 'generate') {
+                finalizeAndExport();
+            } else if (choice === 'treml') {
+                step = 8;
+                tempX = sustainX || canvas.width * 0.5;
+                tempY = sustainY || canvas.height * 0.5;
+                updateUIState();
+                redrawCanvas();
+            } else {
+                step = 10;
+                updateUIState();
+                redrawCanvas();
+            }
+        }
+
+        function finishCalibration() {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function finalizeAndExport() {
+            statusText.innerText = "Génération de l'image définitive...";
             redrawCanvas(true);
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                btnDownload.href = url;
+
+            setTimeout(() => {
+                const dataUrl = canvas.toDataURL('image/png');
+                btnDownload.href = dataUrl;
                 btnDownload.download = 'Acuitix_Resultat_Definitif.png';
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
-                adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
-                sideColorDrawer.style.display = 'none';
-                sideColorDrawer.classList.remove('open');
-                statusText.innerText = "Terminé ! Image prête au téléchargement.";
-            }, 'image/png');
+                adjustPanel.style.display = 'none';
+                statusText.innerText = "Calage terminé avec succès ! 🎉";
+            }, 300);
         }
     </script>
 </body>
