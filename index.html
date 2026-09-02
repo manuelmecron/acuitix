@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.110 - Assistant CAO Compact</title>
+    <title>Acuitix V.111 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -473,13 +473,13 @@
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Choisissez une option</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleFinishChoice('generate')">Générer</button>
-                <button class="btn btn-info" style="margin-top: 0;" onclick="handleFinishChoice('treml')">Bloc sustain</button>
+                <button class="btn btn-info" style="margin-top: 0;" onclick="handleFinishChoice('treml')">TREML</button>
                 <button class="btn btn-secondary" style="margin-top: 0;" onclick="handleFinishChoice('back')">Retour</button>
             </div>
         </div>
     </div>
 
-    <h1>Acuitix V.110 - Assistant CAO</h1>
+    <h1>Acuitix V.111 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -2165,7 +2165,7 @@
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.110) !";
+                statusText.innerText = "✅ Calage expert terminé (v.111) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2238,7 +2238,7 @@
             const dataURL = canvas.toDataURL('image/png');
             const link = document.getElementById('a');
             const a = document.createElement('a');
-            a.download = 'Acuitix_V110_Resultat.png';
+            a.download = 'Acuitix_V111_Resultat.png';
             a.href = dataURL;
             a.click();
             redrawCanvas(false);
