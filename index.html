@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.120 - Assistant CAO Compact</title>
+    <title>Acuitix V.121 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.120 - Assistant CAO</h1>
+    <h1>Acuitix V.121 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1483,6 +1483,20 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
+                } else if (step === 9) {
+                    if (springPhase === 0) {
+                        currentSpring.p1 = { x: imgX, y: imgY };
+                        springPhase = 1;
+                        tempX = imgX + 30;
+                        tempY = imgY;
+                    } else if (springPhase === 1) {
+                        currentSpring.p2 = { x: imgX, y: imgY };
+                        springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
+                        const countEl = document.getElementById('spring-count-display');
+                        if (countEl) countEl.innerText = springs.length;
+                        const modal = document.getElementById('spring-finish-modal');
+                        if (modal) modal.style.display = 'flex';
+                    }
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -1815,7 +1829,6 @@
             let halfH = lengthVal / 2;
             let leftEdgeX = -halfW;
 
-            // Perçage Central (PBAVC) strictement aligné au centre géométrique (Y=0) par rapport au bloc sustain
             let centralX = leftEdgeX + dist14Px + latPx;
             let centralY = 0;
 
@@ -1838,19 +1851,16 @@
             ctx.lineTo(-halfW, halfH);
             ctx.stroke();
 
-            // Perçage Central (PBAVC) indissociable du milieu du bloc
             ctx.beginPath();
             ctx.arc(centralX, centralY, radius, 0, Math.PI * 2);
             ctx.stroke();
             dessinerCroixCentreLocal(centralX, centralY, color);
 
-            // Perçage Supérieur (PBAVS) modifiable en écartement Y, bouge latéralement avec X
             ctx.beginPath();
             ctx.arc(superiorX, superiorY, radius, 0, Math.PI * 2);
             ctx.stroke();
             dessinerCroixCentreLocal(superiorX, superiorY, color);
 
-            // Perçage Inférieur (PBAVI) modifiable en écartement Y, bouge latéralement avec X
             ctx.beginPath();
             ctx.arc(inferiorX, inferiorY, radius, 0, Math.PI * 2);
             ctx.stroke();
@@ -2084,7 +2094,7 @@
                 }
             }
 
-            // Étape des ressorts (maintenant avant le PBAV)
+            // Étape 9 : Traçage des ressorts (avant PBAV, comme dans l'index 107)
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
                     drawSpring(s.p1, s.p2, s.width, elementColor);
@@ -2111,7 +2121,7 @@
                 }
             }
 
-            // Étape PBAV (maintenant après les ressorts)
+            // Étape 10 : Ajout perçages PBAV (après les ressorts)
             if (step >= 10 || isForFinalExport) {
                 if (!isForFinalExport && step === 10) {
                     drawPbavGroup(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor, pbavSpread, pbavLateral, true);
@@ -2332,7 +2342,7 @@
         }
 
         function finishSpringTracing() {
-            step = 10; // Passe à l'étape PBAV après les ressorts
+            step = 10;
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
@@ -2351,37 +2361,42 @@
                 step = 3;
                 statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
                 tempX = canvas.width * 0.3; tempY = canvas.height * 0.3; tempAngle = 0; tempSize = canvas.width * 0.04;
-            } else if (step >= 3 && step <= 5) {
-                corners[step - 3].x = tempX; corners[step - 3].y = tempY; corners[step - 3].size = tempSize; corners[step - 3].angle = tempAngle;
-                step++;
-                const names = ["", "", "", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche"];
-                statusText.innerText = "Étape " + step + " / 6 : " + names[step];
-                if (step === 4) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.3; }
-                else if (step === 5) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.7; }
-                else if (step === 6) { tempX = canvas.width * 0.3; tempY = canvas.height * 0.7; }
+            } else if (step === 3) {
+                corners[0].x = tempX; corners[0].y = tempY; corners[0].size = tempSize; corners[0].angle = tempAngle;
+                step = 4;
+                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
+                tempX = canvas.width * 0.7; tempY = canvas.height * 0.3;
+            } else if (step === 4) {
+                corners[1].x = tempX; corners[1].y = tempY; corners[1].size = tempSize; corners[1].angle = tempAngle;
+                step = 5;
+                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
+                tempX = canvas.width * 0.7; tempY = canvas.height * 0.7;
+            } else if (step === 5) {
+                corners[2].x = tempX; corners[2].y = tempY; corners[2].size = tempSize; corners[2].angle = tempAngle;
+                step = 6;
+                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
+                tempX = canvas.width * 0.3; tempY = canvas.height * 0.7;
             } else if (step === 6) {
                 corners[3].x = tempX; corners[3].y = tempY; corners[3].size = tempSize; corners[3].angle = tempAngle;
                 step = 7;
-                statusText.innerText = "Étape 7 : Ajout des perçages libres";
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.015; tempAngle = 0;
-            } else if (step === 7) {
-                if (!hasTremlBlock) {
-                    finalizeAndGenerate();
-                    return;
-                }
+                statusText.innerText = "Étape optionnelle : Perçages";
+                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.015;
             } else if (step === 8) {
                 sustainX = tempX; sustainY = tempY; sustainAngle = tempAngle;
-                step = 9; // Étape de traçage des ressorts
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                step = 9;
+                statusText.innerText = "Traçage des ressorts tremolo";
                 springPhase = 0;
-                tempX = canvas.width * 0.4; tempY = canvas.height * 0.5; tempAngle = 0;
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                tempX = canvas.width * 0.4; tempY = canvas.height * 0.5;
             } else if (step === 9) {
-                step = 10; // Étape PBAV après les ressorts
-                statusText.innerText = "Étape 10 : Ajout perçages PBAV";
-                tempX = sustainX; tempY = sustainY; tempAngle = sustainAngle; tempSize = canvas.width * 0.02;
+                step = 10;
+                statusText.innerText = "Ajout perçages PBAV";
+                tempX = sustainX; tempY = sustainY; tempAngle = sustainAngle;
             } else if (step === 10) {
-                finalizeAndGenerate();
+                generateFinalResult();
+                return;
+            } else {
+                generateFinalResult();
                 return;
             }
             zoomLevel = 1.0;
@@ -2392,25 +2407,28 @@
         }
 
         window.askPrevStep = function() {
+            stopAction();
             triggerBackPrompt(() => {
                 prevStep();
             });
         }
 
         function prevStep() {
-            stopAction();
             if (step > 1) {
-                if (step === 8 && !hasTremlBlock) {
+                if (step === 8) {
                     step = 7;
-                } else if (step === 10) {
-                    step = 9;
+                    statusText.innerText = "Étape optionnelle : Perçages";
                 } else if (step === 9) {
                     step = 8;
+                    statusText.innerText = "Positionnement bloc sustain";
+                } else if (step === 10) {
+                    step = 9;
+                    statusText.innerText = "Traçage des ressorts tremolo";
                 } else {
                     step--;
+                    const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages"];
+                    statusText.innerText = "Étape " + step + " / 6 : " + (stepNames[step] || "");
                 }
-                const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Ajout perçages PBAV"];
-                statusText.innerText = "Étape : " + (stepNames[step] || step);
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
@@ -2420,81 +2438,48 @@
         }
 
         function updateUIState() {
-            const scaleStandard = document.getElementById('scale-controls-standard');
+            if (step === 7) {
+                holeActionPanel.style.display = 'block';
+            } else {
+                holeActionPanel.style.display = 'none';
+            }
+
+            const scaleStd = document.getElementById('scale-controls-standard');
             const scaleSustain = document.getElementById('scale-controls-sustain');
             const scalePbav = document.getElementById('scale-controls-pbav');
             const scaleSpring = document.getElementById('scale-controls-spring');
-            const angleRow = document.getElementById('angle-controls-row');
-            const dpadBox = document.getElementById('dpad-container-box');
 
-            scaleStandard.style.display = 'none';
-            scaleSustain.style.display = 'none';
-            scalePbav.style.display = 'none';
-            scaleSpring.style.display = 'none';
-            angleRow.style.display = 'flex';
-            dpadBox.style.display = 'flex';
-            holeActionPanel.style.display = 'none';
+            if (scaleStd) scaleStd.style.display = 'none';
+            if (scaleSustain) scaleSustain.style.display = 'none';
+            if (scalePbav) scalePbav.style.display = 'none';
+            if (scaleSpring) scaleSpring.style.display = 'none';
 
-            if (step >= 1 && step <= 6) {
-                scaleStandard.style.display = 'flex';
-            } else if (step === 7) {
-                scaleStandard.style.display = 'flex';
-                holeActionPanel.style.display = 'block';
-            } else if (step === 8) {
-                scaleSustain.style.display = 'flex';
+            if (step === 8) {
+                if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                scaleSpring.style.display = 'flex';
+                if (scaleSpring) scaleSpring.style.display = 'flex';
             } else if (step === 10) {
-                scalePbav.style.display = 'flex';
+                if (scalePbav) scalePbav.style.display = 'flex';
+            } else {
+                if (scaleStd) scaleStd.style.display = 'flex';
             }
         }
 
-        function finalizeAndGenerate() {
-            stopAction();
-            adjustPanel.style.display = 'none';
-            generalToolsContainer.style.display = 'none';
-            sideColorDrawer.style.display = 'none';
-            statusText.innerText = "Tracé terminé avec succès !";
+        function generateFinalResult() {
             redrawCanvas(true);
-            
-            const dataURL = canvas.toDataURL('image/png');
-            btnDownload.href = dataURL;
-            btnDownload.download = 'Acuitix_V120_Resultat.png';
-            btnDownload.style.display = 'block';
-            btnRetry.style.display = 'block';
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                btnDownload.href = url;
+                btnDownload.download = 'Acuitix_Resultat_Definitif.png';
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                sideColorDrawer.classList.remove('open');
+                statusText.innerText = "Terminé ! Image prête au téléchargement.";
+            }, 'image/png');
         }
-
-        canvas.addEventListener('pointerdown', (e) => {
-            if (step === 9) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                let clientClickX = (e.clientX - rect.left) * scaleX;
-                let clientClickY = (e.clientY - rect.top) * scaleY;
-                let imgX, imgY;
-                if (zoomLevel !== 1.0) {
-                    imgX = (clientClickX - rect.width / 2) / zoomLevel + tempX - manualPanX;
-                    imgY = (clientClickY - rect.height / 2) / zoomLevel + tempY - manualPanY;
-                } else {
-                    imgX = clientClickX;
-                    imgY = clientClickY;
-                }
-
-                if (springPhase === 0) {
-                    currentSpring.p1 = { x: imgX, y: imgY };
-                    springPhase = 1;
-                    tempX = imgX + 20;
-                    tempY = imgY + 20;
-                } else if (springPhase === 1) {
-                    currentSpring.p2 = { x: imgX, y: imgY };
-                    springPhase = 2;
-                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    document.getElementById('spring-count-display').innerText = springs.length;
-                    document.getElementById('spring-finish-modal').style.display = 'flex';
-                }
-                redrawCanvas();
-            }
-        });
     </script>
 </body>
 </html>
