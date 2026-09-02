@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.118 - Assistant CAO Compact</title>
+    <title>Acuitix V.119 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.118 - Assistant CAO</h1>
+    <h1>Acuitix V.119 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -886,6 +886,16 @@
                                 <button class="btn-info" onmousedown="startAction(() => adjustWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
                             </div>
                         </div>
+                        <div id="scale-controls-pbav" style="display:none; flex-direction:column; gap:4px;">
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpread(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpread(0.5), 60)" ontouchend="stopAction()">➕ Écartement +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpread(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpread(-0.5), 60)" ontouchend="stopAction()">➖ Écartement -</button>
+                            </div>
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavLat(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavLat(0.5), 60)" ontouchend="stopAction()">⬅️ Latéral -</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavLat(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavLat(-0.5), 60)" ontouchend="stopAction()">➡️ Latéral +</button>
+                            </div>
+                        </div>
                         <div id="scale-controls-spring" style="display:none; flex-direction:column; gap:4px;">
                             <div class="control-row">
                                 <button class="btn-info" onmousedown="startAction(() => adjustSpringWidth(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(0.5), 60)" ontouchend="stopAction()">➕ Largeur +</button>
@@ -1139,9 +1149,11 @@
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
         let hasTremlBlock = false;
+        let pbavSpread = 10.50;
+        let pbavLateral = 0;
         let springs = [];
         let currentSpring = { p1: null, p2: null, width: 20 };
-        let springPhase = 0; // 0: placing p1, 1: placing p2, 2: adjusting width
+        let springPhase = 0;
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1698,6 +1710,16 @@
             redrawCanvas();
         }
 
+        window.adjustPbavSpread = function(delta) {
+            pbavSpread = Math.max(2, pbavSpread + delta);
+            redrawCanvas();
+        }
+
+        window.adjustPbavLat = function(delta) {
+            pbavLateral += delta;
+            redrawCanvas();
+        }
+
         window.adjustSpringWidth = function(delta) {
             currentSpring.width = Math.max(2, currentSpring.width + delta);
             redrawCanvas();
@@ -1775,6 +1797,91 @@
             ctx.arc(0, 0, Math.max(2, canvas.width / 300), 0, Math.PI * 2);
             ctx.fill();
 
+            ctx.restore();
+        }
+
+        function drawPbavGroup(x, y, lengthVal, widthVal, angleDeg, color, spread, lateral, isInteractive) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+
+            let mmSize = getStandardMm(standard1Type);
+            let pxPerMm = box1.size / mmSize;
+            let dist14Px = 14 * pxPerMm;
+            let spreadPx = spread * pxPerMm;
+            let latPx = lateral * pxPerMm;
+
+            let halfW = widthVal / 2;
+            let halfH = lengthVal / 2;
+            let leftEdgeX = -halfW;
+
+            let centralX = leftEdgeX + dist14Px + latPx;
+            let centralY = 0;
+
+            let superiorX = centralX;
+            let superiorY = -spreadPx;
+
+            let inferiorX = centralX;
+            let inferiorY = spreadPx;
+
+            let radius = 1.5 * pxPerMm;
+
+            // Dessin du rectangle sustain pour repère
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+            ctx.strokeRect(-halfW, -halfH, widthVal, lengthVal);
+
+            ctx.beginPath();
+            ctx.moveTo(-halfW, -halfH);
+            ctx.lineTo(halfW, halfH);
+            ctx.moveTo(halfW, -halfH);
+            ctx.lineTo(-halfW, halfH);
+            ctx.stroke();
+
+            // Perçage Central (PBAVC)
+            ctx.beginPath();
+            ctx.arc(centralX, centralY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            dessinerCroixCentreLocal(centralX, centralY, color);
+
+            // Perçage Supérieur (PBAVS)
+            ctx.beginPath();
+            ctx.arc(superiorX, superiorY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            dessinerCroixCentreLocal(superiorX, superiorY, color);
+
+            // Perçage Inférieur (PBAVI)
+            ctx.beginPath();
+            ctx.arc(inferiorX, inferiorY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            dessinerCroixCentreLocal(inferiorX, inferiorY, color);
+
+            if (isInteractive) {
+                ctx.fillStyle = color;
+                ctx.font = 'bold ' + Math.max(10, canvas.width / 35) + 'px Arial';
+                ctx.fillText('PBAVC', centralX + radius + 4, centralY - radius - 4);
+                ctx.fillText('PBAVS', superiorX + radius + 4, superiorY - radius - 4);
+                ctx.fillText('PBAVI', inferiorX + radius + 4, inferiorY - radius - 4);
+            }
+
+            ctx.restore();
+        }
+
+        function dessinerCroixCentreLocal(x, y, col) {
+            ctx.save();
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 1;
+            let len = 4;
+            ctx.beginPath();
+            ctx.moveTo(x - len, y);
+            ctx.lineTo(x + len, y);
+            ctx.moveTo(x, y - len);
+            ctx.lineTo(x, y + len);
+            ctx.stroke();
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         }
 
@@ -1978,10 +2085,18 @@
             }
 
             if (step >= 9 || isForFinalExport) {
+                if (!isForFinalExport && step === 9) {
+                    drawPbavGroup(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor, pbavSpread, pbavLateral, true);
+                } else if (hasTremlBlock) {
+                    drawPbavGroup(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor, pbavSpread, pbavLateral, false);
+                }
+            }
+
+            if (step >= 10 || isForFinalExport) {
                 springs.forEach(s => {
                     drawSpring(s.p1, s.p2, s.width, elementColor);
                 });
-                if (!isForFinalExport && step === 9) {
+                if (!isForFinalExport && step === 10) {
                     if (springPhase === 1 && currentSpring.p1) {
                         ctx.save();
                         ctx.strokeStyle = elementColor;
@@ -2151,7 +2266,7 @@
 
         window.askValidateStep = function() {
             stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts"];
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Ajout perçages PBAV", "Traçage des ressorts"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
@@ -2215,11 +2330,11 @@
         }
 
         function finishSpringTracing() {
-            step = 10;
+            step = 11;
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.118) !";
+            statusText.innerText = "✅ Calage expert terminé (v.119) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2254,16 +2369,15 @@
                 box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
                 step = 3;
                 
-                // Prédisposition d'un rectangle parfait aligné entre les étalons
                 let cx = (box1.x + box2.x) / 2;
                 let cy = (box1.y + box2.y) / 2;
                 let rectW = Math.max(80, Math.abs(box2.x - box1.x) * 0.85);
                 let rectH = rectW * 0.65;
                 
-                corners[0] = { x: cx - rectW/2, y: cy - rectH/2, size: box1.size, angle: 0 }; // Haut-Gauche
-                corners[1] = { x: cx + rectW/2, y: cy - rectH/2, size: box1.size, angle: 0 }; // Haut-Droit
-                corners[2] = { x: cx + rectW/2, y: cy + rectH/2, size: box1.size, angle: 0 }; // Bas-Droit
-                corners[3] = { x: cx - rectW/2, y: cy + rectH/2, size: box1.size, angle: 0 }; // Bas-Gauche
+                corners[0] = { x: cx - rectW/2, y: cy - rectH/2, size: box1.size, angle: 0 };
+                corners[1] = { x: cx + rectW/2, y: cy - rectH/2, size: box1.size, angle: 0 };
+                corners[2] = { x: cx + rectW/2, y: cy + rectH/2, size: box1.size, angle: 0 };
+                corners[3] = { x: cx - rectW/2, y: cy + rectH/2, size: box1.size, angle: 0 };
 
                 tempX = corners[0].x;
                 tempY = corners[0].y;
@@ -2292,11 +2406,11 @@
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 7) {
-                step = 10;
+                step = 11;
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                statusText.innerText = "✅ Calage expert terminé (v.119) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2307,23 +2421,30 @@
                 sustainAngle = tempAngle;
                 if (hasTremlBlock) {
                     step = 9;
-                    springs = [];
-                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                    springPhase = 0;
-                    tempX = canvas.width * 0.4;
-                    tempY = canvas.height * 0.5;
+                    pbavSpread = 10.50;
+                    pbavLateral = 0;
+                    tempX = sustainX;
+                    tempY = sustainY;
+                    tempAngle = sustainAngle;
                 } else {
-                    step = 10;
+                    step = 11;
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.119) !";
                     btnDownload.style.display = 'block';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
                     return;
                 }
             } else if (step === 9) {
+                step = 10;
+                springs = [];
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                springPhase = 0;
+                tempX = canvas.width * 0.4;
+                tempY = canvas.height * 0.5;
+            } else if (step === 10) {
                 if (springPhase === 0) {
                     currentSpring.p1 = { x: tempX, y: tempY };
                     springPhase = 1;
@@ -2359,49 +2480,16 @@
 
         function prevStep() {
             zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            if (step === 9) {
-                if (springPhase === 2) {
-                    springPhase = 1;
-                    tempX = currentSpring.p2.x;
-                    tempY = currentSpring.p2.y;
-                } else if (springPhase === 1) {
-                    springPhase = 0;
-                    tempX = currentSpring.p1.x;
-                    tempY = currentSpring.p1.y;
-                } else if (springPhase === 0) {
-                    if (springs.length > 0) {
-                        let last = springs.pop();
-                        currentSpring = last;
-                        springPhase = 2;
-                        tempX = currentSpring.p2.x;
-                        tempY = currentSpring.p2.y;
-                    } else {
-                        step = 8;
-                        hasTremlBlock = true;
-                        tempX = sustainX;
-                        tempY = sustainY;
-                        tempAngle = sustainAngle;
-                    }
-                }
-                updateUIState();
-                redrawCanvas();
-                return;
-            }
-            if (step === 8) {
-                step = 7;
-                hasTremlBlock = false;
-            } else if (step > 1) {
+            if (step > 1) {
                 step--;
-                if (step === 1) {
-                    tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
-                } else if (step === 2) {
-                    tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
-                } else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x;
-                    tempY = corners[idx].y;
-                    tempAngle = corners[idx].angle;
-                    tempSize = corners[idx].size;
+                if (step === 8 && hasTremlBlock) {
+                    tempX = sustainX;
+                    tempY = sustainY;
+                    tempAngle = sustainAngle;
+                } else if (step === 9 && hasTremlBlock) {
+                    tempX = sustainX;
+                    tempY = sustainY;
+                    tempAngle = sustainAngle;
                 }
             }
             updateUIState();
@@ -2409,52 +2497,51 @@
         }
 
         function updateUIState() {
-            const stepNames = [
-                "",
-                "Étalon principal GAUCHE (" + standard1Type + ")",
-                "Étalon secondaire DROIT (" + standard2Type + ")",
-                "Coin Haut-Gauche",
-                "Coin Haut-Droit",
-                "Coin Bas-Droit",
-                "Coin Bas-Gauche",
-                "Positionnement des perçages",
-                "Positionnement bloc sustain",
-                "Traçage des ressorts"
-            ];
-            statusText.innerText = "Étape " + step + " / 9 : " + (stepNames[step] || "");
-
-            const isSpringStep = (step === 9);
-            const isSustainStep = (step === 8);
-            const isHoleStep = (step === 7);
-
-            document.getElementById('scale-controls-standard').style.display = (isSpringStep || isSustainStep || isHoleStep) ? 'none' : 'flex';
-            document.getElementById('scale-controls-sustain').style.display = isSustainStep ? 'flex' : 'none';
-            document.getElementById('scale-controls-spring').style.display = isSpringStep ? 'flex' : 'none';
-            holeActionPanel.style.display = isHoleStep ? 'block' : 'none';
-
-            const btnVal = document.getElementById('btn-validate-step');
-            if (btnVal) {
-                if (isHoleStep) {
-                    btnVal.innerText = "Terminer les perçages ➡️";
-                } else if (isSpringStep) {
-                    if (springPhase === 0) btnVal.innerText = "Valider point départ ➡️";
-                    else if (springPhase === 1) btnVal.innerText = "Valider point fin ➡️";
-                    else if (springPhase === 2) btnVal.innerText = "Valider ce ressort ✅";
-                } else {
-                    btnVal.innerText = "Valider l'étape";
-                }
+            if (step === 1) {
+                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
+            } else if (step === 2) {
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+            } else if (step >= 3 && step <= 6) {
+                const names = ["Haut-Gauche", "Haut-Droit", "Bas-Droit", "Bas-Gauche"];
+                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + names[step - 3];
+            } else if (step === 7) {
+                statusText.innerText = "Étape 7 : Poser les perçages";
+            } else if (step === 8) {
+                statusText.innerText = "Étape 8 : Positionnement bloc sustain";
+            } else if (step === 9) {
+                statusText.innerText = "Étape 9 : Ajustement des perçages PBAV";
+            } else if (step === 10) {
+                statusText.innerText = "Étape 10 : Traçage des ressorts";
             }
+
+            if (step === 7) {
+                holeActionPanel.style.display = 'block';
+            } else {
+                holeActionPanel.style.display = 'none';
+            }
+
+            const scaleStd = document.getElementById('scale-controls-standard');
+            const scaleSustain = document.getElementById('scale-controls-sustain');
+            const scalePbav = document.getElementById('scale-controls-pbav');
+            const scaleSpring = document.getElementById('scale-controls-spring');
+            const angleRow = document.getElementById('angle-controls-row');
+            const dpadBox = document.getElementById('dpad-container-box');
+
+            if (scaleStd) scaleStd.style.display = (step >= 1 && step <= 6) ? 'flex' : 'none';
+            if (scaleSustain) scaleSustain.style.display = (step === 8) ? 'flex' : 'none';
+            if (scalePbav) scalePbav.style.display = (step === 9) ? 'flex' : 'none';
+            if (scaleSpring) scaleSpring.style.display = (step === 10) ? 'flex' : 'none';
+            if (angleRow) angleRow.style.display = (step === 7 || step === 10) ? 'none' : 'flex';
+            if (dpadBox) dpadBox.style.display = (step === 7) ? 'none' : 'flex';
         }
 
         btnDownload.addEventListener('click', function() {
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataURL;
-            a.download = 'Acuitix_V118_export.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const link = document.createElement('a');
+            link.download = 'acuitix-v119-export.png';
+            link.href = dataURL;
+            link.click();
             redrawCanvas(false);
         });
     </script>
