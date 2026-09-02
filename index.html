@@ -1476,15 +1476,12 @@
                         xyAxisY.y = imgY;
                     }
                 } else if (step === 10) {
-                    // Pour le pas 10 (PBAV), placer les 3 perçages en même temps et bouger sur X uniquement
-                    let spacing = canvas.width * 0.05; // espacement horizontal par défaut entre les 3 perçages
-                    pbavHoles = [
-                        { x: imgX - spacing, y: imgY, radius: tempSize },
-                        { x: imgX,           y: imgY, radius: tempSize },
-                        { x: imgX + spacing, y: imgY, radius: tempSize }
-                    ];
+                    let dx = imgX - tempX;
                     tempX = imgX;
                     tempY = imgY;
+                    pbavHoles.forEach(h => {
+                        h.x += dx;
+                    });
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -1678,17 +1675,10 @@
 
         window.moveTarget = function(dx, dy) {
             if (step === 10) {
-                // Pour l'étape 10 (PBAV), bouger sur l'axe X uniquement
                 tempX += dx;
-                let spacing = canvas.width * 0.05;
-                if (pbavHoles.length === 3) {
-                    pbavHoles[0].x = tempX - spacing;
-                    pbavHoles[0].y = tempY;
-                    pbavHoles[1].x = tempX;
-                    pbavHoles[1].y = tempY;
-                    pbavHoles[2].x = tempX + spacing;
-                    pbavHoles[2].y = tempY;
-                }
+                pbavHoles.forEach(h => {
+                    h.x += dx;
+                });
             } else {
                 tempX += dx;
                 tempY += dy;
@@ -1714,9 +1704,6 @@
 
         window.adjustSize = function(deltaSize) {
             tempSize = Math.max(2, tempSize + deltaSize);
-            if (step === 10 && pbavHoles.length === 3) {
-                pbavHoles.forEach(h => h.radius = tempSize);
-            }
             redrawCanvas();
         }
 
@@ -1751,13 +1738,10 @@
                 holes.push({ x: tempX, y: tempY, radius: tempSize });
                 redrawCanvas();
             } else if (step === 10) {
-                if (pbavHoles.length === 0) {
+                if (pbavHoles.length < 3) {
                     let spacing = canvas.width * 0.05;
-                    pbavHoles = [
-                        { x: tempX - spacing, y: tempY, radius: tempSize },
-                        { x: tempX,           y: tempY, radius: tempSize },
-                        { x: tempX + spacing, y: tempY, radius: tempSize }
-                    ];
+                    let newX = tempX + (pbavHoles.length * spacing);
+                    pbavHoles.push({ x: newX, y: tempY, radius: tempSize });
                     redrawCanvas();
                 }
             }
@@ -1768,7 +1752,7 @@
                 holes.pop();
                 redrawCanvas();
             } else if (step === 10 && pbavHoles.length > 0) {
-                pbavHoles = [];
+                pbavHoles.pop();
                 redrawCanvas();
             }
         }
@@ -1786,14 +1770,6 @@
             } else {
                 tempX = canvas.width * 0.5;
                 tempY = canvas.height * 0.5;
-                if (step === 10) {
-                    let spacing = canvas.width * 0.05;
-                    pbavHoles = [
-                        { x: tempX - spacing, y: tempY, radius: tempSize },
-                        { x: tempX,           y: tempY, radius: tempSize },
-                        { x: tempX + spacing, y: tempY, radius: tempSize }
-                    ];
-                }
             }
             zoomLevel = 1.0;
             manualPanX = 0;
@@ -2079,26 +2055,24 @@
                     ctx.restore();
                 });
 
-                if (!isForFinalExport && step === 10 && pbavHoles.length === 0) {
-                    ctx.save();
-                    ctx.strokeStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 600);
-                    let spacing = canvas.width * 0.05;
-                    [-spacing, 0, spacing].forEach(offsetX => {
-                        let curX = tempX + offsetX;
+                if (!isForFinalExport && step === 10) {
+                    pbavHoles.forEach((h) => {
+                        ctx.save();
+                        ctx.strokeStyle = elementColor;
+                        ctx.lineWidth = Math.max(1.5, refW / 600);
                         ctx.beginPath();
-                        ctx.arc(curX, tempY, tempSize, 0, Math.PI * 2);
+                        ctx.arc(h.x, tempY, h.radius, 0, Math.PI * 2);
                         ctx.stroke();
 
-                        let len = tempSize * 0.4;
+                        let len = h.radius * 0.4;
                         ctx.beginPath();
-                        ctx.moveTo(curX - len, tempY);
-                        ctx.lineTo(curX + len, tempY);
-                        ctx.moveTo(curX, tempY - len);
-                        ctx.lineTo(curX, tempY + len);
+                        ctx.moveTo(h.x - len, tempY);
+                        ctx.lineTo(h.x + len, tempY);
+                        ctx.moveTo(h.x, tempY - len);
+                        ctx.lineTo(h.x, tempY + len);
                         ctx.stroke();
+                        ctx.restore();
                     });
-                    ctx.restore();
                 }
             }
 
@@ -2319,23 +2293,21 @@
         function startPbavStep() {
             step = 10;
             pbavHoles = [];
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
             let mmSize = getStandardMm(standard1Type);
             let pxPerMm = box1.size / mmSize;
-            tempSize = 1.5 * pxPerMm;
+            let defaultRadius = 1.5 * pxPerMm;
+            let baseX = canvas.width * 0.4;
+            let baseY = canvas.height * 0.5;
+            let spacing = canvas.width * 0.05;
+            pbavHoles.push({ x: baseX, y: baseY, radius: defaultRadius });
+            pbavHoles.push({ x: baseX + spacing, y: baseY, radius: defaultRadius });
+            pbavHoles.push({ x: baseX + (spacing * 2), y: baseY, radius: defaultRadius });
+            tempX = baseX;
+            tempY = baseY;
+            tempSize = defaultRadius;
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
-            
-            // Initialiser les 3 perçages PBAV par défaut au centre avec espacement horizontal
-            let spacing = canvas.width * 0.05;
-            pbavHoles = [
-                { x: tempX - spacing, y: tempY, radius: tempSize },
-                { x: tempX,           y: tempY, radius: tempSize },
-                { x: tempX + spacing, y: tempY, radius: tempSize }
-            ];
-
             updateUIState();
             redrawCanvas();
         }
@@ -2432,4 +2404,101 @@
                 } else if (springPhase === 1) {
                     currentSpring.p2 = { x: tempX, y: tempY };
                     springPhase = 2;
+                    zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                    document.getElementById('spring-count-display').innerText = springs.length + 1;
+                    const modal = document.getElementById('spring-finish-modal');
+                    if (modal) modal.style.display = 'flex';
+                    return;
                 } else if (springPhase === 2) {
+                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
+                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                    springPhase = 0;
+                    tempX = canvas.width * 0.4;
+                    tempY = canvas.height * 0.5;
+                }
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 10) {
+                finishExpertTracing();
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function prevStep() {
+            if (step > 1) {
+                step--;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                if (step === 1) {
+                    tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
+                } else if (step === 2) {
+                    tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
+                } else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+                } else if (step === 7) {
+                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
+                } else if (step === 8) {
+                    tempX = sustainX; tempY = sustainY; tempAngle = sustainAngle;
+                } else if (step === 9) {
+                    springPhase = 0;
+                    tempX = canvas.width * 0.4; tempY = canvas.height * 0.5;
+                } else if (step === 10) {
+                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
+                }
+                updateUIState();
+                redrawCanvas();
+            }
+        }
+
+        function updateUIState() {
+            const scaleControlsStandard = document.getElementById('scale-controls-standard');
+            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
+            const scaleControlsSpring = document.getElementById('scale-controls-spring');
+            const angleControlsRow = document.getElementById('angle-controls-row');
+            
+            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
+            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
+            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
+            if (angleControlsRow) angleControlsRow.style.display = 'flex';
+            if (holeActionPanel) holeActionPanel.style.display = 'none';
+
+            if (step === 1) {
+                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 2) {
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step >= 3 && step <= 6) {
+                const cornerNames = ["Haut-Gauche", "Haut-Droit", "Bas-Droit", "Bas-Gauche"];
+                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + cornerNames[step - 3];
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 7) {
+                statusText.innerText = "Étape 7 : Pose des perçages";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
+                if (angleControlsRow) angleControlsRow.style.display = 'none';
+            } else if (step === 8) {
+                statusText.innerText = "Étape 8 : Positionnement bloc sustain";
+                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
+            } else if (step === 9) {
+                statusText.innerText = "Étape 9 : Traçage des ressorts";
+                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
+                if (angleControlsRow) angleControlsRow.style.display = 'none';
+            } else if (step === 10) {
+                statusText.innerText = "Étape 10 : Perçages PBAV";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
+                if (angleControlsRow) angleControlsRow.style.display = 'none';
+            }
+        }
+
+        btnDownload.addEventListener('click', function() {
+            redrawCanvas(true);
+            const dataURL = canvas.toDataURL('image/png');
+            btnDownload.href = dataURL;
+            btnDownload.download = 'Acuitix_Definitive.png';
+        });
+    </script>
+</body>
+</html>
