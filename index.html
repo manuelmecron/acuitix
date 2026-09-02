@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.117 - Assistant CAO Compact</title>
+    <title>Acuitix V.118 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.117 - Assistant CAO</h1>
+    <h1>Acuitix V.118 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -718,53 +718,27 @@
                 <button class="color-choice-btn" style="background:#FF00FF; color:#000;" onclick="selectColorManual('#FF00FF', this)">Magenta</button>
                 <button class="color-choice-btn" style="background:#FFFFFF; color:#000;" onclick="selectColorManual('#FFFFFF', this)">Blanc</button>
             </div>
-
-            <div class="nav-buttons" style="margin-top: 8px;">
-                <button class="btn btn-secondary" onclick="backToXYAdjustment()" style="margin-top:0;">⬅️ Retour</button>
-                <button class="btn" onclick="goToTutorialStep()" style="margin-top:0;">Continuer ➡️</button>
-            </div>
+            
+            <button class="btn" style="margin-top: 8px;" onclick="validateColorAndStartTutorial()">Commencer le calage 🚀</button>
         </div>
 
         <div id="tutorial-panel">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Orientation des éléments</h3>
-            <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
-                Le repère vert doit être parfaitement aligné et parallèle au modèle rouge :
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Tutoriel : Étape par Étape</h3>
+            <p style="font-size: 0.75rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
+                Bienvenue dans l'assistant de calage interactif. Vous allez positionner les différents repères.
             </p>
-            
-            <div class="pickguards-gallery">
-                <div class="pickguard-thumb valid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #28a745;">✅ Parfaitement axé</div>
-                    <svg viewBox="0 0 120 80">
-                        <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
-                    </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Orientation correcte</span>
-                </div>
-
-                <div class="pickguard-thumb invalid" style="padding: 4px;">
-                    <div class="thumb-status-icon" style="color: #dc3545;">❌ Rotation (45°)</div>
-                    <svg viewBox="0 0 120 80">
-                        <rect x="20" y="15" width="80" height="50" fill="red" />
-                        <g transform="rotate(45, 60, 40)">
-                            <rect x="20" y="15" width="80" height="50" fill="none" stroke="#00FF00" stroke-width="4" />
-                        </g>
-                    </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Repère vert de biais</span>
-                </div>
+            <div class="tip-box">
+                💡 <b>Astuce :</b> Vous pouvez à tout moment utiliser les boutons directionnels pour ajuster la position ou cliquer directement sur l'image.
             </div>
-
-            <div class="nav-buttons" style="margin-top: 6px;">
-                <button class="btn btn-secondary" onclick="backToColorSelection()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
-                <button class="btn" onclick="goToTutorialStep2()" style="margin-top:0; padding:8px;">Suivant (Centrage) ➡️</button>
-            </div>
+            <button class="btn" style="margin-top: 6px; padding: 8px;" onclick="goToTutorialStep2()">Suivant (Centrage) ➡️</button>
         </div>
 
         <div id="tutorial-panel-2">
-            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Consigne de positionnement : Centrage des éléments</h3>
-            <p style="font-size: 0.68rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
+            <h3 style="color: #ffc107; margin-top:0; font-size:0.9rem;">Centrage des éléments</h3>
+            <p style="font-size: 0.75rem; color: #fff; margin: 2px 0 4px 0; line-height: 1.2;">
                 Vérifiez la superposition exacte des contours extérieurs :
             </p>
-
+            
             <div class="pickguards-gallery">
                 <div class="pickguard-thumb valid" style="padding: 4px;">
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Élément bien axé</div>
@@ -774,7 +748,6 @@
                     </svg>
                     <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Superposition parfaite</span>
                 </div>
-                
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Décalage</div>
                     <svg viewBox="0 0 120 80">
@@ -804,110 +777,103 @@
                     <div class="thumb-status-icon" style="color: #28a745;">✅ Correct</div>
                     <svg viewBox="0 0 40 40">
                         <rect x="-10" y="-10" width="60" height="60" fill="red" />
-                        <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="5" />
-                        <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
+                        <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Bords alignés</span>
+                    <span style="font-size:0.5rem; color:#28a745; font-weight:bold;">Échelle OK</span>
                 </div>
-                
                 <div class="pickguard-thumb invalid" style="padding: 4px;">
                     <div class="thumb-status-icon" style="color: #dc3545;">❌ Erreur</div>
                     <svg viewBox="0 0 40 40">
-                        <rect x="5" y="5" width="45" height="45" fill="red" />
-                        <rect x="-2" y="-2" width="55" height="55" fill="none" stroke="#00FF00" stroke-width="5" />
-                        <circle cx="0" cy="0" r="16" fill="none" stroke="#ffc107" stroke-width="2" stroke-dasharray="2,2" />
+                        <rect x="0" y="0" width="40" height="40" fill="red" />
+                        <rect x="-10" y="-10" width="60" height="60" fill="none" stroke="#00FF00" stroke-width="4" />
                     </svg>
-                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Imprécis</span>
+                    <span style="font-size:0.5rem; color:#dc3545; font-weight:bold;">Échelle fausse</span>
                 </div>
-            </div>
-
-            <div class="tip-box">
-                💡 <b>Astuce :</b> Utilisez le réglage d'opacité des repères afin de positionner l'élément "à raz" l'objet à détourer<br><br>
-                📌 <b>Remarque :</b> Vos deux étalons sélectionnés serviront de base de calcul fixe pour le script Python.
             </div>
 
             <div class="nav-buttons" style="margin-top: 6px;">
                 <button class="btn btn-secondary" onclick="backToTutorialStep2()" style="margin-top:0; padding:8px;">⬅️ Retour</button>
-                <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">OK, j'ai compris ➡️</button>
+                <button class="btn" onclick="validateTutorialStep()" style="margin-top:0; padding:8px;">C'est parti ! 🚀</button>
             </div>
         </div>
 
-        <div id="general-tools-container" style="display: none;">
+        <div id="general-tools-container" style="display: none; margin-top: 4px;">
             <div class="opacity-control-box">
-                <label for="opacity-slider">Opacité repères : <span id="opacity-val">100</span>%</label>
+                <label for="opacity-slider">Opacité traits : <span id="opacity-val">100</span>%</label>
                 <input type="range" id="opacity-slider" min="20" max="100" value="100" oninput="changerOpacite(this.value)">
             </div>
+            <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
+            
+            <div class="tool-section-title" style="color: #ffc107; margin-top: 4px; margin-bottom:2px;">Déplacement panoramique image</div>
+            <div class="safe-button-grid" style="margin-bottom: 4px;">
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, 2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 2), 40)" ontouchend="stopAction()">⬆️ Haut</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, -2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -2), 40)" ontouchend="stopAction()">⬇️ Bas</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(2, 0), 40)" ontouchend="stopAction()">⬅️ Gauche</button>
+                <button class="btn-secondary" onmousedown="startAction(() => panCamera(-2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-2, 0), 40)" ontouchend="stopAction()">➡️ Droite</button>
+            </div>
+        </div>
 
-            <div class="image-tools-container" style="background: #262626; border: 1px solid #444; border-radius: 6px; padding: 4px; margin-bottom: 4px;">
-                <div class="tool-section-title" style="color: #ffc107;">🔍 Zoom & Panoramique</div>
-                <div class="safe-button-grid">
-                    <button class="btn-info" onclick="adjustZoom(0.3)">🔍+ Zoom</button>
-                    <button class="btn-info" onclick="adjustZoom(-0.3)">🔍- Zoom</button>
+        <div class="adjust-panel" id="adjust-panel">
+            <div class="gameboy-container">
+                <div class="dpad-container" id="dpad-container-box">
+                    <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Ajustement</div>
+                    <div class="dpad-grid">
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(-5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-5, 0), 40)" ontouchend="stopAction()">⬅️</button>
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(5, 0), 40)" ontouchend="stopAction()">➡️</button>
+                        <div></div>
+                        <button onmousedown="startAction(() => moveTarget(0, 5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 5), 40)" ontouchend="stopAction()">⬇️</button>
+                        <div></div>
+                    </div>
                 </div>
-                <button class="btn btn-secondary" style="margin-top: 2px; padding: 8px; font-size: 0.75rem;" onclick="askResetCurrentPos()">🎯 Recentrer l'élément</button>
-                <div class="tool-section-title" style="color: #ffc107; margin-top: 4px; margin-bottom:2px;">Déplacement panoramique image</div>
-                <div class="safe-button-grid" style="margin-bottom: 4px;">
-                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, 2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, 2), 40)" ontouchend="stopAction()">⬆️ Haut</button>
-                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(0, -2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(0, -2), 40)" ontouchend="stopAction()">⬇️ Bas</button>
-                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(2, 0), 40)" ontouchend="stopAction()">⬅️ Gauche</button>
-                    <button class="btn-secondary" onmousedown="startAction(() => panCamera(-2, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => panCamera(-2, 0), 40)" ontouchend="stopAction()">➡️ Droite</button>
+
+                <div class="controls-right" id="scale-controls-standard" style="display: none;">
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustSize(1), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(1), 40)" ontouchend="stopAction()">🔍+ Taille +</button>
+                        <button onmousedown="startAction(() => adjustSize(-1), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-1), 40)" ontouchend="stopAction()">🔍- Taille -</button>
+                    </div>
+                    <div class="control-row" id="angle-controls-row">
+                        <button onmousedown="startAction(() => adjustAngle(-1), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-1), 70)" ontouchend="stopAction()">↺ Angle -</button>
+                        <button onmousedown="startAction(() => adjustAngle(1), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(1), 70)" ontouchend="stopAction()">↻ Angle +</button>
+                    </div>
+                </div>
+
+                <div class="controls-right" id="scale-controls-sustain" style="display: none;">
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustLength(2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(2), 40)" ontouchend="stopAction()">Longeur +</button>
+                        <button onmousedown="startAction(() => adjustLength(-2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(-2), 40)" ontouchend="stopAction()">Longeur -</button>
+                    </div>
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustWidth(2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(2), 40)" ontouchend="stopAction()">Largeur +</button>
+                        <button onmousedown="startAction(() => adjustWidth(-2), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(-2), 40)" ontouchend="stopAction()">Largeur -</button>
+                    </div>
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustAngle(-1), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-1), 70)" ontouchend="stopAction()">↺ Angle -</button>
+                        <button onmousedown="startAction(() => adjustAngle(1), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(1), 70)" ontouchend="stopAction()">↻ Angle +</button>
+                    </div>
+                </div>
+
+                <div class="controls-right" id="scale-controls-spring" style="display: none;">
+                    <div class="control-row">
+                        <button onmousedown="startAction(() => adjustSpringWidth(1), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(1), 40)" ontouchend="stopAction()">Épaisseur +</button>
+                        <button onmousedown="startAction(() => adjustSpringWidth(-1), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(-1), 40)" ontouchend="stopAction()">Épaisseur -</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="adjust-panel" id="adjust-panel">
-                <div class="gameboy-container">
-                    <div class="dpad-container" id="dpad-container-box">
-                        <div class="tool-section-title" style="color: #ffc107; margin-bottom:2px;">Ajustement</div>
-                        <div class="dpad-grid">
-                            <div></div>
-                            <button onmousedown="startAction(() => moveTarget(0, -5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, -5), 40)" ontouchend="stopAction()">⬆️</button>
-                            <div></div>
-                            <button onmousedown="startAction(() => moveTarget(-5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(-5, 0), 40)" ontouchend="stopAction()">⬅️</button>
-                            <div></div>
-                            <button onmousedown="startAction(() => moveTarget(5, 0), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(5, 0), 40)" ontouchend="stopAction()">➡️</button>
-                            <div></div>
-                            <button onmousedown="startAction(() => moveTarget(0, 5), 40)" onmouseup="stopAction()" ontouchstart="startAction(() => moveTarget(0, 5), 40)" ontouchend="stopAction()">⬇️</button>
-                            <div></div>
-                        </div>
-                    </div>
-
-                    <div class="controls-right">
-                        <div class="control-row" id="scale-controls-standard">
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(0.5), 60)" ontouchend="stopAction()">➕ Échelle +</button>
-                            <button class="btn-info" onmousedown="startAction(() => adjustSize(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSize(-0.5), 60)" ontouchend="stopAction()">➖ Échelle -</button>
-                        </div>
-                        <div id="scale-controls-sustain" style="display:none; flex-direction:column; gap:4px;">
-                            <div class="control-row">
-                                <button class="btn-info" onmousedown="startAction(() => adjustLength(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(0.5), 60)" ontouchend="stopAction()">➕ Longueur +</button>
-                                <button class="btn-info" onmousedown="startAction(() => adjustLength(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustLength(-0.5), 60)" ontouchend="stopAction()">➖ Longueur -</button>
-                            </div>
-                            <div class="control-row">
-                                <button class="btn-info" onmousedown="startAction(() => adjustWidth(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(0.5), 60)" ontouchend="stopAction()">➕ Largeur +</button>
-                                <button class="btn-info" onmousedown="startAction(() => adjustWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
-                            </div>
-                        </div>
-                        <div id="scale-controls-spring" style="display:none; flex-direction:column; gap:4px;">
-                            <div class="control-row">
-                                <button class="btn-info" onmousedown="startAction(() => adjustSpringWidth(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(0.5), 60)" ontouchend="stopAction()">➕ Largeur +</button>
-                                <button class="btn-info" onmousedown="startAction(() => adjustSpringWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
-                            </div>
-                        </div>
-                        <div class="control-row" id="angle-controls-row">
-                            <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
-                            <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
-                        </div>
-                    </div>
+            <div id="hole-action-panel" style="display: none; margin-top: 4px;">
+                <div class="safe-button-grid">
+                    <button class="btn" style="background: #28a745; margin-top:0; padding:8px;" onclick="addHole()">➕ Ajouter ce perçage</button>
+                    <button class="btn btn-danger" style="margin-top:0; padding:8px;" onclick="removeLastHole()">↩ Annuler perçage</button>
                 </div>
+            </div>
 
-                <div id="hole-action-panel" style="display:none; margin-bottom: 4px;">
-                    <button class="btn" style="background: #28a745; margin-top:0; padding: 10px;" onclick="addHole()">✅ Poser un perçage ici</button>
-                    <button class="btn btn-danger" style="margin-top:4px; padding: 8px;" onclick="removeLastHole()">⌫ Annuler le dernier perçage</button>
-                </div>
-
-                <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; padding: 10px;">⬅️ Retour</button>
-                    <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape</button>
-                </div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="btn-prev-step" onclick="askPrevStep()" style="margin-top:0; padding: 10px;">⬅️ Retour</button>
+                <button class="btn btn-info" id="btn-validate-step" style="margin-top:0; padding: 10px;" onclick="askValidateStep()">Valider l'étape</button>
             </div>
         </div>
 
@@ -923,7 +889,6 @@
         const liveGuideCanvas = document.getElementById('live-guide-canvas');
         const liveCtx = liveGuideCanvas.getContext('2d');
         let liveAnimFrameId = null;
-
         let isDraggingYAxis = false;
         let liveYAxisXOffset = 0;
 
@@ -946,66 +911,346 @@
         const holeActionPanel = document.getElementById('hole-action-panel');
         const selectStandard1 = document.getElementById('select-standard-1');
         const selectStandard2 = document.getElementById('select-standard-2');
-        const cameraOrientationOverlay = document.getElementById('camera-orientation-overlay');
+        
+        let currentImg = null;
+        let rotationAngle = 0;
+        let imgOffsetX = 0;
+        let imgOffsetY = 0;
+        let zoomLevel = 1.0;
+        let manualPanX = 0;
+        let manualPanY = 0;
+        let currentOpacity = 1.0;
+        let elementColor = '#00FFFF';
+        let isSelectingColorState = false;
 
-        let pendingRecenterCallback = null;
-        let pendingBackCallback = null;
+        let standard1Type = '2E';
+        let standard2Type = '2E';
 
-        window.triggerRecenterPrompt = function(callback) {
-            pendingRecenterCallback = callback;
-            const modal = document.getElementById('recenter-modal');
-            if (modal) modal.style.display = 'flex';
-        };
+        let box1 = { x: 0, y: 0, size: 40, angle: 0 };
+        let box2 = { x: 0, y: 0, size: 40, angle: 0 };
+        let xyAxisX = { x: 0, y: 0, angle: 0 };
+        let xyAxisY = { x: 0, y: 0, angle: 0 };
+        
+        let corners = [
+            { x: 0, y: 0, size: 0, angle: 0 },
+            { x: 0, y: 0, size: 0, angle: 0 },
+            { x: 0, y: 0, size: 0, angle: 0 },
+            { x: 0, y: 0, size: 0, angle: 0 }
+        ];
+        
+        let holes = [];
+        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
+        let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
+        let hasTremlBlock = false;
+        let springs = [];
+        let currentSpring = { p1: null, p2: null, width: 20 };
 
-        window.confirmRecenter = function(yes) {
-            const modal = document.getElementById('recenter-modal');
-            if (modal) modal.style.display = 'none';
-            if (yes && typeof pendingRecenterCallback === 'function') {
-                pendingRecenterCallback();
+        let step = 1; 
+        let mediaStream = null;
+        let actionInterval = null;
+
+        function startAction(actionFunc, intervalMs) {
+            actionFunc();
+            stopAction();
+            actionInterval = setInterval(actionFunc, intervalMs);
+        }
+
+        function stopAction() {
+            if (actionInterval) {
+                clearInterval(actionInterval);
+                actionInterval = null;
             }
-            pendingRecenterCallback = null;
-        };
+        }
 
-        window.triggerBackPrompt = function(callback) {
-            pendingBackCallback = callback;
-            const modal = document.getElementById('back-modal');
-            if (modal) modal.style.display = 'flex';
-        };
-
-        window.confirmBack = function(yes) {
-            const modal = document.getElementById('back-modal');
-            if (modal) modal.style.display = 'none';
-            if (yes && typeof pendingBackCallback === 'function') {
-                pendingBackCallback();
+        function updateCanvasDimensions() {
+            if (!currentImg) return;
+            let maxWidth = window.innerWidth > 480 ? 472 : window.innerWidth - 12;
+            let maxHeight = window.innerHeight * 0.65;
+            let imgW = currentImg.width;
+            let imgH = currentImg.height;
+            let ratio = imgW / imgH;
+            let displayW = maxWidth;
+            let displayH = displayW / ratio;
+            if (displayH > maxHeight) {
+                displayH = maxHeight;
+                displayW = displayH * ratio;
             }
-            pendingBackCallback = null;
-        };
+            canvas.width = Math.round(displayW);
+            canvas.height = Math.round(displayH);
+        }
 
-        window.handleCenterRecenterClick = function() {
-            triggerRecenterPrompt(() => {
-                resetCurrentPos();
+        window.goToPhotoCapture = function() {
+            standard1Type = selectStandard1.value;
+            standard2Type = selectStandard2.value;
+            initialStandardPanel.style.display = 'none';
+            welcomePanel.style.display = 'block';
+        }
+
+        window.backToStandards = function() {
+            welcomePanel.style.display = 'none';
+            initialStandardPanel.style.display = 'block';
+        }
+
+        window.startLiveCamera = function() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Votre navigateur ne supporte pas l'accès à la caméra.");
+                return;
+            }
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            };
+            navigator.mediaDevices.getUserMedia(constraints)
+            .then(stream => {
+                mediaStream = stream;
+                videoElement.srcObject = stream;
+                videoElement.style.display = 'block';
+                canvas.style.display = 'none';
+                welcomePanel.style.display = 'none';
+                initialStandardPanel.style.display = 'none';
+                liveBackBtn.style.display = 'flex';
+                liveCaptureButtonsContainer.style.display = 'block';
+                document.body.classList.add('live-fullscreen-mode');
+                checkLiveOrientation();
+                window.addEventListener('resize', checkLiveOrientation);
+                window.addEventListener('orientationchange', checkLiveOrientation);
+            })
+            .catch(err => {
+                const fallbackConstraints = { video: { facingMode: "environment" } };
+                navigator.mediaDevices.getUserMedia(fallbackConstraints)
+                .then(stream => {
+                    mediaStream = stream;
+                    videoElement.srcObject = stream;
+                    videoElement.style.display = 'block';
+                    canvas.style.display = 'none';
+                    welcomePanel.style.display = 'none';
+                    initialStandardPanel.style.display = 'none';
+                    liveBackBtn.style.display = 'flex';
+                    liveCaptureButtonsContainer.style.display = 'block';
+                    document.body.classList.add('live-fullscreen-mode');
+                    checkLiveOrientation();
+                    window.addEventListener('resize', checkLiveOrientation);
+                    window.addEventListener('orientationchange', checkLiveOrientation);
+                })
+                .catch(err2 => {
+                    alert("Impossible d'accéder à la caméra arrière : " + err2.message);
+                });
             });
-        };
+        }
 
-        window.handleCenterRecenterClick2 = function() {
-            resetCurrentPos();
-        };
+        function checkLiveOrientation() {
+            const overlay = document.getElementById('camera-orientation-overlay');
+            if (window.innerHeight > window.innerWidth) {
+                overlay.style.display = 'flex';
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
 
-        function getXYStep() {
+        window.stopLiveCameraAndReset = function() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            videoElement.style.display = 'none';
+            liveGuideCanvas.style.display = 'none';
+            liveBackBtn.style.display = 'none';
+            liveCaptureButtonsContainer.style.display = 'none';
+            document.body.classList.remove('live-fullscreen-mode');
+            if (liveAnimFrameId) {
+                cancelAnimationFrame(liveAnimFrameId);
+                liveAnimFrameId = null;
+            }
+            resetToWelcome();
+        }
+
+        window.captureLiveSnapshot = function() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = videoElement.videoWidth || 1280;
+            tempCanvas.height = videoElement.videoHeight || 720;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            videoElement.style.display = 'none';
+            liveGuideCanvas.style.display = 'none';
+            liveBackBtn.style.display = 'none';
+            liveCaptureButtonsContainer.style.display = 'none';
+            document.body.classList.remove('live-fullscreen-mode');
+            if (liveAnimFrameId) {
+                cancelAnimationFrame(liveAnimFrameId);
+                liveAnimFrameId = null;
+            }
+
+            const dataURL = tempCanvas.toDataURL('image/jpeg', 0.95);
+            loadBaseImageFromDataURL(dataURL);
+        }
+
+        fileInputGallery.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                loadBaseImageFromDataURL(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function loadBaseImageFromDataURL(dataURL) {
+            const img = new Image();
+            img.onload = function() {
+                currentImg = img;
+                rotationAngle = 0;
+                imgOffsetX = 0;
+                imgOffsetY = 0;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                
+                updateCanvasDimensions();
+                
+                let wCanvas = canvas.width;
+                let hCanvas = canvas.height;
+                let defaultSize = wCanvas * 0.035;
+
+                box1 = { x: wCanvas * 0.25, y: hCanvas * 0.5, size: defaultSize, angle: 0 };
+                box2 = { x: wCanvas * 0.75, y: hCanvas * 0.5, size: defaultSize, angle: 0 };
+                
+                // Prédisposition d'un rectangle parfait et aligné pour les 4 coins
+                let rectW = wCanvas * 0.5;
+                let rectH = hCanvas * 0.5;
+                let cxCenter = wCanvas * 0.5;
+                let cyCenter = hCanvas * 0.5;
+                
+                corners[0] = { x: cxCenter - rectW / 2, y: cyCenter - rectH / 2, size: defaultSize, angle: 0 }; // Haut-Gauche
+                corners[1] = { x: cxCenter + rectW / 2, y: cyCenter - rectH / 2, size: defaultSize, angle: 0 }; // Haut-Droite
+                corners[2] = { x: cxCenter - rectW / 2, y: cyCenter + rectH / 2, size: defaultSize, angle: 0 }; // Bas-Gauche
+                corners[3] = { x: cxCenter + rectW / 2, y: cyCenter + rectH / 2, size: defaultSize, angle: 0 }; // Bas-Droite
+
+                sustainLength = wCanvas * 0.2;
+                sustainWidth = wCanvas * 0.08;
+                sustainAngle = 0;
+                sustainX = wCanvas * 0.5;
+                sustainY = hCanvas * 0.5;
+
+                xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
+                xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
+
+                tempX = wCanvas * 0.5;
+                tempY = hCanvas * 0.5;
+                tempAngle = 0;
+                tempSize = defaultSize;
+                hasTremlBlock = false;
+                springs = [];
+
+                welcomePanel.style.display = 'none';
+                initialStandardPanel.style.display = 'none';
+                goToPreCapture();
+            };
+            img.src = dataURL;
+        }
+
+        canvas.addEventListener('click', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientClickX = (e.clientX - rect.left) * scaleX;
+            let clientClickY = (e.clientY - rect.top) * scaleY;
+            let imgX, imgY;
+            if (zoomLevel !== 1.0) {
+                imgX = (clientClickX - rect.width / 2) / zoomLevel + tempX - manualPanX;
+                imgY = (clientClickY - rect.height / 2) / zoomLevel + tempY - manualPanY;
+            } else {
+                imgX = clientClickX;
+                imgY = clientClickY;
+            }
+
+            if (!isSelectingColorState) {
+                if (step === 0) {
+                    const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
+                    if (activeAxis === 'X') {
+                        xyAxisX.x = imgX;
+                        xyAxisX.y = imgY;
+                    } else {
+                        xyAxisY.x = imgX;
+                        xyAxisY.y = imgY;
+                    }
+                } else {
+                    tempX = imgX;
+                    tempY = imgY;
+                }
+                redrawCanvas();
+            }
+        });
+
+        window.toggleColorDrawer = function() {
+            sideColorDrawer.classList.toggle('open');
+        }
+
+        window.selectColorManual = function(colorHex, element) {
+            elementColor = colorHex;
+            document.querySelectorAll('.color-choice-btn').forEach(btn => btn.classList.remove('selected'));
+            if(element) {
+                element.classList.add('selected');
+            } else {
+                document.querySelectorAll('.color-choice-btn').forEach(btn => {
+                    if(btn.style.backgroundColor === colorHex || btn.style.background.includes(colorHex)) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+            redrawCanvas();
+        }
+
+        window.rotateImage90 = function() {
+            rotationAngle = (rotationAngle + 90) % 360;
+            redrawCanvas();
+        }
+
+        window.resetCanvasAndTempPos = function() {
+            rotationAngle = 0;
+            imgOffsetX = 0;
+            imgOffsetY = 0;
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            tempX = canvas.width * 0.5;
+            tempY = canvas.height * 0.5;
+            redrawCanvas();
+        }
+
+        window.adjustZoom = function(delta) {
+            zoomLevel = Math.max(1.0, Math.min(5.0, zoomLevel + delta));
+            if (zoomLevel === 1.0) {
+                manualPanX = 0;
+                manualPanY = 0;
+            }
+            redrawCanvas();
+        }
+
+        window.panCamera = function(dx, dy) {
+            if (zoomLevel > 1.0) {
+                manualPanX += dx;
+                manualPanY += dy;
+                redrawCanvas();
+            }
+        }
+
+        window.getXYStep = function() {
             const force = document.getElementById('xy-force-selector')?.value || 'coarse';
             return force === 'fine' ? 1 : 5;
         }
-        function getScaleStep() {
-            const force = document.getElementById('xy-force-selector')?.value || 'coarse';
-            return force === 'fine' ? 1 : 3;
-        }
-        function getAngleStep() {
+
+        window.getAngleStep = function() {
             const force = document.getElementById('xy-force-selector')?.value || 'coarse';
             return force === 'fine' ? 0.1 : 1.0;
         }
-
-        let xyAxisX = { x: 0, y: 0, angle: 0 };
-        let xyAxisY = { x: 0, y: 0, angle: 0 };
 
         window.adjustXYAxisPos = function(dx, dy) {
             const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
@@ -1017,10 +1262,6 @@
                 xyAxisY.y += dy;
             }
             redrawCanvas();
-        }
-
-        window.adjustXYScale = function(delta) {
-            adjustSize(delta);
         }
 
         window.adjustXYAngle = function(deltaDeg) {
@@ -1066,474 +1307,13 @@
         window.goToColorSelectionFromXY = function() {
             xyAdjustmentPanel.style.display = 'none';
             colorChoicePanel.style.display = 'block';
-            statusText.innerText = "Choix de la couleur du tracé";
-            isSelectingColorState = true;
-            redrawCanvas();
+            statusText.innerText = "Choix de la couleur";
         }
 
-        liveGuideCanvas.addEventListener('pointerdown', (e) => {
-            isDraggingYAxis = true;
-            updateYAxisPosition(e);
-        });
-        window.addEventListener('pointermove', (e) => {
-            if (!isDraggingYAxis) return;
-            updateYAxisPosition(e);
-        });
-        window.addEventListener('pointerup', () => {
-            isDraggingYAxis = false;
-        });
-
-        function updateYAxisPosition(e) {
-            const rect = liveGuideCanvas.getBoundingClientRect();
-            const scaleX = liveGuideCanvas.width / rect.width;
-            const clientX = (e.clientX - rect.left) * scaleX;
-            liveYAxisXOffset = clientX - (liveGuideCanvas.width / 2);
-        }
-
-        let isSyncing = false;
-
-        function handleStandardChange(changedBox) {
-            if (isSyncing) return;
-            isSyncing = true;
-
-            const val1 = selectStandard1.value;
-            const val2 = selectStandard2.value;
-
-            if (changedBox === 1) {
-                if (val1 === '11') {
-                    selectStandard2.value = '11';
-                } else if (val2 === '11') {
-                    selectStandard2.value = '2E';
-                }
-            } else {
-                if (val2 === '11') {
-                    selectStandard1.value = '11';
-                } else if (val1 === '11') {
-                    selectStandard1.value = '2E';
-                }
-            }
-
-            isSyncing = false;
-        }
-
-        selectStandard1.addEventListener('change', () => handleStandardChange(1));
-        selectStandard2.addEventListener('change', () => handleStandardChange(2));
-
-        let currentImg = null;
-        let mediaStream = null;
-        let isLiveCameraActive = false;
-        let step = 0;
-        let rotationAngle = 0;
-        let imgOffsetX = 0;
-        let imgOffsetY = 0;
-        let currentScaleRatio = 1.0;
-        let box1 = { x: 0, y: 0, size: 0, angle: 0 };
-        let box2 = { x: 0, y: 0, size: 0, angle: 0 };
-        let corners = [
-            { x: 0, y: 0, size: 0, angle: 0 },
-            { x: 0, y: 0, size: 0, angle: 0 },
-            { x: 0, y: 0, size: 0, angle: 0 },
-            { x: 0, y: 0, size: 0, angle: 0 }
-        ];
-        let holes = [];
-        let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
-        let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
-        let hasTremlBlock = false;
-        let springs = [];
-        let currentSpring = { p1: null, p2: null, width: 20 };
-        let springPhase = 0; // 0: placing p1, 1: placing p2, 2: adjusting width
-        let zoomLevel = 1.0;
-        let manualPanX = 0;
-        let manualPanY = 0;
-        let actionInterval = null;
-        let elementColor = "#00FFFF";
-        let currentOpacity = 1.0;
-        let isSelectingColorState = false;
-        let standard1Type = "2E";
-        let standard2Type = "2E";
-
-        function getStandardInfo(type) {
-            switch(type) {
-                case '11': return { name: 'Étalon 11 (Carré)', val: '10x10 mm' };
-                case '2E': return { name: 'Pièce de 2 €', val: 'Ø 25.75 mm' };
-                case '1E': return { name: 'Pièce de 1 €', val: 'Ø 23.25 mm' };
-                case '0.50E': return { name: 'Pièce de 50 Centimes', val: 'Ø 24.25 mm' };
-                case '0.20E': return { name: 'Pièce de 20 Centimes', val: 'Ø 22.25 mm' };
-                case '0.10E': return { name: 'Pièce de 10 Centimes', val: 'Ø 19.75 mm' };
-                case '0.05E': return { name: 'Pièce de 5 Centimes', val: 'Ø 21.25 mm' };
-                case '0.02E': return { name: 'Pièce de 2 Centimes', val: 'Ø 18.75 mm' };
-                case '0.01E': return { name: 'Pièce de 1 Centime', val: 'Ø 16.25 mm' };
-                case 'CARD': return { name: 'Carte de fidélité', val: '85x54 mm' };
-                default: return { name: 'Standard', val: '10 mm' };
-            }
-        }
-
-        function getStandardMm(type) {
-            switch(type) {
-                case '11': return 10;
-                case '2E': return 25.75;
-                case '1E': return 23.25;
-                case '0.50E': return 24.25;
-                case '0.20E': return 22.25;
-                case '0.10E': return 19.75;
-                case '0.05E': return 21.25;
-                case '0.02E': return 18.75;
-                case '0.01E': return 16.25;
-                case 'CARD': return 85;
-                default: return 25.75;
-            }
-        }
-
-        window.goToPhotoCapture = function() {
-            standard1Type = selectStandard1.value;
-            standard2Type = selectStandard2.value;
-            initialStandardPanel.style.display = 'none';
-            welcomePanel.style.display = 'block';
-            statusText.style.display = 'block';
-            statusText.innerText = "Étape 0 : Source de l'image";
-        }
-
-        window.backToStandards = function() {
-            welcomePanel.style.display = 'none';
-            initialStandardPanel.style.display = 'block';
-            statusText.style.display = 'none';
-        }
-
-        window.backToWelcome = function() {
-            stopAction();
-            stopLiveCameraAndReset();
-            canvas.style.display = 'none';
-            xyAdjustmentPanel.style.display = 'none';
-            preCaptureTools.style.display = 'none';
-            colorChoicePanel.style.display = 'none';
-            tutorialPanel.style.display = 'none';
-            tutorialPanel2.style.display = 'none';
-            tutorialPanel3.style.display = 'none';
-            generalToolsContainer.style.display = 'none';
-            adjustPanel.style.display = 'none';
-            btnDownload.style.display = 'none';
-            btnRetry.style.display = 'none';
-            initialStandardPanel.style.display = 'none';
-            welcomePanel.style.display = 'block';
-            statusText.style.display = 'block';
-            statusText.innerText = "Étape 0 : Source de l'image";
-            sideColorDrawer.style.display = 'none';
-            sideColorDrawer.classList.remove('open');
-            fileInputGallery.value = '';
-            currentImg = null;
-            holes = [];
-            hasTremlBlock = false;
-            springs = [];
-            step = 1;
-        }
-
-        window.startLiveCamera = async function() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { exact: "environment" }, zoom: 1 }
-                });
-            } catch (err) {
-                try {
-                    mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment", zoom: 1 }
-                    });
-                } catch (err2) {
-                    try {
-                        mediaStream = await navigator.mediaDevices.getUserMedia({
-                            video: { facingMode: "environment" }
-                        });
-                    } catch (err3) {
-                        alert("Impossible d'accéder à la caméra arrière : " + err3.message);
-                        return;
-                    }
-                }
-            }
-
-            const videoTrack = mediaStream.getVideoTracks()[0];
-            if (videoTrack && typeof videoTrack.getCapabilities === 'function') {
-                const capabilities = videoTrack.getCapabilities();
-                if (capabilities.zoom) {
-                    const targetZoom = Math.max(capabilities.zoom.min, 1);
-                    videoTrack.applyConstraints({ advanced: [{ zoom: targetZoom }] }).catch(() => {});
-                }
-            }
-
-            videoElement.srcObject = mediaStream;
-            isLiveCameraActive = true;
-            
-            document.body.classList.add('live-fullscreen-mode');
-            welcomePanel.style.display = 'none';
-            videoElement.style.display = 'block';
-            liveGuideCanvas.style.display = 'block';
-            liveBackBtn.style.display = 'flex';
-            statusText.style.display = 'block';
-            statusText.innerText = "Étape 0 : Caméra Live - Cadrage";
-
-            checkOrientationForLiveCamera();
-            window.addEventListener('resize', checkOrientationForLiveCamera);
-            window.addEventListener('orientationchange', checkOrientationForLiveCamera);
-
-            startLiveGuidesLoop();
-        }
-
-        function startLiveGuidesLoop() {
-            if (!isLiveCameraActive) return;
-            if (videoElement.videoWidth && videoElement.videoHeight) {
-                liveGuideCanvas.width = videoElement.videoWidth;
-                liveGuideCanvas.height = videoElement.videoHeight;
-            }
-            liveCtx.clearRect(0, 0, liveGuideCanvas.width, liveGuideCanvas.height);
-
-            const w = liveGuideCanvas.width;
-            const h = liveGuideCanvas.height;
-
-            let currentYAxisX = (w / 2) + liveYAxisXOffset;
-            liveCtx.strokeStyle = '#00FF00';
-            liveCtx.lineWidth = Math.max(2, w / 400);
-            liveCtx.beginPath();
-            liveCtx.moveTo(currentYAxisX, 0);
-            liveCtx.lineTo(currentYAxisX, h);
-            liveCtx.stroke();
-
-            liveCtx.strokeStyle = '#FF0000';
-            liveCtx.lineWidth = Math.max(2, w / 400);
-            liveCtx.beginPath();
-            liveCtx.moveTo(0, h / 2);
-            liveCtx.lineTo(w, h / 2);
-            liveCtx.stroke();
-
-            liveAnimFrameId = requestAnimationFrame(startLiveGuidesLoop);
-        }
-
-        function checkOrientationForLiveCamera() {
-            if (!isLiveCameraActive) return;
-            const isPortrait = window.innerHeight > window.innerWidth;
-            if (isPortrait) {
-                cameraOrientationOverlay.style.display = 'flex';
-                liveCaptureButtonsContainer.style.display = 'none';
-                liveBackBtn.style.display = 'none';
-            } else {
-                cameraOrientationOverlay.style.display = 'none';
-                liveCaptureButtonsContainer.style.display = 'block';
-                liveBackBtn.style.display = 'flex';
-            }
-        }
-
-        window.stopLiveCameraAndReset = function() {
-            if (mediaStream) {
-                mediaStream.getTracks().forEach(track => track.stop());
-                mediaStream = null;
-            }
-            isLiveCameraActive = false;
-            
-            document.body.classList.remove('live-fullscreen-mode');
-            if (liveAnimFrameId) {
-                cancelAnimationFrame(liveAnimFrameId);
-                liveAnimFrameId = null;
-            }
-
-            window.removeEventListener('resize', checkOrientationForLiveCamera);
-            window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
-            videoElement.style.display = 'none';
-            liveGuideCanvas.style.display = 'none';
-            liveBackBtn.style.display = 'none';
-            liveCaptureButtonsContainer.style.display = 'none';
-            cameraOrientationOverlay.style.display = 'none';
-            welcomePanel.style.display = 'block';
-            statusText.innerText = "Étape 0 : Source de l'image";
-        }
-
-        window.captureLiveSnapshot = function() {
-            if (!videoElement.videoWidth) return;
-
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = videoElement.videoWidth;
-            tempCanvas.height = videoElement.videoHeight;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
-
-            const img = new Image();
-            img.onload = function() {
-                if (mediaStream) {
-                    mediaStream.getTracks().forEach(track => track.stop());
-                    mediaStream = null;
-                }
-                isLiveCameraActive = false;
-                
-                document.body.classList.remove('live-fullscreen-mode');
-                if (liveAnimFrameId) {
-                    cancelAnimationFrame(liveAnimFrameId);
-                    liveAnimFrameId = null;
-                }
-
-                window.removeEventListener('resize', checkOrientationForLiveCamera);
-                window.removeEventListener('orientationchange', checkOrientationForLiveCamera);
-                videoElement.style.display = 'none';
-                liveGuideCanvas.style.display = 'none';
-                liveBackBtn.style.display = 'none';
-                liveCaptureButtonsContainer.style.display = 'none';
-                cameraOrientationOverlay.style.display = 'none';
-
-                currentImg = img;
-                rotationAngle = 0;
-                imgOffsetX = 0;
-                imgOffsetY = 0;
-                updateCanvasDimensions();
-                step = 0;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                let wCanvas = canvas.width;
-                let hCanvas = canvas.height;
-                let defaultSize = wCanvas * 0.035;
-                box1.size = defaultSize;
-                box2.size = defaultSize;
-                for(let i=0; i<4; i++) {
-                    corners[i].size = wCanvas * 0.04;
-                }
-                xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
-                xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
-                tempX = wCanvas * 0.5;
-                tempY = hCanvas * 0.5;
-                tempAngle = 0;
-                tempSize = defaultSize;
-                hasTremlBlock = false;
-                springs = [];
-
-                goToPreCapture();
-            };
-            img.src = tempCanvas.toDataURL('image/png');
-        }
-
-        function handleImageFile(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    currentImg = img;
-                    rotationAngle = (img.width < img.height) ? 90 : 0;
-                    imgOffsetX = 0;
-                    imgOffsetY = 0;
-                    updateCanvasDimensions();
-                    step = 0;
-                    zoomLevel = 1.0;
-                    manualPanX = 0;
-                    manualPanY = 0;
-                    let wCanvas = canvas.width;
-                    let hCanvas = canvas.height;
-                    let defaultSize = wCanvas * 0.035;
-                    box1.size = defaultSize;
-                    box2.size = defaultSize;
-                    for(let i=0; i<4; i++) {
-                        corners[i].size = wCanvas * 0.04;
-                    }
-                    xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
-                    xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
-                    tempX = wCanvas * 0.5;
-                    tempY = hCanvas * 0.5;
-                    tempAngle = 0;
-                    tempSize = defaultSize;
-                    hasTremlBlock = false;
-                    springs = [];
-                    welcomePanel.style.display = 'none';
-                    goToPreCapture();
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        fileInputGallery.addEventListener('change', handleImageFile);
-
-        canvas.addEventListener('click', function(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            let clientClickX = (e.clientX - rect.left) * scaleX;
-            let clientClickY = (e.clientY - rect.top) * scaleY;
-            let imgX, imgY;
-            if (zoomLevel !== 1.0) {
-                imgX = (clientClickX - rect.width / 2) / zoomLevel + tempX - manualPanX;
-                imgY = (clientClickY - rect.height / 2) / zoomLevel + tempY - manualPanY;
-            } else {
-                imgX = clientClickX;
-                imgY = clientClickY;
-            }
-            if (!isSelectingColorState) {
-                if (step === 0) {
-                    const activeAxis = document.getElementById('active-xy-selector')?.value || 'X';
-                    if (activeAxis === 'X') {
-                        xyAxisX.x = imgX;
-                        xyAxisX.y = imgY;
-                    } else {
-                        xyAxisY.x = imgX;
-                        xyAxisY.y = imgY;
-                    }
-                } else {
-                    tempX = imgX;
-                    tempY = imgY;
-                }
-                redrawCanvas();
-            }
-        });
-
-        window.toggleColorDrawer = function() {
-            sideColorDrawer.classList.toggle('open');
-        }
-
-        window.selectColorManual = function(colorHex, element) {
-            elementColor = colorHex;
-            document.querySelectorAll('.color-choice-btn').forEach(btn => btn.classList.remove('selected'));
-            if(element) {
-                element.classList.add('selected');
-            } else {
-                document.querySelectorAll('.color-choice-btn').forEach(btn => {
-                    if(btn.style.backgroundColor === colorHex || btn.getAttribute('onclick')?.includes(colorHex)) {
-                        btn.classList.add('selected');
-                    }
-                });
-            }
-            redrawCanvas();
-        }
-
-        window.goToColorSelection = function() {
-            preCaptureTools.style.display = 'none';
-            colorChoicePanel.style.display = 'block';
-            statusText.innerText = "Choix de la couleur du tracé";
-            isSelectingColorState = true;
-            redrawCanvas();
-        }
-
-        window.backToXYAdjustment = function() {
-            colorChoicePanel.style.display = 'none';
-            xyAdjustmentPanel.style.display = 'block';
-            statusText.innerText = "Ajustement et Calage";
-            isSelectingColorState = false;
-            redrawCanvas();
-        }
-
-        window.backToPreCapture = function() {
-            xyAdjustmentPanel.style.display = 'none';
-            preCaptureTools.style.display = 'block';
-            statusText.innerText = "Étape 0 : Orientation et Cadrage";
-            isSelectingColorState = false;
-            redrawCanvas();
-        }
-
-        window.goToTutorialStep = function() {
+        window.validateColorAndStartTutorial = function() {
             colorChoicePanel.style.display = 'none';
             tutorialPanel.style.display = 'block';
-            statusText.innerText = "Consigne : Orientation des éléments";
-            isSelectingColorState = false;
-            redrawCanvas();
-        }
-
-        window.backToColorSelection = function() {
-            tutorialPanel.style.display = 'none';
-            colorChoicePanel.style.display = 'block';
-            statusText.innerText = "Choix de la couleur du tracé";
+            statusText.innerText = "Tutoriel : Bienvenue";
             isSelectingColorState = true;
             redrawCanvas();
         }
@@ -1541,14 +1321,6 @@
         window.goToTutorialStep2 = function() {
             tutorialPanel.style.display = 'none';
             tutorialPanel2.style.display = 'block';
-            statusText.innerText = "Consigne : Centrage des éléments";
-            isSelectingColorState = false;
-            redrawCanvas();
-        }
-
-        window.backToTutorialStep1 = function() {
-            tutorialPanel2.style.display = 'none';
-            tutorialPanel.style.display = 'block';
             statusText.innerText = "Consigne : Orientation des éléments";
             isSelectingColorState = false;
             redrawCanvas();
@@ -1581,10 +1353,10 @@
             zoomLevel = 1.0;
             manualPanX = 0;
             manualPanY = 0;
-            tempX = canvas.width * 0.5;
-            tempY = canvas.height * 0.5;
-            tempAngle = 0;
-            tempSize = canvas.width * 0.035;
+            tempX = box1.x;
+            tempY = box1.y;
+            tempAngle = box1.angle;
+            tempSize = box1.size;
             updateUIState();
             redrawCanvas();
         }
@@ -1607,58 +1379,30 @@
             initialStandardPanel.style.display = 'block';
             statusText.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            sideColorDrawer.classList.remove('open');
-            fileInputGallery.value = '';
-            currentImg = null;
-            holes = [];
-            hasTremlBlock = false;
-            springs = [];
             step = 1;
         }
 
-        function updateCanvasDimensions() {
-            if (!currentImg) return;
-            let w = currentImg.width;
-            let h = currentImg.height;
-            if (rotationAngle === 90 || rotationAngle === 270) {
-                w = currentImg.height;
-                h = currentImg.width;
-            }
-            currentScaleRatio = 1.0;
-            canvas.width = w;
-            canvas.height = h;
+        window.backToPreCapture = function() {
+            xyAdjustmentPanel.style.display = 'none';
+            preCaptureTools.style.display = 'block';
+            statusText.innerText = "Étape 0 : Orientation et Cadrage";
         }
 
-        window.rotateImage90 = function() {
-            rotationAngle = (rotationAngle + 90) % 360;
-            updateCanvasDimensions();
-            resetCanvasAndTempPos();
+        window.backToWelcome = function() {
+            xyAdjustmentPanel.style.display = 'none';
+            preCaptureTools.style.display = 'none';
+            canvas.style.display = 'none';
+            statusText.style.display = 'none';
+            sideColorDrawer.style.display = 'none';
+            welcomePanel.style.display = 'block';
         }
 
-        window.resetCanvasAndTempPos = function() {
-            triggerRecenterPrompt(() => {
-                imgOffsetX = 0;
-                imgOffsetY = 0;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                redrawCanvas();
-            });
-        }
-
-        window.startAction = function(actionFn, speedMs) {
-            stopAction();
-            actionFn();
-            actionInterval = setInterval(actionFn, speedMs);
-        }
-
-        window.stopAction = function() {
-            if (actionInterval) {
-                clearInterval(actionInterval);
-                actionInterval = null;
-            }
+        window.backToTutorialStep1 = function() {
+            tutorialPanel2.style.display = 'none';
+            tutorialPanel.style.display = 'block';
+            statusText.innerText = "Tutoriel : Bienvenue";
+            isSelectingColorState = true;
+            redrawCanvas();
         }
 
         window.moveTarget = function(dx, dy) {
@@ -1667,24 +1411,13 @@
             redrawCanvas();
         }
 
-        window.panCamera = function(dx, dy) {
-            manualPanX += dx;
-            manualPanY += dy;
-            redrawCanvas();
-        }
-
-        window.adjustZoom = function(delta) {
-            zoomLevel = Math.max(1.0, Math.min(6.0, zoomLevel + delta));
+        window.adjustSize = function(delta) {
+            tempSize = Math.max(2, tempSize + delta);
             redrawCanvas();
         }
 
         window.adjustAngle = function(deltaDeg) {
             tempAngle += deltaDeg;
-            redrawCanvas();
-        }
-
-        window.adjustSize = function(deltaSize) {
-            tempSize = Math.max(2, tempSize + deltaSize);
             redrawCanvas();
         }
 
@@ -1748,86 +1481,261 @@
             redrawCanvas();
         }
 
-        function drawSustainRectangle(x, y, lengthVal, widthVal, angleDeg, color) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
-
-            let w = widthVal;
-            let h = lengthVal;
-            let halfW = w / 2;
-            let halfH = h / 2;
-
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-
-            ctx.strokeRect(-halfW, -halfH, w, h);
-
-            ctx.beginPath();
-            ctx.moveTo(-halfW, -halfH);
-            ctx.lineTo(halfW, halfH);
-            ctx.moveTo(halfW, -halfH);
-            ctx.lineTo(-halfW, halfH);
-            ctx.stroke();
-
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(0, 0, Math.max(2, canvas.width / 300), 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
+        let pendingRecenterCallback = null;
+        function triggerRecenterPrompt(cb) {
+            pendingRecenterCallback = cb;
+            document.getElementById('recenter-modal').style.display = 'flex';
+        }
+        window.confirmRecenter = function(yes) {
+            document.getElementById('recenter-modal').style.display = 'none';
+            if (yes && pendingRecenterCallback) {
+                pendingRecenterCallback();
+            }
+            pendingRecenterCallback = null;
         }
 
-        function drawSpring(p1, p2, width, color) {
-            ctx.save();
-            let cx = (p1.x + p2.x) / 2;
-            let cy = (p1.y + p2.y) / 2;
-            let length = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-            let angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        let pendingBackCallback = null;
+        window.askPrevStep = function() {
+            if (step === 1) return;
+            document.getElementById('back-modal').style.display = 'flex';
+        }
+        window.confirmBack = function(yes) {
+            document.getElementById('back-modal').style.display = 'none';
+            if (yes) {
+                prevStepCore();
+            }
+        }
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
+        function prevStepCore() {
+            if (step > 1) {
+                if (step === 2) {
+                    box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                } else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    corners[idx].x = tempX; corners[idx].y = tempY; corners[idx].angle = tempAngle; corners[idx].size = tempSize;
+                } else if (step === 7) {
+                    // Revenir à l'étape 6
+                } else if (step === 8) {
+                    hasTremlBlock = false;
+                } else if (step === 9) {
+                    step = 8;
+                    updateUIState();
+                    redrawCanvas();
+                    return;
+                } else if (step === 10) {
+                    if (hasTremlBlock) {
+                        step = 9;
+                        updateUIState();
+                        redrawCanvas();
+                        return;
+                    } else {
+                        step = 8;
+                        updateUIState();
+                        redrawCanvas();
+                        return;
+                    }
+                }
+                step--;
+                loadCoordsForCurrentStep();
+            }
+        }
 
-            ctx.translate(cx, cy);
-            ctx.rotate(angle);
-            let halfW = width / 2;
-            let halfL = length / 2;
+        window.askValidateStep = function() {
+            if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
+                step = 2;
+                loadCoordsForCurrentStep();
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                step = 3;
+                loadCoordsForCurrentStep();
+            } else if (step >= 3 && step <= 6) {
+                let idx = step - 3;
+                corners[idx].x = tempX; corners[idx].y = tempY; corners[idx].angle = tempAngle; corners[idx].size = tempSize;
+                if (step < 6) {
+                    step++;
+                    loadCoordsForCurrentStep();
+                } else {
+                    step = 7;
+                    loadCoordsForCurrentStep();
+                }
+            } else if (step === 7) {
+                document.getElementById('finish-menu-modal').style.display = 'flex';
+                return;
+            } else if (step === 8) {
+                sustainX = tempX; sustainY = tempY; sustainAngle = tempAngle;
+                if (hasTremlBlock) {
+                    step = 9;
+                    springs = [];
+                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                    springPhase = 0;
+                    tempX = canvas.width * 0.4;
+                    tempY = canvas.height * 0.5;
+                } else {
+                    step = 10;
+                    adjustPanel.style.display = 'none';
+                    generalToolsContainer.style.display = 'none';
+                    sideColorDrawer.style.display = 'none';
+                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    btnDownload.style.display = 'block';
+                    btnRetry.style.display = 'block';
+                    redrawCanvas(true);
+                    return;
+                }
+            } else if (step === 9) {
+                if (springPhase === 0) {
+                    currentSpring.p1 = { x: tempX, y: tempY };
+                    springPhase = 1;
+                    tempX = canvas.width * 0.6;
+                    tempY = canvas.height * 0.5;
+                } else if (springPhase === 1) {
+                    currentSpring.p2 = { x: tempX, y: tempY };
+                    springPhase = 2;
+                } else if (springPhase === 2) {
+                    springs.push({ ...currentSpring });
+                    if (springs.length < 2) {
+                        currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                        springPhase = 0;
+                        tempX = canvas.width * 0.4;
+                        tempY = canvas.height * 0.5;
+                    } else {
+                        document.getElementById('spring-count-display').innerText = springs.length;
+                        document.getElementById('spring-finish-modal').style.display = 'flex';
+                        return;
+                    }
+                }
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        let springPhase = 0;
+        window.handleFinishChoice = function(choice) {
+            document.getElementById('finish-menu-modal').style.display = 'none';
+            if (choice === 'generate') {
+                step = 10;
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+            } else if (choice === 'treml') {
+                hasTremlBlock = true;
+                step = 8;
+                sustainLength = canvas.width * 0.2;
+                sustainWidth = canvas.width * 0.08;
+                sustainAngle = 0;
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                updateUIState();
+                redrawCanvas();
+            } else if (choice === 'back') {
+                // Reste à l'étape 7
+            }
+        }
+
+        window.handleSpringChoice = function(choice) {
+            document.getElementById('spring-finish-modal').style.display = 'none';
+            if (choice === 'add') {
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                springPhase = 0;
+                tempX = canvas.width * 0.4;
+                tempY = canvas.height * 0.5;
+                redrawCanvas();
+            } else if (choice === 'finish') {
+                step = 10;
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+            }
+        }
+
+        function loadCoordsForCurrentStep() {
+            if (step === 1) {
+                tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
+            } else if (step === 2) {
+                tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
+            } else if (step >= 3 && step <= 6) {
+                let idx = step - 3;
+                tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function updateUIState() {
+            const scaleControlsStandard = document.getElementById('scale-controls-standard');
+            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
+            const scaleControlsSpring = document.getElementById('scale-controls-spring');
+            const angleControlsRow = document.getElementById('angle-controls-row');
             
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-            ctx.strokeRect(-halfL, -halfW, length, width);
+            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
+            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
+            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
+            if (holeActionPanel) holeActionPanel.style.display = 'none';
+            if (angleControlsRow) angleControlsRow.style.display = 'flex';
 
-            ctx.beginPath();
-            ctx.moveTo(-halfL, 0);
-            ctx.lineTo(halfL, 0);
-            ctx.stroke();
-
-            ctx.restore();
-
-            dessinerCroixCentre(p1.x, p1.y, color);
-            dessinerCroixCentre(p2.x, p2.y, color);
+            if (step === 1) {
+                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 2) {
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 3) {
+                statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 4) {
+                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droite";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 5) {
+                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droite";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 6) {
+                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 7) {
+                statusText.innerText = "Étape optionnelle : Ajout des perçages";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
+            } else if (step === 8) {
+                statusText.innerText = "Calage du bloc sustain (TREML)";
+                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
+            } else if (step === 9) {
+                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
+                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
+                if (angleControlsRow) angleControlsRow.style.display = 'none';
+            }
         }
+
+        btnDownload.addEventListener('click', function() {
+            redrawCanvas(true);
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Acuitix_Definitif.png';
+            link.href = dataURL;
+            link.click();
+        });
 
         function redrawCanvas(isForFinalExport = false) {
             if (!currentImg) return;
-            
             if (!isForFinalExport) {
                 updateCanvasDimensions();
             }
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
+
             if (!isForFinalExport && zoomLevel !== 1.0) {
                 ctx.translate(canvas.width / 2, canvas.height / 2);
                 ctx.scale(zoomLevel, zoomLevel);
                 ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
             }
+
             ctx.save();
             ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
             ctx.rotate((rotationAngle * Math.PI) / 180);
@@ -1855,50 +1763,45 @@
             if (!isForFinalExport && step === 0 && !isSelectingColorState) {
                 ctx.save();
                 ctx.lineWidth = Math.max(2, canvas.width / 500);
-
-                ctx.save();
-                ctx.strokeStyle = '#FF0000';
-                ctx.translate(xyAxisX.x, xyAxisX.y);
-                ctx.rotate((xyAxisX.angle * Math.PI) / 180);
+                ctx.strokeStyle = elementColor;
                 ctx.beginPath();
-                ctx.moveTo(-canvas.width * 2, 0);
-                ctx.lineTo(canvas.width * 2, 0);
+                ctx.moveTo(xyAxisX.x - refW, xyAxisX.y);
+                ctx.lineTo(xyAxisX.x + refW, xyAxisX.y);
                 ctx.stroke();
-                ctx.restore();
-                dessinerCroixCentre(xyAxisX.x, xyAxisX.y, '#FF0000');
+                dessinerCroixCentre(xyAxisX.x, xyAxisX.y, elementColor);
 
-                ctx.save();
-                ctx.strokeStyle = '#00FF00';
-                ctx.translate(xyAxisY.x, xyAxisY.y);
-                ctx.rotate((xyAxisY.angle * Math.PI) / 180);
                 ctx.beginPath();
-                ctx.moveTo(0, -canvas.height * 2);
-                ctx.lineTo(0, canvas.height * 2);
+                ctx.moveTo(xyAxisY.x, xyAxisY.y - refW);
+                ctx.lineTo(xyAxisY.x, xyAxisY.y + refW);
                 ctx.stroke();
-                ctx.restore();
-                dessinerCroixCentre(xyAxisY.x, xyAxisY.y, '#00FF00');
-
+                dessinerCroixCentre(xyAxisY.x, xyAxisY.y, elementColor);
                 ctx.restore();
             }
 
+            let rx1 = (!isForFinalExport && step === 1) ? tempX : box1.x;
+            let ry1 = (!isForFinalExport && step === 1) ? tempY : box1.y;
+            let rsize1 = (!isForFinalExport && step === 1) ? tempSize : box1.size;
+            let rang1 = (!isForFinalExport && step === 1) ? tempAngle : box1.angle;
+
+            let rx2 = (!isForFinalExport && step === 2) ? tempX : box2.x;
+            let ry2 = (!isForFinalExport && step === 2) ? tempY : box2.y;
+            let rsize2 = (!isForFinalExport && step === 2) ? tempSize : box2.size;
+            let rang2 = (!isForFinalExport && step === 2) ? tempAngle : box2.angle;
+
             if (step >= 1 || isForFinalExport) {
-                let rx = (!isForFinalExport && step === 1) ? tempX : box1.x;
-                let ry = (!isForFinalExport && step === 1) ? tempY : box1.y;
-                let rsz = (!isForFinalExport && step === 1) ? tempSize : box1.size;
-                let rang = (!isForFinalExport && step === 1) ? tempAngle : box1.angle;
-                drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
-                if (standard1Type !== '11' && (!isForFinalExport || step >= 1)) {
-                    dessinerCroixCentre(rx, ry, elementColor);
+                drawStandardShape(rx1, ry1, rsize1, rang1, elementColor, standard1Type);
+                if (!isForFinalExport && step === 1) {
+                    dessinerCroixCentre(tempX, tempY, elementColor);
+                } else if (isForFinalExport || step >= 2) {
+                    dessinerCroixCentre(rx1, ry1, elementColor);
                 }
             }
 
             if (step >= 2 || isForFinalExport) {
-                let rx2 = (!isForFinalExport && step === 2) ? tempX : box2.x;
-                let ry2 = (!isForFinalExport && step === 2) ? tempY : box2.y;
-                let rsz2 = (!isForFinalExport && step === 2) ? tempSize : box2.size;
-                let rang2 = (!isForFinalExport && step === 2) ? tempAngle : box2.angle;
-                drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
-                if (standard2Type !== '11' && (!isForFinalExport || step >= 2)) {
+                drawStandardShape(rx2, ry2, rsize2, rang2, elementColor, standard2Type);
+                if (!isForFinalExport && step === 2) {
+                    dessinerCroixCentre(tempX, tempY, elementColor);
+                } else if (isForFinalExport || step >= 3) {
                     dessinerCroixCentre(rx2, ry2, elementColor);
                 }
             }
@@ -1935,64 +1838,41 @@
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
                     ctx.stroke();
-
-                    let len = tempSize * 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(tempX - len, tempY);
-                    ctx.lineTo(tempX + len, tempY);
-                    ctx.moveTo(tempX, tempY - len);
-                    ctx.lineTo(tempX, tempY + len);
-                    ctx.stroke();
+                    dessinerCroixCentre(tempX, tempY, elementColor);
                     ctx.restore();
                 }
 
-                holes.forEach((h, index) => {
+                holes.forEach(h => {
                     ctx.save();
                     ctx.strokeStyle = elementColor;
                     ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
                     ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
                     ctx.stroke();
-
-                    let len = h.radius * 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(h.x - len, h.y);
-                    ctx.lineTo(h.x + len, h.y);
-                    ctx.moveTo(h.x, h.y - len);
-                    ctx.lineTo(h.x, h.y + len);
-                    ctx.stroke();
-
-                    ctx.fillStyle = elementColor;
-                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
+                    dessinerCroixCentre(h.x, h.y, elementColor);
                     ctx.restore();
                 });
             }
 
-            if (step >= 8 || isForFinalExport) {
+            if (hasTremlBlock || step === 8 || step === 9 || isForFinalExport) {
+                let sx = (!isForFinalExport && step === 8) ? tempX : sustainX;
+                let sy = (!isForFinalExport && step === 8) ? tempY : sustainY;
+                let sa = (!isForFinalExport && step === 8) ? tempAngle : sustainAngle;
+                drawSustainBlock(sx, sy, sustainLength, sustainWidth, sa, elementColor);
                 if (!isForFinalExport && step === 8) {
-                    drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
-                } else if (hasTremlBlock) {
-                    drawSustainRectangle(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor);
+                    dessinerCroixCentre(tempX, tempY, elementColor);
                 }
             }
 
-            if (step >= 9 || isForFinalExport) {
-                springs.forEach(s => {
-                    drawSpring(s.p1, s.p2, s.width, elementColor);
+            if (hasTremlBlock && (step >= 9 || isForFinalExport)) {
+                springs.forEach(sp => {
+                    if (sp.p1 && sp.p2) {
+                        drawSpring(sp.p1, sp.p2, sp.width, elementColor);
+                    }
                 });
                 if (!isForFinalExport && step === 9) {
                     if (springPhase === 1 && currentSpring.p1) {
-                        ctx.save();
-                        ctx.strokeStyle = elementColor;
-                        ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-                        ctx.setLineDash([4, 4]);
-                        ctx.beginPath();
-                        ctx.moveTo(currentSpring.p1.x, currentSpring.p1.y);
-                        ctx.lineTo(tempX, tempY);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
-                        ctx.restore();
+                        drawSpring(currentSpring.p1, { x: tempX, y: tempY }, currentSpring.width, elementColor);
                         dessinerCroixCentre(currentSpring.p1.x, currentSpring.p1.y, elementColor);
                         dessinerCroixCentre(tempX, tempY, elementColor);
                     } else if (springPhase === 0) {
@@ -2029,7 +1909,6 @@
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
-
             if (type === '11') {
                 let half = size / 2;
                 ctx.strokeStyle = '#000000';
@@ -2041,7 +1920,6 @@
                 ctx.moveTo(half, -half);
                 ctx.lineTo(-half, half);
                 ctx.stroke();
-
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.strokeRect(-half, -half, size, size);
@@ -2052,52 +1930,26 @@
                 ctx.lineTo(-half, half);
                 ctx.stroke();
             } else if (type === 'CARD') {
-                let cardW = size;
-                let cardH = size * (54 / 85);
-                let radius = cardH * 0.15;
-                
+                let w = size * 2.125;
+                let h = size * 1.35;
+                let radius = h * 0.1;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
-                ctx.beginPath();
-                ctx.moveTo(-cardW / 2, 0);
-                ctx.lineTo(cardW / 2, 0);
-                ctx.moveTo(0, -cardH / 2);
-                ctx.lineTo(0, cardH / 2);
-                ctx.stroke();
-
+                strokeRoundedRect(-w/2, -h/2, w, h, radius);
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
-                ctx.beginPath();
-                ctx.moveTo(-cardW / 2, 0);
-                ctx.lineTo(cardW / 2, 0);
-                ctx.moveTo(0, -cardH / 2);
-                ctx.lineTo(0, cardH / 2);
-                ctx.stroke();
-
-                ctx.fillStyle = color;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
+                strokeRoundedRect(-w/2, -h/2, w, h, radius);
             } else {
                 let radius = size / 2;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
                 ctx.stroke();
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
                 ctx.stroke();
             }
             ctx.restore();
@@ -2124,330 +1976,48 @@
             ctx.rotate((angleDeg * Math.PI) / 180);
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
-
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = Math.max(2.5, canvas.width / 500);
             ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
+            ctx.moveTo(0, dirY * (size * 1.5));
             ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
+            ctx.lineTo(dirX * (size * 1.5), 0);
             ctx.stroke();
-
             ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+            ctx.lineWidth = Math.max(1.2, canvas.width / 700);
             ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
+            ctx.moveTo(0, dirY * (size * 1.5));
             ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.lineTo(dirX * (size * 1.5), 0);
             ctx.stroke();
             ctx.restore();
         }
 
-        window.askValidateStep = function() {
-            stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts"];
-            let label = stepNames[step] || "cette étape";
-            if (step === 7 && holes.length === 0) {
-                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
-            }
-            if (step === 7) {
-                showFinishMenu();
-            } else {
-                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
-                    validateStep();
-                }
-            }
+        function drawSustainBlock(x, y, length, width, angleDeg, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            let lHalf = length / 2;
+            let wHalf = width / 2;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+            ctx.strokeRect(-lHalf, -wHalf, length, width);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1.2, canvas.width / 700);
+            ctx.strokeRect(-lHalf, -wHalf, length, width);
+            ctx.restore();
         }
 
-        window.showFinishMenu = function() {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        window.handleFinishChoice = function(choice) {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'none';
-            
-            if (choice === 'generate') {
-                hasTremlBlock = false;
-                validateStep();
-            } else if (choice === 'treml') {
-                step = 8;
-                hasTremlBlock = true;
-                if (corners && corners.length === 4) {
-                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
-                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
-                } else {
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                }
-                tempAngle = 0;
-                sustainLength = canvas.width * 0.14;
-                sustainWidth = canvas.width * 0.08;
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                updateUIState();
-                redrawCanvas();
-            } else if (choice === 'back') {
-            }
-        }
-
-        window.handleSpringChoice = function(choice) {
-            const modal = document.getElementById('spring-finish-modal');
-            if (modal) modal.style.display = 'none';
-            if (choice === 'add') {
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                springPhase = 0;
-                tempX = canvas.width * 0.4;
-                tempY = canvas.height * 0.5;
-                updateUIState();
-                redrawCanvas();
-            } else {
-                finishSpringTracing();
-            }
-        }
-
-        function finishSpringTracing() {
-            step = 10;
-            adjustPanel.style.display = 'none';
-            generalToolsContainer.style.display = 'none';
-            sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.117) !";
-            btnDownload.style.display = 'block';
-            btnRetry.style.display = 'block';
-            redrawCanvas(true);
-        }
-
-        window.askPrevStep = function() {
-            stopAction();
-            triggerBackPrompt(() => {
-                if (step === 1) {
-                    generalToolsContainer.style.display = 'none';
-                    adjustPanel.style.display = 'none';
-                    tutorialPanel3.style.display = 'block';
-                    statusText.innerText = "Consigne : Alignement de l'échelle";
-                    redrawCanvas();
-                    return;
-                }
-                prevStep();
-            });
-        }
-
-        window.validateStep = function() {
-            stopAction();
-            if (step === 1) {
-                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
-                step = 2;
-                tempX = box1.x + (canvas.width * 0.15);
-                tempY = box1.y;
-                tempAngle = box1.angle;
-                tempSize = box1.size;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 2) {
-                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
-                step = 3;
-                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
-                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
-                tempAngle = 0;
-                tempSize = box1.size;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step >= 3 && step <= 6) {
-                let idx = step - 3;
-                corners[idx].x = tempX;
-                corners[idx].y = tempY;
-                corners[idx].angle = tempAngle;
-                corners[idx].size = tempSize;
-                step++;
-                if (step <= 6) {
-                    let nextIdx = step - 3;
-                    tempX = corners[nextIdx - 1].x + (canvas.width * 0.1);
-                    tempY = corners[nextIdx - 1].y + (canvas.height * 0.1);
-                    tempAngle = corners[nextIdx - 1].angle;
-                    tempSize = corners[nextIdx - 1].size;
-                } else if (step === 7) {
-                    let mmSize = getStandardMm(standard1Type);
-                    let pxPerMm = box1.size / mmSize;
-                    tempSize = 1.5 * pxPerMm;
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                }
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 7) {
-                step = 10;
-                adjustPanel.style.display = 'none';
-                generalToolsContainer.style.display = 'none';
-                sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.117) !";
-                btnDownload.style.display = 'block';
-                btnRetry.style.display = 'block';
-                redrawCanvas(true);
-                return;
-            } else if (step === 8) {
-                sustainX = tempX;
-                sustainY = tempY;
-                sustainAngle = tempAngle;
-                if (hasTremlBlock) {
-                    step = 9;
-                    springs = [];
-                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                    springPhase = 0;
-                    tempX = canvas.width * 0.4;
-                    tempY = canvas.height * 0.5;
-                } else {
-                    step = 10;
-                    adjustPanel.style.display = 'none';
-                    generalToolsContainer.style.display = 'none';
-                    sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.117) !";
-                    btnDownload.style.display = 'block';
-                    btnRetry.style.display = 'block';
-                    redrawCanvas(true);
-                    return;
-                }
-            } else if (step === 9) {
-                if (springPhase === 0) {
-                    currentSpring.p1 = { x: tempX, y: tempY };
-                    springPhase = 1;
-                    tempX = canvas.width * 0.6;
-                    tempY = canvas.height * 0.5;
-                } else if (springPhase === 1) {
-                    currentSpring.p2 = { x: tempX, y: tempY };
-                    springPhase = 2;
-                } else if (springPhase === 2) {
-                    springs.push({ ...currentSpring });
-                    if (springs.length < 2) {
-                        currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                        springPhase = 0;
-                        tempX = canvas.width * 0.4;
-                        tempY = canvas.height * 0.5;
-                    } else if (springs.length >= 2 && springs.length < 4) {
-                        document.getElementById('spring-count-display').innerText = springs.length;
-                        document.getElementById('spring-finish-modal').style.display = 'flex';
-                        return;
-                    } else if (springs.length === 4) {
-                        finishSpringTracing();
-                        return;
-                    }
-                }
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-                updateUIState();
-                redrawCanvas();
-                return;
-            }
-            updateUIState();
-            redrawCanvas();
-        }
-
-        function prevStep() {
-            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            if (step === 9) {
-                if (springPhase === 2) {
-                    springPhase = 1;
-                    tempX = currentSpring.p2.x;
-                    tempY = currentSpring.p2.y;
-                } else if (springPhase === 1) {
-                    springPhase = 0;
-                    tempX = currentSpring.p1.x;
-                    tempY = currentSpring.p1.y;
-                } else if (springPhase === 0) {
-                    if (springs.length > 0) {
-                        let last = springs.pop();
-                        currentSpring = last;
-                        springPhase = 2;
-                        tempX = currentSpring.p2.x;
-                        tempY = currentSpring.p2.y;
-                    } else {
-                        step = 8;
-                        hasTremlBlock = true;
-                        tempX = sustainX;
-                        tempY = sustainY;
-                        tempAngle = sustainAngle;
-                    }
-                }
-                updateUIState();
-                redrawCanvas();
-                return;
-            }
-            if (step === 8) {
-                step = 7;
-                hasTremlBlock = false;
-            } else if (step > 1) {
-                step--;
-                if (step === 1) {
-                    tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
-                } else if (step === 2) {
-                    tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
-                } else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
-                }
-            }
-            updateUIState();
-            redrawCanvas();
-        }
-
-        function updateUIState() {
-            const scaleControlsStandard = document.getElementById('scale-controls-standard');
-            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
-            const scaleControlsSpring = document.getElementById('scale-controls-spring');
-            const angleControlsRow = document.getElementById('angle-controls-row');
-            const dpadContainerBox = document.getElementById('dpad-container-box');
-
-            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
-            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
-            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
-            if (angleControlsRow) angleControlsRow.style.display = 'flex';
-            if (dpadContainerBox) dpadContainerBox.style.display = 'flex';
-            if (holeActionPanel) holeActionPanel.style.display = 'none';
-
-            if (step === 1) {
-                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 2) {
-                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 3) {
-                statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 4) {
-                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 5) {
-                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 6) {
-                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 7) {
-                statusText.innerText = "Étape optionnelle : Ajout des perçages";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-                if (holeActionPanel) holeActionPanel.style.display = 'block';
-            } else if (step === 8) {
-                statusText.innerText = "Calage du bloc sustain (TREML)";
-                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
-            } else if (step === 9) {
-                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
-                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
-                if (angleControlsRow) angleControlsRow.style.display = 'none';
-            }
-        }
-
-        btnDownload.addEventListener('click', function() {
-            redrawCanvas(true);
-            const dataURL = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = 'Acuitix_Definitif.png';
-            link.href = dataURL;
-            link.click();
-            redrawCanvas(false);
-        });
-    </script>
-</body>
-</html>
+        function drawSpring(p1, p2, springWidth, color) {
+            ctx.save();
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1.2, canvas.width / 700);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
