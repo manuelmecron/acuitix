@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.119 - Assistant CAO Compact</title>
+    <title>Acuitix V.120 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.119 - Assistant CAO</h1>
+    <h1>Acuitix V.120 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1117,7 +1117,7 @@
         let currentSpring = { p1: null, p2: null, width: 20 };
         let springPhase = 0; 
         let pbavSpacing = 20; 
-        let pbavOffsetX = 0; // Ajouté pour permettre le mouvement global sur l'axe X des 3 cercles PBAV
+        let pbavOffsetX = 0;
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1605,12 +1605,11 @@
 
         window.moveTarget = function(dx, dy) {
             if (step === 10) {
-                dy = 0; // Bloque le mouvement Y vertical indépendant pour les PBAV
+                dy = 0; 
             }
             tempX += dx;
             tempY += dy;
             if (step === 10) {
-                // Met à jour le décalage X global pour les 3 cercles PBAV
                 pbavOffsetX += dx;
             }
             redrawCanvas();
@@ -1777,13 +1776,12 @@
             ctx.translate(centerX, centerY);
             ctx.rotate((angleDeg * Math.PI) / 180);
 
-            // Applique l'offset global en X et l'espacement pour chaque cercle
             let spacingPx = spacing * pxPerMm;
             let offsetsY = [-spacingPx, 0, spacingPx];
             
             offsetsY.forEach((offsetY, index) => {
                 ctx.save();
-                ctx.translate(offsetX, offsetY); // Intègre l'offset X commun aux 3 cercles
+                ctx.translate(offsetX, offsetY);
 
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.5, canvas.width / 600);
@@ -1972,6 +1970,7 @@
                 }
             }
 
+            // CODE RESTAURÉ & CONSERVÉ EXACTEMENT TEL QUE DANS "09_ressorts_ok.html"
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
                     drawSpring(s.p1, s.p2, s.width, elementColor);
@@ -2244,7 +2243,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.119) !";
+            statusText.innerText = "✅ Calage expert terminé (v.120) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2393,7 +2392,7 @@
                 if (scaleStd) scaleStd.style.display = 'flex';
             } else if (step === 7) {
                 if (holePanel) holePanel.style.display = 'block';
-                if (angleRow) angleRow.style.display = 'none';
+                if (scaleStd) scaleStd.style.display = 'flex';
             } else if (step === 8) {
                 if (scaleSus) scaleSus.style.display = 'flex';
             } else if (step === 9) {
