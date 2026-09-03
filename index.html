@@ -892,6 +892,17 @@
                                 <button class="btn-info" onmousedown="startAction(() => adjustSpringWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
                             </div>
                         </div>
+                        <!-- Contrôles spécifiques étape PBAV -->
+                        <div id="scale-controls-pbav" style="display:none; flex-direction:column; gap:4px;">
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpacing(1, 0), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpacing(1, 0), 60)" ontouchend="stopAction()">⬆️ Écart Haut +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpacing(-1, 0), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpacing(-1, 0), 60)" ontouchend="stopAction()">⬇️ Écart Haut -</button>
+                            </div>
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpacing(0, 1), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpacing(0, 1), 60)" ontouchend="stopAction()">⬆️ Écart Bas +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavSpacing(0, -1), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavSpacing(0, -1), 60)" ontouchend="stopAction()">⬇️ Écart Bas -</button>
+                            </div>
+                        </div>
                         <div class="control-row" id="angle-controls-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                             <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
@@ -1141,7 +1152,14 @@
         let hasTremlBlock = false;
         let springs = [];
         let currentSpring = { p1: null, p2: null, width: 20 };
-        let springPhase = 0; // 0: placing p1, 1: placing p2, 2: adjusting width
+        let springPhase = 0;
+
+        // Variables étape PBAV (3 cercles d'env 4mm de diamètre)
+        let pbavX = 0; // X lié des 3 cercles (le cercle du milieu est calé sur sustainX)
+        let pbavOffsetTop = 30;  // Écart vers le haut pour le cercle supérieur
+        let pbavOffsetBottom = 30; // Écart vers le bas pour le cercle inférieur
+        let pbavCircleDiameter = 0; // Calculé dynamiquement (environ 4mm convertis en px)
+
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1471,6 +1489,9 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
+                } else if (step === 10) {
+                    // Clic pour déplacer les 3 cercles liés de PBAV latéralement (axe X)
+                    pbavX = imgX;
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -1662,8 +1683,13 @@
         }
 
         window.moveTarget = function(dx, dy) {
-            tempX += dx;
-            tempY += dy;
+            if (step === 10) {
+                // En mode PBAV, déplacement latéral (axe X uniquement, pas d'axe Y pour le centre)
+                pbavX += dx;
+            } else {
+                tempX += dx;
+                tempY += dy;
+            }
             redrawCanvas();
         }
 
@@ -1703,6 +1729,13 @@
             redrawCanvas();
         }
 
+        // Fonction spécifique pour ajuster l'écartement des cercles haut/bas en étape PBAV
+        window.adjustPbavSpacing = function(deltaTop, deltaBottom) {
+            pbavOffsetTop = Math.max(5, pbavOffsetTop + deltaTop);
+            pbavOffsetBottom = Math.max(5, pbavOffsetBottom + deltaBottom);
+            redrawCanvas();
+        }
+
         window.changerOpacite = function(val) {
             currentOpacity = val / 100;
             const valEl = document.getElementById('opacity-val');
@@ -1738,6 +1771,8 @@
             if (step === 0) {
                 xyAxisX = { x: canvas.width * 0.5, y: canvas.height * 0.4, angle: 0 };
                 xyAxisY = { x: canvas.width * 0.5, y: canvas.height * 0.6, angle: 0 };
+            } else if (step === 10) {
+                pbavX = sustainX;
             } else {
                 tempX = canvas.width * 0.5;
                 tempY = canvas.height * 0.5;
@@ -2003,6 +2038,45 @@
                 }
             }
 
+            // Rendu de l'étape PBAV (3 cercles de ~4mm de diamètre, alignés verticalement, liés, centrés en X sur le bloc sustain, Y central fixe)
+            if (step >= 10 || isForFinalExport) {
+                let mmSize = getStandardMm(standard1Type);
+                let pxPerMm = box1.size / mmSize;
+                pbavCircleDiameter = 4 * pxPerMm; // ~4 mm convertis en pixels
+                let rCircle = pbavCircleDiameter / 2;
+
+                // Si on est à l'étape 10 active, le bloc sustain est déjà posé en (sustainX, sustainY). Le centre est toujours aligné sur sustainX.
+                let currentPbavX = (!isForFinalExport && step === 10) ? pbavX : sustainX;
+                let centerY = sustainY; // Le cercle du milieu est bloqué sur l'axe Y du bloc sustain
+
+                // Coordonnées des 3 centres
+                let cTop = { x: currentPbavX, y: centerY - pbavOffsetTop };
+                let cMid = { x: currentPbavX, y: centerY };
+                let cBot = { x: currentPbavX, y: centerY + pbavOffsetBottom };
+
+                ctx.save();
+                ctx.strokeStyle = elementColor;
+                ctx.lineWidth = Math.max(1.5, refW / 600);
+
+                // Ligne de liaison verticale entre les 3 cercles
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(cTop.x, cTop.y);
+                ctx.lineTo(cBot.x, cBot.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Dessin des 3 cercles et de leurs centres respectifs
+                [cTop, cMid, cBot].forEach(c => {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
+                    ctx.stroke();
+                    dessinerCroixCentre(c.x, c.y, elementColor);
+                });
+
+                ctx.restore();
+            }
+
             ctx.globalAlpha = 1.0;
             ctx.restore();
         }
@@ -2151,7 +2225,7 @@
 
         window.askValidateStep = function() {
             stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts"];
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Étape PBAV"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
@@ -2210,16 +2284,26 @@
                 updateUIState();
                 redrawCanvas();
             } else {
-                finishSpringTracing();
+                // Au lieu de terminer direct, on enchaîne sur l'étape PBAV après les ressorts
+                step = 10;
+                pbavX = sustainX; // Initialisé sur le centre X du bloc sustain
+                pbavOffsetTop = 30;
+                pbavOffsetBottom = 30;
+                updateUIState();
+                statusText.innerText = "Étape PBAV : 3 cercles liés";
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
             }
         }
 
-        function finishSpringTracing() {
-            step = 10;
+        function finishPbavTracing() {
+            step = 11;
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.117) !";
+            statusText.innerText = "✅ Calage expert terminé (v.117) avec PBAV !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2280,7 +2364,7 @@
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 7) {
-                step = 10;
+                step = 11;
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
@@ -2301,7 +2385,7 @@
                     tempX = canvas.width * 0.4;
                     tempY = canvas.height * 0.5;
                 } else {
-                    step = 10;
+                    step = 11;
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
@@ -2332,13 +2416,25 @@
                         document.getElementById('spring-finish-modal').style.display = 'flex';
                         return;
                     } else if (springs.length === 4) {
-                        finishSpringTracing();
+                        // Fin des ressorts -> Lancement direct de l'étape PBAV
+                        step = 10;
+                        pbavX = sustainX;
+                        pbavOffsetTop = 30;
+                        pbavOffsetBottom = 30;
+                        updateUIState();
+                        statusText.innerText = "Étape PBAV : 3 cercles liés";
+                        zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                        redrawCanvas();
                         return;
                     }
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 updateUIState();
                 redrawCanvas();
+                return;
+            } else if (step === 10) {
+                // Validation finale après l'étape PBAV
+                finishPbavTracing();
                 return;
             }
             updateUIState();
@@ -2365,87 +2461,72 @@
                         tempY = currentSpring.p2.y;
                     } else {
                         step = 8;
-                        hasTremlBlock = true;
                         tempX = sustainX;
                         tempY = sustainY;
                         tempAngle = sustainAngle;
                     }
                 }
-                updateUIState();
-                redrawCanvas();
-                return;
-            }
-            if (step === 8) {
-                step = 7;
-                hasTremlBlock = false;
-            } else if (step > 1) {
-                step--;
-                if (step === 1) {
-                    tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
-                } else if (step === 2) {
-                    tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
-                } else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+            } else if (step === 10) {
+                // Retour depuis PBAV vers la fin des ressorts
+                step = 9;
+                springPhase = 2;
+                if (springs.length > 0) {
+                    let last = springs.pop();
+                    currentSpring = last;
+                    tempX = currentSpring.p2.x;
+                    tempY = currentSpring.p2.y;
                 }
+            } else {
+                step--;
             }
             updateUIState();
             redrawCanvas();
         }
 
         function updateUIState() {
-            const scaleControlsStandard = document.getElementById('scale-controls-standard');
-            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
-            const scaleControlsSpring = document.getElementById('scale-controls-spring');
-            const angleControlsRow = document.getElementById('angle-controls-row');
+            const stepNames = [
+                "", 
+                "Étalon principal GAUCHE (" + standard1Type + ")", 
+                "Étalon secondaire DROIT (" + standard2Type + ")", 
+                "Coin Haut-Gauche", 
+                "Coin Haut-Droit", 
+                "Coin Bas-Droit", 
+                "Coin Bas-Gauche", 
+                "Perçages (Optionnel)", 
+                "Positionnement bloc sustain", 
+                "Traçage des ressorts",
+                "Étape PBAV (3 cercles liés)"
+            ];
+            statusText.innerText = "Étape " + step + " / " + (stepNames.length - 1) + " : " + (stepNames[step] || "");
+            
+            if (holeActionPanel) {
+                holeActionPanel.style.display = (step === 7) ? 'block' : 'none';
+            }
+
+            const scaleStandard = document.getElementById('scale-controls-standard');
+            const scaleSustain = document.getElementById('scale-controls-sustain');
+            const scaleSpring = document.getElementById('scale-controls-spring');
+            const scalePbav = document.getElementById('scale-controls-pbav');
+            const angleRow = document.getElementById('angle-controls-row');
             const dpadContainerBox = document.getElementById('dpad-container-box');
 
-            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
-            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
-            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
-            if (angleControlsRow) angleControlsRow.style.display = 'flex';
-            if (dpadContainerBox) dpadContainerBox.style.display = 'flex';
-            if (holeActionPanel) holeActionPanel.style.display = 'none';
-
-            if (step === 1) {
-                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 2) {
-                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 3) {
-                statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 4) {
-                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 5) {
-                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 6) {
-                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step === 7) {
-                statusText.innerText = "Étape optionnelle : Ajout des perçages";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-                if (holeActionPanel) holeActionPanel.style.display = 'block';
-            } else if (step === 8) {
-                statusText.innerText = "Calage du bloc sustain (TREML)";
-                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
-            } else if (step === 9) {
-                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
-                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
-                if (angleControlsRow) angleControlsRow.style.display = 'none';
-            }
+            if (scaleStandard) scaleStandard.style.display = (step >= 1 && step <= 7) ? 'flex' : 'none';
+            if (scaleSustain) scaleSustain.style.display = (step === 8) ? 'flex' : 'none';
+            if (scaleSpring) scaleSpring.style.display = (step === 9) ? 'flex' : 'none';
+            if (scalePbav) scalePbav.style.display = (step === 10) ? 'flex' : 'none';
+            if (angleRow) angleRow.style.display = (step <= 8) ? 'flex' : 'none';
+            if (dpadContainerBox) dpadContainerBox.style.display = (step === 10) ? 'block' : 'block';
         }
 
         btnDownload.addEventListener('click', function() {
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = 'Acuitix_Definitif.png';
-            link.href = dataURL;
-            link.click();
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = 'Acuitix_V117_Final_PBAV.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             redrawCanvas(false);
         });
     </script>
