@@ -892,6 +892,16 @@
                                 <button class="btn-info" onmousedown="startAction(() => adjustSpringWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustSpringWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur -</button>
                             </div>
                         </div>
+                        <div id="scale-controls-pbav" style="display:none; flex-direction:column; gap:4px;">
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavLength(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavLength(0.5), 60)" ontouchend="stopAction()">➕ Longueur PBAV +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavLength(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavLength(-0.5), 60)" ontouchend="stopAction()">➖ Longueur PBAV -</button>
+                            </div>
+                            <div class="control-row">
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavWidth(0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavWidth(0.5), 60)" ontouchend="stopAction()">➕ Largeur PBAV +</button>
+                                <button class="btn-info" onmousedown="startAction(() => adjustPbavWidth(-0.5), 60)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustPbavWidth(-0.5), 60)" ontouchend="stopAction()">➖ Largeur PBAV -</button>
+                            </div>
+                        </div>
                         <div class="control-row" id="angle-controls-row">
                             <button onmousedown="startAction(() => adjustAngle(-0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(-0.5), 70)" ontouchend="stopAction()">↺ -0.5°</button>
                             <button onmousedown="startAction(() => adjustAngle(0.5), 70)" onmouseup="stopAction()" ontouchstart="startAction(() => adjustAngle(0.5), 70)" ontouchend="stopAction()">↻ +0.5°</button>
@@ -1138,10 +1148,12 @@
         let holes = [];
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
+        let pbavLength = 0, pbavWidth = 0, pbavAngle = 0, pbavX = 0, pbavY = 0;
         let hasTremlBlock = false;
+        let hasPbav = false;
         let springs = [];
         let currentSpring = { p1: null, p2: null, width: 20 };
-        let springPhase = 0; // 0: placing p1, 1: placing p2, 2: adjusting width
+        let springPhase = 0;
         let zoomLevel = 1.0;
         let manualPanX = 0;
         let manualPanY = 0;
@@ -1223,6 +1235,7 @@
             currentImg = null;
             holes = [];
             hasTremlBlock = false;
+            hasPbav = false;
             springs = [];
             step = 1;
         }
@@ -1398,6 +1411,7 @@
                 tempAngle = 0;
                 tempSize = defaultSize;
                 hasTremlBlock = false;
+                hasPbav = false;
                 springs = [];
 
                 goToPreCapture();
@@ -1436,6 +1450,7 @@
                     tempAngle = 0;
                     tempSize = defaultSize;
                     hasTremlBlock = false;
+                    hasPbav = false;
                     springs = [];
                     welcomePanel.style.display = 'none';
                     goToPreCapture();
@@ -1470,17 +1485,6 @@
                     } else {
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
-                    }
-                } else if (step === 9) {
-                    if (springPhase === 0) {
-                        currentSpring.p1 = { x: imgX, y: imgY };
-                        springPhase = 1;
-                    } else if (springPhase === 1) {
-                        currentSpring.p2 = { x: imgX, y: imgY };
-                        springPhase = 2;
-                        document.getElementById('scale-controls-standard').style.display = 'none';
-                        document.getElementById('scale-controls-spring').style.display = 'flex';
-                        statusText.innerText = "Étape 9 / 9 : Ajustement de la largeur du ressort";
                     }
                 } else {
                     tempX = imgX;
@@ -1585,7 +1589,7 @@
             tutorialPanel3.style.display = 'none';
             isSelectingColorState = false;
             step = 1;
-            statusText.innerText = "Étape 1 / 9 : Étalon principal GAUCHE (" + standard1Type + ")";
+            statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
             generalToolsContainer.style.display = 'block';
             adjustPanel.style.display = 'block';
             sideColorDrawer.style.display = 'block';
@@ -1623,6 +1627,7 @@
             currentImg = null;
             holes = [];
             hasTremlBlock = false;
+            hasPbav = false;
             springs = [];
             step = 1;
         }
@@ -1714,6 +1719,16 @@
             redrawCanvas();
         }
 
+        window.adjustPbavLength = function(delta) {
+            pbavLength = Math.max(2, pbavLength + delta);
+            redrawCanvas();
+        }
+
+        window.adjustPbavWidth = function(delta) {
+            pbavWidth = Math.max(2, pbavWidth + delta);
+            redrawCanvas();
+        }
+
         window.changerOpacite = function(val) {
             currentOpacity = val / 100;
             const valEl = document.getElementById('opacity-val');
@@ -1757,216 +1772,6 @@
             manualPanX = 0;
             manualPanY = 0;
             redrawCanvas();
-        }
-
-        window.askPrevStep = function() {
-            triggerBackPrompt(() => {
-                prevStep();
-            });
-        }
-
-        function prevStep() {
-            if (step > 1) {
-                step--;
-                if (step === 1) {
-                    tempX = box1.x; tempY = box1.y; tempSize = box1.size; tempAngle = box1.angle;
-                } else if (step === 2) {
-                    tempX = box2.x; tempY = box2.y; tempSize = box2.size; tempAngle = box2.angle;
-                } else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x; tempY = corners[idx].y; tempSize = corners[idx].size; tempAngle = corners[idx].angle;
-                } else if (step === 7) {
-                    if (holes.length > 0) {
-                        let lastH = holes.pop();
-                        tempX = lastH.x; tempY = lastH.y; tempSize = lastH.radius;
-                    } else {
-                        tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
-                    }
-                } else if (step === 8) {
-                    tempX = sustainX; tempY = sustainY; sustainLength = sustainLength; sustainWidth = sustainWidth; tempAngle = sustainAngle;
-                } else if (step === 9) {
-                    if (springs.length > 0) {
-                        currentSpring = springs.pop();
-                        springPhase = 2;
-                    } else {
-                        springPhase = 0;
-                    }
-                }
-                updateUIState();
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                redrawCanvas();
-            } else if (step === 1) {
-                triggerBackPrompt(() => {
-                    sideColorDrawer.style.display = 'none';
-                    sideColorDrawer.classList.remove('open');
-                    generalToolsContainer.style.display = 'none';
-                    adjustPanel.style.display = 'none';
-                    goToTutorialStep3();
-                });
-            }
-        }
-
-        window.askValidateStep = function() {
-            if (step === 9) {
-                if (springPhase < 2) {
-                    alert("Veuillez placer les deux extrémités du ressort en cliquant sur l'image.");
-                    return;
-                }
-                document.getElementById('spring-count-display').innerText = springs.length + 1;
-                const modal = document.getElementById('spring-finish-modal');
-                if (modal) modal.style.display = 'flex';
-                return;
-            }
-            validateStep();
-        }
-
-        window.handleSpringChoice = function(choice) {
-            const modal = document.getElementById('spring-finish-modal');
-            if (modal) modal.style.display = 'none';
-
-            if (choice === 'add') {
-                springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                currentSpring = { p1: null, p2: null, width: 20 };
-                springPhase = 0;
-                document.getElementById('scale-controls-spring').style.display = 'none';
-                document.getElementById('scale-controls-standard').style.display = 'flex';
-                statusText.innerText = "Étape 9 / 9 : Placement du ressort n°" + (springs.length + 1) + " (Point 1)";
-                redrawCanvas();
-            } else {
-                springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                finishCalibration();
-            }
-        }
-
-        window.handleFinishChoice = function(choice) {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'none';
-
-            if (choice === 'generate') {
-                finalizeAndGenerate();
-            } else if (choice === 'treml') {
-                hasTremlBlock = true;
-                sustainLength = 40;
-                sustainWidth = 20;
-                sustainAngle = 0;
-                sustainX = canvas.width * 0.5;
-                sustainY = canvas.height * 0.5;
-                step = 8;
-                tempX = sustainX;
-                tempY = sustainY;
-                tempAngle = sustainAngle;
-                updateUIState();
-                redrawCanvas();
-            } else if (choice === 'back') {
-                step = 7;
-                updateUIState();
-                redrawCanvas();
-            }
-        }
-
-        function validateStep() {
-            if (step === 1) {
-                box1.x = tempX; box1.y = tempY; box1.size = tempSize; box1.angle = tempAngle;
-                step = 2;
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.035; tempAngle = 0;
-                statusText.innerText = "Étape 2 / 9 : Étalon secondaire DROIT (" + standard2Type + ")";
-            } else if (step === 2) {
-                box2.x = tempX; box2.y = tempY; box2.size = tempSize; box2.angle = tempAngle;
-                step = 3;
-                tempX = canvas.width * 0.3; tempY = canvas.height * 0.3; tempSize = canvas.width * 0.04; tempAngle = 0;
-                statusText.innerText = "Étape 3 / 9 : Coin supérieur GAUCHE";
-            } else if (step >= 3 && step <= 6) {
-                let idx = step - 3;
-                corners[idx].x = tempX; corners[idx].y = tempY; corners[idx].size = tempSize; corners[idx].angle = tempAngle;
-                if (step < 6) {
-                    step++;
-                    if (step === 4) { statusText.innerText = "Étape 4 / 9 : Coin supérieur DROIT"; tempX = canvas.width * 0.7; tempY = canvas.height * 0.3; }
-                    else if (step === 5) { statusText.innerText = "Étape 5 / 9 : Coin inférieur DROIT"; tempX = canvas.width * 0.7; tempY = canvas.height * 0.7; }
-                    else if (step === 6) { statusText.innerText = "Étape 6 / 9 : Coin inférieur GAUCHE"; tempX = canvas.width * 0.3; tempY = canvas.height * 0.7; }
-                } else {
-                    step = 7;
-                    statusText.innerText = "Étape 7 / 9 : Perçages (Optionnel)";
-                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5; tempSize = canvas.width * 0.015;
-                    holeActionPanel.style.display = 'block';
-                }
-            } else if (step === 7) {
-                holeActionPanel.style.display = 'none';
-                const modal = document.getElementById('finish-menu-modal');
-                if (modal) modal.style.display = 'flex';
-                return;
-            } else if (step === 8) {
-                sustainX = tempX; sustainY = tempY; sustainAngle = tempAngle;
-                hasTremlBlock = true;
-                step = 9;
-                tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
-                springPhase = 0;
-                document.getElementById('scale-controls-standard').style.display = 'none';
-                document.getElementById('scale-controls-spring').style.display = 'flex';
-                statusText.innerText = "Étape 9 / 9 : Placement du ressort n°1 (Point 1)";
-            }
-            updateUIState();
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            redrawCanvas();
-        }
-
-        function finishCalibration() {
-            finalizeAndGenerate();
-        }
-
-        function updateUIState() {
-            const scaleStandard = document.getElementById('scale-controls-standard');
-            const scaleSustain = document.getElementById('scale-controls-sustain');
-            const scaleSpring = document.getElementById('scale-controls-spring');
-            const angleRow = document.getElementById('angle-controls-row');
-            
-            if(scaleStandard) scaleStandard.style.display = 'none';
-            if(scaleSustain) scaleSustain.style.display = 'none';
-            if(scaleSpring) scaleSpring.style.display = 'none';
-            if(angleRow) angleRow.style.display = 'flex';
-
-            if (step >= 1 && step <= 6) {
-                if(scaleStandard) scaleStandard.style.display = 'flex';
-            } else if (step === 7) {
-                if(scaleStandard) scaleStandard.style.display = 'flex';
-                if(angleRow) angleRow.style.display = 'none';
-            } else if (step === 8) {
-                if(scaleSustain) scaleSustain.style.display = 'flex';
-            } else if (step === 9) {
-                if(scaleSpring) scaleSpring.style.display = 'flex';
-                if(angleRow) angleRow.style.display = 'none';
-            }
-        }
-
-        function finalizeAndGenerate() {
-            generalToolsContainer.style.display = 'none';
-            sideColorDrawer.style.display = 'none';
-            sideColorDrawer.classList.remove('open');
-            statusText.style.display = 'none';
-            adjustPanel.style.display = 'none';
-
-            redrawCanvas(true);
-
-            let dataURL = canvas.toDataURL('image/png');
-            btnDownload.href = dataURL;
-            btnDownload.download = 'acuitix_definitif.png';
-            btnDownload.style.display = 'block';
-            btnRetry.style.display = 'block';
-
-            let dataObj = {
-                standard1: { type: standard1Type, mm: getStandardMm(standard1Type), ...box1 },
-                standard2: { type: standard2Type, mm: getStandardMm(standard2Type), ...box2 },
-                corners: corners,
-                holes: holes,
-                hasTremlBlock: hasTremlBlock,
-                tremlBlock: hasTremlBlock ? { x: sustainX, y: sustainY, length: sustainLength, width: sustainWidth, angle: sustainAngle } : null,
-                springs: springs,
-                color: elementColor
-            };
-            console.log("Données CAO générées :", JSON.stringify(dataObj, null, 2));
         }
 
         function drawSustainRectangle(x, y, lengthVal, widthVal, angleDeg, color) {
@@ -2224,6 +2029,14 @@
                 }
             }
 
+            if (step >= 10 || isForFinalExport) {
+                if (!isForFinalExport && step === 10) {
+                    drawSustainRectangle(tempX, tempY, pbavLength, pbavWidth, tempAngle, elementColor);
+                } else if (hasPbav) {
+                    drawSustainRectangle(pbavX, pbavY, pbavLength, pbavWidth, pbavAngle, elementColor);
+                }
+            }
+
             ctx.globalAlpha = 1.0;
             ctx.restore();
         }
@@ -2310,60 +2123,17 @@
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.moveTo(-radius, 0);
+                ctx.lineTo(radius, 0);
                 ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(-radius * 0.7, 0);
-                ctx.lineTo(radius * 0.7, 0);
-                ctx.moveTo(0, -radius * 0.7);
-                ctx.lineTo(0, radius * 0.7);
-                ctx.stroke();
-
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
                 ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(-radius * 0.7, 0);
-                ctx.lineTo(radius * 0.7, 0);
-                ctx.moveTo(0, -radius * 0.7);
-                ctx.lineTo(0, radius * 0.7);
+                ctx.moveTo(-radius, 0);
+                ctx.lineTo(radius, 0);
                 ctx.stroke();
             }
-            ctx.restore();
-        }
-
-        function drawCornerMarker(x, y, size, angleDeg, color, index) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
-            let len = size * 0.5;
-
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-            ctx.beginPath();
-            if (index === 0) { ctx.moveTo(len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, len); }
-            else if (index === 1) { ctx.moveTo(-len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, len); }
-            else if (index === 2) { ctx.moveTo(-len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, -len); }
-            else if (index === 3) { ctx.moveTo(len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, -len); }
-            ctx.stroke();
-
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.2, canvas.width / 700);
-            ctx.beginPath();
-            if (index === 0) { ctx.moveTo(len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, len); }
-            else if (index === 1) { ctx.moveTo(-len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, len); }
-            else if (index === 2) { ctx.moveTo(-len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, -len); }
-            else if (index === 3) { ctx.moveTo(len, 0); ctx.lineTo(0, 0); ctx.lineTo(0, -len); }
-            ctx.stroke();
-
-            ctx.fillStyle = color;
-            ctx.font = 'bold ' + Math.max(10, canvas.width / 35) + 'px Arial';
-            if (index === 0) ctx.fillText('C1', 4, 14);
-            else if (index === 1) ctx.fillText('C2', -22, 14);
-            else if (index === 2) ctx.fillText('C3', -22, -6);
-            else if (index === 3) ctx.fillText('C4', 4, -6);
-
             ctx.restore();
         }
 
@@ -2380,6 +2150,348 @@
             ctx.quadraticCurveTo(x, y, x + radius, y);
             ctx.closePath();
             ctx.stroke();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
+            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+            ctx.beginPath();
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
+            ctx.stroke();
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+            ctx.beginPath();
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        window.askValidateStep = function() {
+            stopAction();
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Positionnement PBAV"];
+            let label = stepNames[step] || "cette étape";
+            if (step === 7 && holes.length === 0) {
+                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
+            }
+            if (step === 7) {
+                showFinishMenu();
+            } else {
+                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+                    validateStep();
+                }
+            }
+        }
+
+        window.showFinishMenu = function() {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        window.handleFinishChoice = function(choice) {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'none';
+            
+            if (choice === 'generate') {
+                hasTremlBlock = false;
+                hasPbav = false;
+                validateStep();
+            } else if (choice === 'treml') {
+                step = 8;
+                hasTremlBlock = true;
+                if (corners && corners.length === 4) {
+                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                } else {
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                }
+                tempAngle = 0;
+                sustainLength = canvas.width * 0.14;
+                sustainWidth = canvas.width * 0.08;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
+            } else if (choice === 'back') {
+            }
+        }
+
+        window.handleSpringChoice = function(choice) {
+            const modal = document.getElementById('spring-finish-modal');
+            if (modal) modal.style.display = 'none';
+            if (choice === 'add') {
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                springPhase = 0;
+                tempX = canvas.width * 0.4;
+                tempY = canvas.height * 0.5;
+                updateUIState();
+                redrawCanvas();
+            } else {
+                // Passage à la partie PBAV après les ressorts
+                step = 10;
+                hasPbav = true;
+                if (corners && corners.length === 4) {
+                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                } else {
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                }
+                tempAngle = 0;
+                pbavLength = canvas.width * 0.20;
+                pbavWidth = canvas.width * 0.12;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
+            }
+        }
+
+        window.askPrevStep = function() {
+            stopAction();
+            triggerBackPrompt(() => {
+                if (step === 1) {
+                    generalToolsContainer.style.display = 'none';
+                    adjustPanel.style.display = 'none';
+                    tutorialPanel3.style.display = 'block';
+                    statusText.innerText = "Consigne : Alignement de l'échelle";
+                    redrawCanvas();
+                    return;
+                }
+                prevStep();
+            });
+        }
+
+        window.validateStep = function() {
+            stopAction();
+            if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
+                step = 2;
+                tempX = box1.x + (canvas.width * 0.15);
+                tempY = box1.y;
+                tempAngle = box1.angle;
+                tempSize = box1.size;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                step = 3;
+                tempX = Math.min(box1.x, box2.x) - (canvas.width * 0.08);
+                tempY = Math.min(box1.y, box2.y) - (canvas.height * 0.08);
+                tempAngle = 0;
+                tempSize = box1.size;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step >= 3 && step <= 6) {
+                let idx = step - 3;
+                corners[idx].x = tempX;
+                corners[idx].y = tempY;
+                corners[idx].angle = tempAngle;
+                corners[idx].size = tempSize;
+                step++;
+                if (step <= 6) {
+                    let nextIdx = step - 3;
+                    tempX = corners[nextIdx - 1].x + (canvas.width * 0.1);
+                    tempY = corners[nextIdx - 1].y + (canvas.height * 0.1);
+                    tempAngle = corners[nextIdx - 1].angle;
+                    tempSize = corners[nextIdx - 1].size;
+                } else if (step === 7) {
+                    let mmSize = getStandardMm(standard1Type);
+                    let pxPerMm = box1.size / mmSize;
+                    tempSize = 1.5 * pxPerMm;
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                }
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 7) {
+                step = 11;
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+                return;
+            } else if (step === 8) {
+                sustainX = tempX;
+                sustainY = tempY;
+                sustainAngle = tempAngle;
+                if (hasTremlBlock) {
+                    step = 9;
+                    springs = [];
+                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                    springPhase = 0;
+                    tempX = canvas.width * 0.4;
+                    tempY = canvas.height * 0.5;
+                } else {
+                    step = 11;
+                    adjustPanel.style.display = 'none';
+                    generalToolsContainer.style.display = 'none';
+                    sideColorDrawer.style.display = 'none';
+                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    btnDownload.style.display = 'block';
+                    btnRetry.style.display = 'block';
+                    redrawCanvas(true);
+                    return;
+                }
+            } else if (step === 9) {
+                if (springPhase === 0) {
+                    currentSpring.p1 = { x: tempX, y: tempY };
+                    springPhase = 1;
+                    tempX = canvas.width * 0.6;
+                    tempY = canvas.height * 0.5;
+                } else if (springPhase === 1) {
+                    currentSpring.p2 = { x: tempX, y: tempY };
+                    springPhase = 2;
+                } else if (springPhase === 2) {
+                    springs.push({ ...currentSpring });
+                    if (springs.length < 2) {
+                        currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                        springPhase = 0;
+                        tempX = canvas.width * 0.4;
+                        tempY = canvas.height * 0.5;
+                    } else if (springs.length >= 2 && springs.length < 4) {
+                        document.getElementById('spring-count-display').innerText = springs.length;
+                        document.getElementById('spring-finish-modal').style.display = 'flex';
+                        return;
+                    } else if (springs.length === 4) {
+                        // Passage direct à la PBAV après le max de ressorts
+                        step = 10;
+                        hasPbav = true;
+                        tempX = canvas.width * 0.5;
+                        tempY = canvas.height * 0.5;
+                        tempAngle = 0;
+                        pbavLength = canvas.width * 0.20;
+                        pbavWidth = canvas.width * 0.12;
+                        zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                        updateUIState();
+                        redrawCanvas();
+                        return;
+                    }
+                }
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
+                return;
+            } else if (step === 10) {
+                pbavX = tempX;
+                pbavY = tempY;
+                pbavAngle = tempAngle;
+                step = 11;
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function prevStep() {
+            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            if (step === 10) {
+                step = 9;
+                hasPbav = false;
+                updateUIState();
+                redrawCanvas();
+                return;
+            }
+            if (step === 9) {
+                if (springPhase === 2) {
+                    springPhase = 1;
+                    tempX = currentSpring.p2.x;
+                    tempY = currentSpring.p2.y;
+                } else if (springPhase === 1) {
+                    springPhase = 0;
+                    tempX = currentSpring.p1.x;
+                    tempY = currentSpring.p1.y;
+                } else if (springPhase === 0) {
+                    if (springs.length > 0) {
+                        let last = springs.pop();
+                        currentSpring = last;
+                        springPhase = 2;
+                        tempX = currentSpring.p2.x;
+                        tempY = currentSpring.p2.y;
+                    } else {
+                        step = 8;
+                        hasTremlBlock = true;
+                        tempX = sustainX;
+                        tempY = sustainY;
+                        tempAngle = sustainAngle;
+                    }
+                }
+                updateUIState();
+                redrawCanvas();
+                return;
+            }
+            if (step === 8) {
+                step = 7;
+                hasTremlBlock = false;
+            } else if (step > 1) {
+                step--;
+                if (step === 1) {
+                    tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
+                } else if (step === 2) {
+                    tempX = box2.x; tempY = box2.y; tempAngle = box2.angle; tempSize = box2.size;
+                } else if (step >= 3 && step <= 6) {
+                    let idx = step - 3;
+                    tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
+                }
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function updateUIState() {
+            const scaleControlsStandard = document.getElementById('scale-controls-standard');
+            const scaleControlsSustain = document.getElementById('scale-controls-sustain');
+            const scaleControlsSpring = document.getElementById('scale-controls-spring');
+            const scaleControlsPbav = document.getElementById('scale-controls-pbav');
+
+            if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
+            if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
+            if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
+            if (scaleControlsPbav) scaleControlsPbav.style.display = 'none';
+            if (holeActionPanel) holeActionPanel.style.display = 'none';
+
+            if (step >= 1 && step <= 6) {
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+                statusText.innerText = "Étape " + step + " / 6 : " + (step === 1 ? "Étalon principal GAUCHE" : step === 2 ? "Étalon secondaire DROIT" : "Coin " + (step-2));
+            } else if (step === 7) {
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
+                statusText.innerText = "Étape 7 : Perçages";
+            } else if (step === 8) {
+                if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
+                statusText.innerText = "Étape 8 : Positionnement bloc sustain (TREML)";
+            } else if (step === 9) {
+                if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
+                statusText.innerText = "Étape 9 : Traçage des ressorts";
+            } else if (step === 10) {
+                if (scaleControlsPbav) scaleControlsPbav.style.display = 'flex';
+                statusText.innerText = "Étape 10 : Positionnement PBAV";
+            }
         }
     </script>
 </body>
