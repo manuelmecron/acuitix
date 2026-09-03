@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.118 - Assistant CAO Compact</title>
+    <title>Acuitix V.117 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.118 - Assistant CAO</h1>
+    <h1>Acuitix V.117 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1471,16 +1471,6 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
-                } else if (step === 9) {
-                    if (springPhase === 0) {
-                        currentSpring.p1 = { x: imgX, y: imgY };
-                        springPhase = 1;
-                        tempX = imgX + 50;
-                        tempY = imgY;
-                    } else if (springPhase === 1) {
-                        currentSpring.p2 = { x: imgX, y: imgY };
-                        springPhase = 2;
-                    }
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -2229,7 +2219,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.118) !";
+            statusText.innerText = "✅ Calage expert terminé (v.117) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2290,14 +2280,11 @@
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 7) {
-                // Placé juste après l'étape de placement des ressorts / transition de fin de perçage vers l'étape 8 (Bloc sustain) ou fin
-                // Ici l'étape de placement des ressorts correspond à step = 9. 
-                // Le code isolé pour l'étape des ressorts a été intégré proprement.
                 step = 10;
                 adjustPanel.style.display = 'none';
                 generalToolsContainer.style.display = 'none';
                 sideColorDrawer.style.display = 'none';
-                statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                statusText.innerText = "✅ Calage expert terminé (v.117) !";
                 btnDownload.style.display = 'block';
                 btnRetry.style.display = 'block';
                 redrawCanvas(true);
@@ -2318,7 +2305,7 @@
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.117) !";
                     btnDownload.style.display = 'block';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
@@ -2411,11 +2398,13 @@
             const scaleControlsSustain = document.getElementById('scale-controls-sustain');
             const scaleControlsSpring = document.getElementById('scale-controls-spring');
             const angleControlsRow = document.getElementById('angle-controls-row');
-            
+            const dpadContainerBox = document.getElementById('dpad-container-box');
+
             if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
             if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
             if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
             if (angleControlsRow) angleControlsRow.style.display = 'flex';
+            if (dpadContainerBox) dpadContainerBox.style.display = 'flex';
             if (holeActionPanel) holeActionPanel.style.display = 'none';
 
             if (step === 1) {
@@ -2437,18 +2426,28 @@
                 statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
                 if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 7) {
-                statusText.innerText = "Étape 7 : Positionnement des Perçages";
+                statusText.innerText = "Étape optionnelle : Ajout des perçages";
                 if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
                 if (holeActionPanel) holeActionPanel.style.display = 'block';
             } else if (step === 8) {
-                statusText.innerText = "Étape 8 : Positionnement bloc sustain (TREML)";
+                statusText.innerText = "Calage du bloc sustain (TREML)";
                 if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts (" + (springs.length + 1) + "/4)";
+                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
                 if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
                 if (angleControlsRow) angleControlsRow.style.display = 'none';
             }
         }
+
+        btnDownload.addEventListener('click', function() {
+            redrawCanvas(true);
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Acuitix_Definitif.png';
+            link.href = dataURL;
+            link.click();
+            redrawCanvas(false);
+        });
     </script>
 </body>
 </html>
