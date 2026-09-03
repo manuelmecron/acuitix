@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.117 - Assistant CAO Compact</title>
+    <title>Acuitix V.118 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -483,13 +483,13 @@
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Ressorts tracés (<span id="spring-count-display">2</span>). Voulez-vous en ajouter un autre ou terminer ?</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
-                <button class="btn btn-info" style="margin-top: 0;" onclick="handleSpringChoice('finish')">Terminer le calage</button>
+                <button class="btn" id="btn-add-spring" style="background: #28a745; margin-top: 0;" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
+                <button class="btn btn-info" id="btn-finish-spring" style="margin-top: 0;" onclick="handleSpringChoice('finish')">Terminer le calage</button>
             </div>
         </div>
     </div>
 
-    <h1>Acuitix V.117 - Assistant CAO</h1>
+    <h1>Acuitix V.118 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1139,7 +1139,7 @@
         let currentImg = null;
         let mediaStream = null;
         let isLiveCameraActive = false;
-        let step = 0;
+        let step = 1;
         let rotationAngle = 0;
         let imgOffsetX = 0;
         let imgOffsetY = 0;
@@ -2058,7 +2058,7 @@
                 pbavCircleDiameter = 4 * pxPerMm; 
                 let rCircle = pbavCircleDiameter / 2;
 
-                let currentPbavX = (!isForFinalExport && step === 10) ? pbavX : sustainX;
+                let currentPbavX = (!isForFinalExport && step === 10) ? pbavX : pbavX;
                 let centerY = sustainY; 
 
                 let cTop = { x: currentPbavX, y: centerY - pbavOffsetTop };
@@ -2086,16 +2086,16 @@
                 ctx.restore();
             }
 
-            // Étape PBAR (3 cercles de ~4mm de diam, écart fixe de 10.5 mm, alignés verticalement, cercle milieu aligné sur sustainX, déplacement X global)
+            // Étape PBAR
             if (step >= 11 || isForFinalExport) {
                 let mmSize = getStandardMm(standard1Type);
                 let pxPerMm = box1.size / mmSize;
-                pbarCircleDiameter = 4 * pxPerMm; // ~4 mm convertis en px
+                pbarCircleDiameter = 4 * pxPerMm; 
                 let rCircle = pbarCircleDiameter / 2;
-                let spacingPx = 10.5 * pxPerMm; // Écart standard de 10.5 mm verrouillé
+                let spacingPx = 10.5 * pxPerMm;
 
-                let currentPbarX = (!isForFinalExport && step === 11) ? pbarX : sustainX;
-                let centerY = sustainY; // Axe Y fixe centré sur le bloc sustain
+                let currentPbarX = (!isForFinalExport && step === 11) ? pbarX : pbarX;
+                let centerY = sustainY; 
 
                 let pbarTop = { x: currentPbarX, y: centerY - spacingPx };
                 let pbarMid = { x: currentPbarX, y: centerY };
@@ -2194,31 +2194,54 @@
                 ctx.moveTo(0, -cardH / 2);
                 ctx.lineTo(0, cardH / 2);
                 ctx.stroke();
-
-                ctx.fillStyle = color;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
             } else {
-                let radius = size / 2;
+                let r = size / 2;
                 ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
                 ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-r * 0.7, 0);
+                ctx.lineTo(r * 0.7, 0);
+                ctx.moveTo(0, -r * 0.7);
+                ctx.lineTo(0, r * 0.7);
+                ctx.stroke();
+
                 ctx.strokeStyle = color;
                 ctx.lineWidth = Math.max(1.0, canvas.width / 800);
                 ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
+                ctx.arc(0, 0, r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-r * 0.7, 0);
+                ctx.lineTo(r * 0.7, 0);
+                ctx.moveTo(0, -r * 0.7);
+                ctx.lineTo(0, r * 0.7);
                 ctx.stroke();
             }
+            ctx.restore();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, color, index) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((angleDeg * Math.PI) / 180);
+            let r = size / 2;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.5, 0);
+            ctx.lineTo(r * 0.5, 0);
+            ctx.moveTo(0, -r * 0.5);
+            ctx.lineTo(0, r * 0.5);
+            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.font = 'bold ' + Math.max(10, canvas.width / 35) + 'px Arial';
+            ctx.fillText('C' + (index + 1), r + 4, -r);
             ctx.restore();
         }
 
@@ -2237,253 +2260,237 @@
             ctx.stroke();
         }
 
-        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
-            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
-            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
+        window.askPrevStep = function() {
+            triggerBackPrompt(() => {
+                prevStep();
+            });
+        }
 
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-            ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
-
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-            ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
+        function prevStep() {
+            if (step > 1) {
+                if (step === 9 && springs.length > 0) {
+                    springs.pop();
+                    springPhase = 0;
+                    currentSpring = { p1: null, p2: null, width: 20 };
+                    redrawCanvas();
+                    return;
+                }
+                if (step === 9 && springs.length === 0) {
+                    step = 8;
+                } else if (step === 10) {
+                    step = 9;
+                    if (hasTremlBlock && springs.length > 0) {
+                        springPhase = 2;
+                    }
+                } else if (step === 11) {
+                    step = 10;
+                } else {
+                    step--;
+                }
+                updateUIState();
+                loadStepPosition();
+                redrawCanvas();
+            }
         }
 
         window.askValidateStep = function() {
-            stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Étape PBAV", "Étape PBAR"];
-            let label = stepNames[step] || "cette étape";
-            if (step === 7 && holes.length === 0) {
-                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
-            }
-            if (step === 7) {
-                showFinishMenu();
-            } else {
-                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
-                    validateStep();
-                }
-            }
+            validateStep();
         }
 
-        window.showFinishMenu = function() {
-            const modal = document.getElementById('finish-menu-modal');
-            if (modal) modal.style.display = 'flex';
+        function validateStep() {
+            saveCurrentStepPosition();
+
+            if (step === 1) {
+                step = 2;
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+                loadStepPosition();
+            } else if (step >= 2 && step <= 5) {
+                step++;
+                let cornerNames = ["Haut Gauche", "Haut Droit", "Bas Gauche", "Bas Droit"];
+                statusText.innerText = "Coin " + (step - 2) + " / 4 : " + cornerNames[step - 3];
+                loadStepPosition();
+            } else if (step === 6) {
+                step = 7;
+                statusText.innerText = "Étape 5 / 6 : Perçages (Optionnel)";
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                tempSize = canvas.width * 0.015;
+            } else if (step === 7) {
+                step = 8;
+                statusText.innerText = "Étape 6 / 6 : Bloc Sustain (Optionnel)";
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
+                sustainLength = canvas.width * 0.08;
+                sustainWidth = canvas.width * 0.04;
+                tempAngle = 0;
+            } else if (step === 8) {
+                hasTremlBlock = true;
+                sustainX = box1.x + (box2.x - box1.x) * 0.5;
+                sustainY = box1.y + (box2.y - box1.y) * 0.5;
+                
+                const modal = document.getElementById('finish-menu-modal');
+                if (modal) modal.style.display = 'flex';
+                return;
+            } else if (step === 9) {
+                if (springPhase === 0) {
+                    currentSpring.p1 = { x: tempX, y: tempY };
+                    springPhase = 1;
+                    statusText.innerText = "Ressort " + (springs.length + 1) + " : Cliquez sur le 2ème point";
+                } else if (springPhase === 1) {
+                    currentSpring.p2 = { x: tempX, y: tempY };
+                    springPhase = 2;
+                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
+                    
+                    const countEl = document.getElementById('spring-count-display');
+                    if (countEl) countEl.innerText = springs.length;
+                    
+                    // Bloquer ou autoriser selon min 2 / max 4 ressorts
+                    const btnAdd = document.getElementById('btn-add-spring');
+                    const btnFinish = document.getElementById('btn-finish-spring');
+                    if (btnAdd && btnFinish) {
+                        if (springs.length >= 4) {
+                            btnAdd.style.display = 'none';
+                        } else {
+                            btnAdd.style.display = 'block';
+                        }
+                        if (springs.length >= 2) {
+                            btnFinish.style.display = 'block';
+                        } else {
+                            btnFinish.style.display = 'none';
+                        }
+                    }
+
+                    const modal = document.getElementById('spring-finish-modal');
+                    if (modal) modal.style.display = 'flex';
+                    return;
+                }
+            } else if (step === 10) {
+                // Validation étape PBAV -> Passage PBAR
+                step = 11;
+                statusText.innerText = "Calage PBAR (3 cercles)";
+                pbarX = sustainX;
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
+                return;
+            } else if (step === 11) {
+                // Fin complète après PBAR -> Génération finale
+                finishProcess();
+                return;
+            }
+
+            zoomLevel = 1.0;
+            manualPanX = 0;
+            manualPanY = 0;
+            updateUIState();
+            redrawCanvas();
         }
 
         window.handleFinishChoice = function(choice) {
             const modal = document.getElementById('finish-menu-modal');
             if (modal) modal.style.display = 'none';
-            
+
             if (choice === 'generate') {
-                hasTremlBlock = false;
-                validateStep();
+                finishProcess();
             } else if (choice === 'treml') {
-                step = 8;
                 hasTremlBlock = true;
-                if (corners && corners.length === 4) {
-                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
-                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
-                } else {
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                }
-                tempAngle = 0;
-                sustainLength = canvas.width * 0.14;
-                sustainWidth = canvas.width * 0.08;
+                step = 9;
+                springPhase = 0;
+                springs = [];
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.02 };
+                statusText.innerText = "Ressort 1 : Cliquez sur le 1er point";
+                tempX = canvas.width * 0.5;
+                tempY = canvas.height * 0.5;
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
                 updateUIState();
                 redrawCanvas();
             } else if (choice === 'back') {
+                step = 8;
+                statusText.innerText = "Étape 6 / 6 : Bloc Sustain (Optionnel)";
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                updateUIState();
+                redrawCanvas();
             }
         }
 
         window.handleSpringChoice = function(choice) {
             const modal = document.getElementById('spring-finish-modal');
             if (modal) modal.style.display = 'none';
+
             if (choice === 'add') {
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                springPhase = 0;
-                tempX = canvas.width * 0.4;
-                tempY = canvas.height * 0.5;
-                updateUIState();
-                redrawCanvas();
-            } else {
+                if (springs.length < 4) {
+                    springPhase = 0;
+                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.02 };
+                    statusText.innerText = "Ressort " + (springs.length + 1) + " : Cliquez sur le 1er point";
+                    tempX = canvas.width * 0.5;
+                    tempY = canvas.height * 0.5;
+                    zoomLevel = 1.0;
+                    manualPanX = 0;
+                    manualPanY = 0;
+                    redrawCanvas();
+                } else {
+                    alert("Maximum 4 ressorts atteint.");
+                }
+            } else if (choice === 'finish') {
+                if (springs.length < 2) {
+                    alert("Vous devez tracer au moins 2 ressorts.");
+                    return;
+                }
+                // Passage à l'étape PBAV après les ressorts
                 step = 10;
-                pbavX = sustainX; 
+                statusText.innerText = "Calage PBAV (3 cercles)";
+                pbavX = sustainX;
                 pbavOffsetTop = 30;
                 pbavOffsetBottom = 30;
-                updateUIState();
-                statusText.innerText = "Étape PBAV : 3 cercles liés";
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
+                updateUIState();
                 redrawCanvas();
             }
         }
 
-        function finishPbarTracing() {
-            step = 12;
-            adjustPanel.style.display = 'none';
-            generalToolsContainer.style.display = 'none';
-            sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.117) avec PBAR (Dernier élément) !";
-            btnDownload.style.display = 'block';
-            btnRetry.style.display = 'block';
-            redrawCanvas(true);
-        }
-
-        window.askPrevStep = function() {
-            stopAction();
-            triggerBackPrompt(() => {
-                if (step === 1) {
-                    generalToolsContainer.style.display = 'none';
-                    adjustPanel.style.display = 'none';
-                    tutorialPanel3.style.display = 'block';
-                    statusText.innerText = "Consigne : Alignement de l'échelle";
-                    redrawCanvas();
-                    return;
-                }
-                prevStep();
-            });
-        }
-
-        window.validateStep = function() {
-            stopAction();
+        function saveCurrentStepPosition() {
             if (step === 1) {
-                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
-                step = 2;
-                tempX = box1.x + (canvas.width * 0.15);
-                tempY = box1.y;
-                tempAngle = box1.angle;
-                tempSize = box1.size;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                box1 = { x: tempX, y: tempY, size: tempSize, angle: tempAngle };
             } else if (step === 2) {
-                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
-                step = 3;
-                tempX = canvas.width * 0.3;
-                tempY = canvas.height * 0.3;
-                tempAngle = 0;
-                tempSize = canvas.width * 0.04;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step >= 3 && step <= 5) {
-                corners[step - 3].x = tempX;
-                corners[step - 3].y = tempY;
-                corners[step - 3].angle = tempAngle;
-                corners[step - 3].size = tempSize;
-                step++;
-                if (step === 4) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.3; }
-                else if (step === 5) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.7; }
-                else if (step === 6) { tempX = canvas.width * 0.3; tempY = canvas.height * 0.7; }
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 6) {
-                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
-                step = 7;
-                tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
-                tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
-                tempSize = canvas.width * 0.02;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 7) {
-                if (hasTremlBlock) {
-                    step = 8;
-                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
-                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
-                    tempAngle = 0;
-                    sustainLength = canvas.width * 0.14;
-                    sustainWidth = canvas.width * 0.08;
-                    zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-                } else {
-                    step = 12; // Fin directe si pas de bloc treml
-                    adjustPanel.style.display = 'none';
-                    generalToolsContainer.style.display = 'none';
-                    sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.117) !";
-                    btnDownload.style.display = 'block';
-                    btnRetry.style.display = 'block';
-                    redrawCanvas(true);
-                    return;
-                }
+                box2 = { x: tempX, y: tempY, size: tempSize, angle: tempAngle };
+            } else if (step >= 3 && step <= 6) {
+                corners[step - 3] = { x: tempX, y: tempY, size: tempSize, angle: tempAngle };
             } else if (step === 8) {
                 sustainX = tempX;
                 sustainY = tempY;
                 sustainAngle = tempAngle;
-                step = 9;
-                springs = [];
-                springPhase = 0;
-                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                tempX = canvas.width * 0.4;
-                tempY = canvas.height * 0.5;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 9) {
-                if (springPhase === 0) {
-                    currentSpring.p1 = { x: tempX, y: tempY };
-                    springPhase = 1;
-                    tempX = canvas.width * 0.6;
-                    tempY = canvas.height * 0.5;
-                } else if (springPhase === 1) {
-                    currentSpring.p2 = { x: tempX, y: tempY };
-                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    springPhase = 2;
-                    document.getElementById('spring-count-display').innerText = springs.length;
-                    const modal = document.getElementById('spring-finish-modal');
-                    if (modal) modal.style.display = 'flex';
-                }
-            } else if (step === 10) {
-                // Passage de l'étape PBAV vers la nouvelle étape PBAR
-                step = 11;
-                pbarX = sustainX; // Initialisé aligné sur le centre du bloc sustain
-                updateUIState();
-                statusText.innerText = "Étape PBAR : 3 cercles alignés (Dernier élément)";
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                redrawCanvas();
-                return;
-            } else if (step === 11) {
-                // Validation de l'étape PBAR (dernier élément)
-                finishPbarTracing();
-                return;
             }
-            updateUIState();
-            redrawCanvas();
         }
 
-        function prevStep() {
-            if (step > 1) {
-                if (step === 8 && !hasTremlBlock) {
-                    step = 7;
-                } else if (step === 10) {
-                    step = 9;
-                } else if (step === 11) {
-                    step = 10; // Retour de PBAR à PBAV
-                } else {
-                    step--;
-                }
-                updateUIState();
-                zoomLevel = 1.0;
-                manualPanX = 0;
-                manualPanY = 0;
-                redrawCanvas();
+        function loadStepPosition() {
+            if (step === 1) {
+                tempX = box1.x || canvas.width * 0.3;
+                tempY = box1.y || canvas.height * 0.5;
+                tempSize = box1.size || canvas.width * 0.035;
+                tempAngle = box1.angle || 0;
+            } else if (step === 2) {
+                tempX = box2.x || canvas.width * 0.7;
+                tempY = box2.y || canvas.height * 0.5;
+                tempSize = box2.size || canvas.width * 0.035;
+                tempAngle = box2.angle || 0;
+            } else if (step >= 3 && step <= 6) {
+                let c = corners[step - 3];
+                tempX = c.x || canvas.width * 0.5;
+                tempY = c.y || canvas.height * 0.5;
+                tempSize = c.size || canvas.width * 0.04;
+                tempAngle = c.angle || 0;
+            } else if (step === 8) {
+                tempX = sustainX || canvas.width * 0.5;
+                tempY = sustainY || canvas.height * 0.5;
+                tempAngle = sustainAngle || 0;
             }
         }
 
@@ -2494,60 +2501,63 @@
             const scalePbav = document.getElementById('scale-controls-pbav');
             const scalePbar = document.getElementById('scale-controls-pbar');
             const angleRow = document.getElementById('angle-controls-row');
-            const dpadBox = document.getElementById('dpad-container-box');
 
             if (scaleStandard) scaleStandard.style.display = 'none';
             if (scaleSustain) scaleSustain.style.display = 'none';
             if (scaleSpring) scaleSpring.style.display = 'none';
             if (scalePbav) scalePbav.style.display = 'none';
             if (scalePbar) scalePbar.style.display = 'none';
-            if (angleRow) angleRow.style.display = 'flex';
             if (holeActionPanel) holeActionPanel.style.display = 'none';
-            if (dpadBox) dpadBox.style.display = 'flex';
+            if (angleRow) angleRow.style.display = 'flex';
 
-            if (step === 1) {
-                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
-                if (scaleStandard) scaleStandard.style.display = 'flex';
-            } else if (step === 2) {
-                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
-                if (scaleStandard) scaleStandard.style.display = 'flex';
-            } else if (step >= 3 && step <= 6) {
-                const names = ["Haut-Gauche", "Haut-Droit", "Bas-Droit", "Bas-Gauche"];
-                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + names[step - 3];
+            if (step >= 1 && step <= 6) {
                 if (scaleStandard) scaleStandard.style.display = 'flex';
             } else if (step === 7) {
-                statusText.innerText = "Étape 5 / 6 : Perçages (Optionnel)";
-                if (holeActionPanel) holeActionPanel.style.display = 'block';
                 if (scaleStandard) scaleStandard.style.display = 'flex';
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
             } else if (step === 8) {
-                statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
                 if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
                 if (scaleSpring) scaleSpring.style.display = 'flex';
-                if (springPhase === 2) {
-                    if (angleRow) angleRow.style.display = 'none';
-                }
+                if (angleRow) angleRow.style.display = 'none';
             } else if (step === 10) {
-                statusText.innerText = "Étape PBAV : 3 cercles liés";
                 if (scalePbav) scalePbav.style.display = 'flex';
                 if (angleRow) angleRow.style.display = 'none';
             } else if (step === 11) {
-                statusText.innerText = "Étape PBAR : 3 cercles alignés (Dernier élément)";
                 if (scalePbar) scalePbar.style.display = 'flex';
                 if (angleRow) angleRow.style.display = 'none';
             }
         }
 
-        btnDownload.addEventListener('click', function() {
+        function finishProcess() {
+            statusText.innerText = "Génération de l'image définitive...";
             redrawCanvas(true);
-            const dataURL = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = 'Acuitix_V117_Final_PBAR.png';
-            link.href = dataURL;
-            link.click();
-            redrawCanvas(false);
-        });
+
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                btnDownload.href = url;
+                btnDownload.download = 'Acuitix_Definitif.png';
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                generalToolsContainer.style.display = 'none';
+                statusText.innerText = "Terminé ! Téléchargez votre image.";
+            }, 'image/png');
+        }
+
+        window.onload = function() {
+            let wCanvas = 800;
+            let hCanvas = 600;
+            canvas.width = wCanvas;
+            canvas.height = hCanvas;
+            let defaultSize = wCanvas * 0.035;
+            box1 = { x: wCanvas * 0.3, y: hCanvas * 0.5, size: defaultSize, angle: 0 };
+            box2 = { x: wCanvas * 0.7, y: hCanvas * 0.5, size: defaultSize, angle: 0 };
+            for(let i=0; i<4; i++) {
+                corners[i] = { x: wCanvas * (0.3 + 0.4*(i%2)), y: hCanvas * (0.3 + 0.4*Math.floor(i/2)), size: wCanvas * 0.04, angle: 0 };
+            }
+            xyAxisX = { x: wCanvas * 0.5, y: hCanvas * 0.4, angle: 0 };
+            xyAxisY = { x: wCanvas * 0.5, y: hCanvas * 0.6, angle: 0 };
+        };
     </script>
 </body>
 </html>
