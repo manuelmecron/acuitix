@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.119 - Assistant CAO Compact</title>
+    <title>Acuitix V.117 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.119 - Assistant CAO</h1>
+    <h1>Acuitix V.117 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1136,7 +1136,6 @@
             { x: 0, y: 0, size: 0, angle: 0 }
         ];
         let holes = [];
-        let pbavHoles = [];
         let tempX = 0, tempY = 0, tempAngle = 0, tempSize = 0;
         let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
         let hasTremlBlock = false;
@@ -1223,7 +1222,6 @@
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
-            pbavHoles = [];
             hasTremlBlock = false;
             springs = [];
             step = 1;
@@ -1401,7 +1399,6 @@
                 tempSize = defaultSize;
                 hasTremlBlock = false;
                 springs = [];
-                pbavHoles = [];
 
                 goToPreCapture();
             };
@@ -1440,7 +1437,6 @@
                     tempSize = defaultSize;
                     hasTremlBlock = false;
                     springs = [];
-                    pbavHoles = [];
                     welcomePanel.style.display = 'none';
                     goToPreCapture();
                 };
@@ -1475,13 +1471,6 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
-                } else if (step === 10) {
-                    let dx = imgX - tempX;
-                    tempX = imgX;
-                    tempY = imgY;
-                    pbavHoles.forEach(h => {
-                        h.x += dx;
-                    });
                 } else {
                     tempX = imgX;
                     tempY = imgY;
@@ -1622,7 +1611,6 @@
             fileInputGallery.value = '';
             currentImg = null;
             holes = [];
-            pbavHoles = [];
             hasTremlBlock = false;
             springs = [];
             step = 1;
@@ -1674,15 +1662,8 @@
         }
 
         window.moveTarget = function(dx, dy) {
-            if (step === 10) {
-                tempX += dx;
-                pbavHoles.forEach(h => {
-                    h.x += dx;
-                });
-            } else {
-                tempX += dx;
-                tempY += dy;
-            }
+            tempX += dx;
+            tempY += dy;
             redrawCanvas();
         }
 
@@ -1737,22 +1718,12 @@
             if (step === 7) {
                 holes.push({ x: tempX, y: tempY, radius: tempSize });
                 redrawCanvas();
-            } else if (step === 10) {
-                if (pbavHoles.length < 3) {
-                    let spacing = canvas.width * 0.05;
-                    let newX = tempX + (pbavHoles.length * spacing);
-                    pbavHoles.push({ x: newX, y: tempY, radius: tempSize });
-                    redrawCanvas();
-                }
             }
         }
 
         window.removeLastHole = function() {
             if (step === 7 && holes.length > 0) {
                 holes.pop();
-                redrawCanvas();
-            } else if (step === 10 && pbavHoles.length > 0) {
-                pbavHoles.pop();
                 redrawCanvas();
             }
         }
@@ -2032,50 +2003,6 @@
                 }
             }
 
-            if (step >= 10 || isForFinalExport) {
-                pbavHoles.forEach((h, index) => {
-                    ctx.save();
-                    ctx.strokeStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 600);
-                    ctx.beginPath();
-                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                    ctx.stroke();
-
-                    let len = h.radius * 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(h.x - len, h.y);
-                    ctx.lineTo(h.x + len, h.y);
-                    ctx.moveTo(h.x, h.y - len);
-                    ctx.lineTo(h.x, h.y + len);
-                    ctx.stroke();
-
-                    ctx.fillStyle = elementColor;
-                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.fillText('PBAV ' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
-                    ctx.restore();
-                });
-
-                if (!isForFinalExport && step === 10) {
-                    pbavHoles.forEach((h) => {
-                        ctx.save();
-                        ctx.strokeStyle = elementColor;
-                        ctx.lineWidth = Math.max(1.5, refW / 600);
-                        ctx.beginPath();
-                        ctx.arc(h.x, tempY, h.radius, 0, Math.PI * 2);
-                        ctx.stroke();
-
-                        let len = h.radius * 0.4;
-                        ctx.beginPath();
-                        ctx.moveTo(h.x - len, tempY);
-                        ctx.lineTo(h.x + len, tempY);
-                        ctx.moveTo(h.x, tempY - len);
-                        ctx.lineTo(h.x, tempY + len);
-                        ctx.stroke();
-                        ctx.restore();
-                    });
-                }
-            }
-
             ctx.globalAlpha = 1.0;
             ctx.restore();
         }
@@ -2224,13 +2151,10 @@
 
         window.askValidateStep = function() {
             stopAction();
-            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Perçages PBAV"];
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts"];
             let label = stepNames[step] || "cette étape";
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
-            }
-            if (step === 10 && pbavHoles.length < 3) {
-                if (!confirm("Vous n'avez pas placé les 3 perçages PBAV (" + pbavHoles.length + "/3). Continuer quand même ?")) return;
             }
             if (step === 7) {
                 showFinishMenu();
@@ -2286,38 +2210,16 @@
                 updateUIState();
                 redrawCanvas();
             } else {
-                startPbavStep();
+                finishSpringTracing();
             }
         }
 
-        function startPbavStep() {
+        function finishSpringTracing() {
             step = 10;
-            pbavHoles = [];
-            let mmSize = getStandardMm(standard1Type);
-            let pxPerMm = box1.size / mmSize;
-            let defaultRadius = 1.5 * pxPerMm;
-            let baseX = canvas.width * 0.4;
-            let baseY = canvas.height * 0.5;
-            let spacing = canvas.width * 0.05;
-            pbavHoles.push({ x: baseX, y: baseY, radius: defaultRadius });
-            pbavHoles.push({ x: baseX + spacing, y: baseY, radius: defaultRadius });
-            pbavHoles.push({ x: baseX + (spacing * 2), y: baseY, radius: defaultRadius });
-            tempX = baseX;
-            tempY = baseY;
-            tempSize = defaultRadius;
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            updateUIState();
-            redrawCanvas();
-        }
-
-        function finishExpertTracing() {
-            step = 11;
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.119) !";
+            statusText.innerText = "✅ Calage expert terminé (v.117) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2378,7 +2280,14 @@
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 7) {
-                finishExpertTracing();
+                step = 10;
+                adjustPanel.style.display = 'none';
+                generalToolsContainer.style.display = 'none';
+                sideColorDrawer.style.display = 'none';
+                statusText.innerText = "✅ Calage expert terminé (v.117) !";
+                btnDownload.style.display = 'block';
+                btnRetry.style.display = 'block';
+                redrawCanvas(true);
                 return;
             } else if (step === 8) {
                 sustainX = tempX;
@@ -2392,7 +2301,14 @@
                     tempX = canvas.width * 0.4;
                     tempY = canvas.height * 0.5;
                 } else {
-                    finishExpertTracing();
+                    step = 10;
+                    adjustPanel.style.display = 'none';
+                    generalToolsContainer.style.display = 'none';
+                    sideColorDrawer.style.display = 'none';
+                    statusText.innerText = "✅ Calage expert terminé (v.117) !";
+                    btnDownload.style.display = 'block';
+                    btnRetry.style.display = 'block';
+                    redrawCanvas(true);
                     return;
                 }
             } else if (step === 9) {
@@ -2404,21 +2320,25 @@
                 } else if (springPhase === 1) {
                     currentSpring.p2 = { x: tempX, y: tempY };
                     springPhase = 2;
-                    zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-                    document.getElementById('spring-count-display').innerText = springs.length + 1;
-                    const modal = document.getElementById('spring-finish-modal');
-                    if (modal) modal.style.display = 'flex';
-                    return;
                 } else if (springPhase === 2) {
-                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
-                    springPhase = 0;
-                    tempX = canvas.width * 0.4;
-                    tempY = canvas.height * 0.5;
+                    springs.push({ ...currentSpring });
+                    if (springs.length < 2) {
+                        currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                        springPhase = 0;
+                        tempX = canvas.width * 0.4;
+                        tempY = canvas.height * 0.5;
+                    } else if (springs.length >= 2 && springs.length < 4) {
+                        document.getElementById('spring-count-display').innerText = springs.length;
+                        document.getElementById('spring-finish-modal').style.display = 'flex';
+                        return;
+                    } else if (springs.length === 4) {
+                        finishSpringTracing();
+                        return;
+                    }
                 }
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
-            } else if (step === 10) {
-                finishExpertTracing();
+                updateUIState();
+                redrawCanvas();
                 return;
             }
             updateUIState();
@@ -2426,9 +2346,40 @@
         }
 
         function prevStep() {
-            if (step > 1) {
+            zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            if (step === 9) {
+                if (springPhase === 2) {
+                    springPhase = 1;
+                    tempX = currentSpring.p2.x;
+                    tempY = currentSpring.p2.y;
+                } else if (springPhase === 1) {
+                    springPhase = 0;
+                    tempX = currentSpring.p1.x;
+                    tempY = currentSpring.p1.y;
+                } else if (springPhase === 0) {
+                    if (springs.length > 0) {
+                        let last = springs.pop();
+                        currentSpring = last;
+                        springPhase = 2;
+                        tempX = currentSpring.p2.x;
+                        tempY = currentSpring.p2.y;
+                    } else {
+                        step = 8;
+                        hasTremlBlock = true;
+                        tempX = sustainX;
+                        tempY = sustainY;
+                        tempAngle = sustainAngle;
+                    }
+                }
+                updateUIState();
+                redrawCanvas();
+                return;
+            }
+            if (step === 8) {
+                step = 7;
+                hasTremlBlock = false;
+            } else if (step > 1) {
                 step--;
-                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 if (step === 1) {
                     tempX = box1.x; tempY = box1.y; tempAngle = box1.angle; tempSize = box1.size;
                 } else if (step === 2) {
@@ -2436,19 +2387,10 @@
                 } else if (step >= 3 && step <= 6) {
                     let idx = step - 3;
                     tempX = corners[idx].x; tempY = corners[idx].y; tempAngle = corners[idx].angle; tempSize = corners[idx].size;
-                } else if (step === 7) {
-                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
-                } else if (step === 8) {
-                    tempX = sustainX; tempY = sustainY; tempAngle = sustainAngle;
-                } else if (step === 9) {
-                    springPhase = 0;
-                    tempX = canvas.width * 0.4; tempY = canvas.height * 0.5;
-                } else if (step === 10) {
-                    tempX = canvas.width * 0.5; tempY = canvas.height * 0.5;
                 }
-                updateUIState();
-                redrawCanvas();
             }
+            updateUIState();
+            redrawCanvas();
         }
 
         function updateUIState() {
@@ -2456,11 +2398,13 @@
             const scaleControlsSustain = document.getElementById('scale-controls-sustain');
             const scaleControlsSpring = document.getElementById('scale-controls-spring');
             const angleControlsRow = document.getElementById('angle-controls-row');
-            
+            const dpadContainerBox = document.getElementById('dpad-container-box');
+
             if (scaleControlsStandard) scaleControlsStandard.style.display = 'none';
             if (scaleControlsSustain) scaleControlsSustain.style.display = 'none';
             if (scaleControlsSpring) scaleControlsSpring.style.display = 'none';
             if (angleControlsRow) angleControlsRow.style.display = 'flex';
+            if (dpadContainerBox) dpadContainerBox.style.display = 'flex';
             if (holeActionPanel) holeActionPanel.style.display = 'none';
 
             if (step === 1) {
@@ -2469,26 +2413,28 @@
             } else if (step === 2) {
                 statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
                 if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-            } else if (step >= 3 && step <= 6) {
-                const cornerNames = ["Haut-Gauche", "Haut-Droit", "Bas-Droit", "Bas-Gauche"];
-                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + cornerNames[step - 3];
+            } else if (step === 3) {
+                statusText.innerText = "Étape 3 / 6 : Coin Haut-Gauche";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 4) {
+                statusText.innerText = "Étape 4 / 6 : Coin Haut-Droit";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 5) {
+                statusText.innerText = "Étape 5 / 6 : Coin Bas-Droit";
+                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
+            } else if (step === 6) {
+                statusText.innerText = "Étape 6 / 6 : Coin Bas-Gauche";
                 if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
             } else if (step === 7) {
-                statusText.innerText = "Étape 7 : Pose des perçages";
+                statusText.innerText = "Étape optionnelle : Ajout des perçages";
                 if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
                 if (holeActionPanel) holeActionPanel.style.display = 'block';
-                if (angleControlsRow) angleControlsRow.style.display = 'none';
             } else if (step === 8) {
-                statusText.innerText = "Étape 8 : Positionnement bloc sustain";
+                statusText.innerText = "Calage du bloc sustain (TREML)";
                 if (scaleControlsSustain) scaleControlsSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
+                statusText.innerText = "Traçage des ressorts (" + (springs.length + 1) + "/4)";
                 if (scaleControlsSpring) scaleControlsSpring.style.display = 'flex';
-                if (angleControlsRow) angleControlsRow.style.display = 'none';
-            } else if (step === 10) {
-                statusText.innerText = "Étape 10 : Perçages PBAV";
-                if (scaleControlsStandard) scaleControlsStandard.style.display = 'flex';
-                if (holeActionPanel) holeActionPanel.style.display = 'block';
                 if (angleControlsRow) angleControlsRow.style.display = 'none';
             }
         }
@@ -2496,8 +2442,11 @@
         btnDownload.addEventListener('click', function() {
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
-            btnDownload.href = dataURL;
-            btnDownload.download = 'Acuitix_Definitive.png';
+            const link = document.createElement('a');
+            link.download = 'Acuitix_Definitif.png';
+            link.href = dataURL;
+            link.click();
+            redrawCanvas(false);
         });
     </script>
 </body>
