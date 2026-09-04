@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.120 - Assistant CAO Compact</title>
+    <title>Acuitix V.121 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.120 - Assistant CAO</h1>
+    <h1>Acuitix V.121 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -2362,7 +2362,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.120) avec PBAR (Dernier élément) !";
+            statusText.innerText = "✅ Calage expert terminé (v.121) avec PBAR (Dernier élément) !";
             exportButtonsContainer.style.display = 'flex';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2432,7 +2432,7 @@
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.120) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.121) !";
                     exportButtonsContainer.style.display = 'flex';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
@@ -2586,13 +2586,13 @@
             }
         }
 
-        // Fonctions d'exportations V.120
+        // Fonctions d'exportations V.121
         function exportTracedImage() {
             if (!currentImg) return;
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V120_Traced.png';
+            link.download = 'Acuitix_V121_Traced.png';
             link.href = dataURL;
             link.click();
             redrawCanvas(false);
@@ -2613,14 +2613,14 @@
 
             const dataURL = tempCanvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V120_Original.png';
+            link.download = 'Acuitix_V121_Original.png';
             link.href = dataURL;
             link.click();
         }
 
         function exportJSONData() {
             const exportData = {
-                version: "Acuitix V.120",
+                version: "Acuitix V.121",
                 timestamp: new Date().toISOString(),
                 image: {
                     width: canvas.width,
@@ -2664,7 +2664,7 @@
             const jsonStr = JSON.stringify(exportData, null, 4);
             const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
             const link = document.createElement('a');
-            link.download = 'Acuitix_V120_Coordinates.txt';
+            link.download = 'Acuitix_V121_Coordinates.txt';
             link.href = URL.createObjectURL(blob);
             link.click();
             URL.revokeObjectURL(link.href);
@@ -2672,8 +2672,8 @@
 
         function exportAllPack() {
             exportTracedImage();
-            setTimeout(() => exportOriginalImage(), 300);
-            setTimeout(() => exportJSONData(), 600);
+            exportOriginalImage();
+            exportJSONData();
         }
     </script>
 </body>
