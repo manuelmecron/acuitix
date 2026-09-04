@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.119 - Assistant CAO Compact</title>
+    <title>Acuitix V.120 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.119 - Assistant CAO</h1>
+    <h1>Acuitix V.120 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -928,7 +928,12 @@
             </div>
         </div>
 
-        <a id="btn-download" class="btn" style="background: #007bff; display: none; padding: 12px;">💾 Télécharger l'image definitive</a>
+        <div id="export-buttons-container" style="display: none; flex-direction: column; gap: 6px; margin-top: 6px;">
+            <button class="btn" style="background: #28a745; padding: 12px;" onclick="exportAllPack()">📦 Tout Télécharger (Pack complet)</button>
+            <button class="btn btn-info" style="padding: 10px;" onclick="exportTracedImage()">🖼️ Photo Tracée (PRE-CAO)</button>
+            <button class="btn btn-secondary" style="padding: 10px;" onclick="exportOriginalImage()">📸 Photo Originale (Brute)</button>
+            <button class="btn btn-warning" style="padding: 10px;" onclick="exportJSONData()">📄 Coordonnées (JSON / TXT)</button>
+        </div>
         <button id="btn-retry" class="btn btn-danger" style="display: none; margin-top: 6px;" onclick="resetToWelcome()">🔄 Recommencer</button>
     </div>
 
@@ -957,7 +962,7 @@
         const generalToolsContainer = document.getElementById('general-tools-container');
         const adjustPanel = document.getElementById('adjust-panel');
         const statusText = document.getElementById('status-text');
-        const btnDownload = document.getElementById('btn-download');
+        const exportButtonsContainer = document.getElementById('export-buttons-container');
         const btnRetry = document.getElementById('btn-retry');
         const sideColorDrawer = document.getElementById('side-color-drawer');
         const holeActionPanel = document.getElementById('hole-action-panel');
@@ -1239,7 +1244,7 @@
             tutorialPanel3.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             adjustPanel.style.display = 'none';
-            btnDownload.style.display = 'none';
+            exportButtonsContainer.style.display = 'none';
             btnRetry.style.display = 'none';
             initialStandardPanel.style.display = 'none';
             welcomePanel.style.display = 'block';
@@ -1639,7 +1644,7 @@
             tutorialPanel3.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             adjustPanel.style.display = 'none';
-            btnDownload.style.display = 'none';
+            exportButtonsContainer.style.display = 'none';
             btnRetry.style.display = 'none';
             welcomePanel.style.display = 'none';
             initialStandardPanel.style.display = 'block';
@@ -2338,7 +2343,6 @@
                 redrawCanvas();
             } else {
                 step = 10;
-                // On initialise pbavX sur sustainX uniquement si elle n'a pas déjà été positionnée
                 if (!pbavX) {
                     pbavX = sustainX; 
                 }
@@ -2358,8 +2362,8 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.119) avec PBAR (Dernier élément) !";
-            btnDownload.style.display = 'block';
+            statusText.innerText = "✅ Calage expert terminé (v.120) avec PBAR (Dernier élément) !";
+            exportButtonsContainer.style.display = 'flex';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
         }
@@ -2428,8 +2432,8 @@
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.119) !";
-                    btnDownload.style.display = 'block';
+                    statusText.innerText = "✅ Calage expert terminé (v.120) !";
+                    exportButtonsContainer.style.display = 'flex';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
                     return;
@@ -2453,7 +2457,7 @@
                     tempY = canvas.height * 0.5;
                 } else if (springPhase === 1) {
                     currentSpring.p2 = { x: tempX, y: tempY };
-                    springPhase = 2; // Activation de la phase de réglage de la largeur
+                    springPhase = 2; 
                 } else if (springPhase === 2) {
                     springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
                     document.getElementById('spring-count-display').innerText = springs.length;
@@ -2481,9 +2485,7 @@
                     }
                 }
             } else if (step === 10) {
-                // Passage de l'étape PBAV vers la nouvelle étape PBAR
                 step = 11;
-                // On conserve pbarX si déjà initialisé/déplacé, sinon on l'aligne sur pbavX ou sustainX
                 if (!pbarX) {
                     pbarX = pbavX || sustainX;
                 }
@@ -2495,7 +2497,6 @@
                 redrawCanvas();
                 return;
             } else if (step === 11) {
-                // Validation de l'étape PBAR (dernier élément)
                 finishPbarTracing();
                 return;
             }
@@ -2510,7 +2511,7 @@
                 } else if (step === 10) {
                     step = 9;
                 } else if (step === 11) {
-                    step = 10; // Retour de PBAR à PBAV
+                    step = 10; 
                 } else {
                     step--;
                 }
@@ -2572,7 +2573,7 @@
                     statusText.innerText = "Étape 9 : Ressort " + (springs.length + 1) + " - Ajuster Largeur";
                     if (scaleSpring) scaleSpring.style.display = 'flex';
                     if (angleRow) angleRow.style.display = 'none';
-                    if (dpadBox) dpadBox.style.display = 'none'; // Désactive le déplacement pour bloquer le ressort
+                    if (dpadBox) dpadBox.style.display = 'none';
                 }
             } else if (step === 10) {
                 statusText.innerText = "Étape PBAV : 3 cercles liés";
@@ -2585,15 +2586,95 @@
             }
         }
 
-        btnDownload.addEventListener('click', function() {
+        // Fonctions d'exportations V.120
+        function exportTracedImage() {
+            if (!currentImg) return;
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V119_Final_PBAR.png';
+            link.download = 'Acuitix_V120_Traced.png';
             link.href = dataURL;
             link.click();
             redrawCanvas(false);
-        });
+        }
+
+        function exportOriginalImage() {
+            if (!currentImg) return;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            tempCtx.save();
+            tempCtx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
+            tempCtx.rotate((rotationAngle * Math.PI) / 180);
+            tempCtx.drawImage(currentImg, -currentImg.width / 2, -currentImg.height / 2, currentImg.width, currentImg.height);
+            tempCtx.restore();
+
+            const dataURL = tempCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Acuitix_V120_Original.png';
+            link.href = dataURL;
+            link.click();
+        }
+
+        function exportJSONData() {
+            const exportData = {
+                version: "Acuitix V.120",
+                timestamp: new Date().toISOString(),
+                image: {
+                    width: canvas.width,
+                    height: canvas.height,
+                    rotationAngle: rotationAngle,
+                    imgOffsetX: imgOffsetX,
+                    imgOffsetY: imgOffsetY
+                },
+                standards: {
+                    standard1: { type: standard1Type, mm: getStandardMm(standard1Type), box: box1 },
+                    standard2: { type: standard2Type, mm: getStandardMm(standard2Type), box: box2 }
+                },
+                xyAxes: {
+                    axisX: xyAxisX,
+                    axisY: xyAxisY
+                },
+                corners: corners,
+                holes: holes,
+                sustainBlock: {
+                    hasTremlBlock: hasTremlBlock,
+                    x: sustainX,
+                    y: sustainY,
+                    length: sustainLength,
+                    width: sustainWidth,
+                    angle: sustainAngle
+                },
+                springs: springs,
+                pbav: {
+                    x: pbavX,
+                    offsetTop: pbavOffsetTop,
+                    offsetBottom: pbavOffsetBottom,
+                    circleDiameter: pbavCircleDiameter
+                },
+                pbar: {
+                    x: pbarX,
+                    circleDiameter: pbarCircleDiameter,
+                    spacingMm: 10.5
+                }
+            };
+
+            const jsonStr = JSON.stringify(exportData, null, 4);
+            const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.download = 'Acuitix_V120_Coordinates.txt';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function exportAllPack() {
+            exportTracedImage();
+            setTimeout(() => exportOriginalImage(), 300);
+            setTimeout(() => exportJSONData(), 600);
+        }
     </script>
 </body>
 </html>
