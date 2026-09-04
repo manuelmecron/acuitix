@@ -482,8 +482,8 @@
     <div id="spring-finish-modal">
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Ressorts tracés (<span id="spring-count-display">2</span>). Voulez-vous en ajouter un autre ou terminer ?</p>
-            <div style="display: flex; flex-direction: column; gap: 8px;" id="spring-modal-buttons">
-                <button class="btn" style="background: #28a745; margin-top: 0;" id="btn-add-another-spring" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
                 <button class="btn btn-info" style="margin-top: 0;" onclick="handleSpringChoice('finish')">Terminer le calage</button>
             </div>
         </div>
@@ -1157,8 +1157,10 @@
         let sustainLength = 0, sustainWidth = 0, sustainAngle = 0, sustainX = 0, sustainY = 0;
         let hasTremlBlock = false;
         let springs = [];
-        let currentSpring = { p1: null, p2: null, width: 20 };
+        
+        // Logique exacte du placement des ressorts (intégrée depuis le code de référence)
         let springPhase = 0;
+        let currentSpring = { p1: null, p2: null, width: 20 };
 
         // Variables étape PBAV (3 cercles d'env 4mm de diamètre)
         let pbavX = 0; 
@@ -1252,6 +1254,7 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
+            springPhase = 0;
             pbavX = 0;
             pbarX = 0;
             step = 1;
@@ -1429,6 +1432,7 @@
                 tempSize = defaultSize;
                 hasTremlBlock = false;
                 springs = [];
+                springPhase = 0;
                 pbavX = 0;
                 pbarX = 0;
 
@@ -1469,6 +1473,7 @@
                     tempSize = defaultSize;
                     hasTremlBlock = false;
                     springs = [];
+                    springPhase = 0;
                     pbavX = 0;
                     pbarX = 0;
                     welcomePanel.style.display = 'none';
@@ -1509,9 +1514,12 @@
                     if (springPhase === 0) {
                         currentSpring.p1 = { x: imgX, y: imgY };
                         springPhase = 1;
+                        tempX = imgX + 50;
+                        tempY = imgY;
                     } else if (springPhase === 1) {
                         currentSpring.p2 = { x: imgX, y: imgY };
                         springPhase = 2;
+                        currentSpring.width = canvas.width * 0.03;
                     }
                 } else if (step === 10) {
                     pbavX = imgX;
@@ -1659,6 +1667,7 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
+            springPhase = 0;
             pbavX = 0;
             pbarX = 0;
             step = 1;
@@ -1842,7 +1851,7 @@
             ctx.restore();
         }
 
-        function drawSpringRect(p1, p2, width, color) {
+        function drawSpring(p1, p2, width, color) {
             ctx.save();
             let cx = (p1.x + p2.x) / 2;
             let cy = (p1.y + p2.y) / 2;
@@ -2043,7 +2052,7 @@
 
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
-                    drawSpringRect(s.p1, s.p2, s.width, elementColor);
+                    drawSpring(s.p1, s.p2, s.width, elementColor);
                 });
                 if (!isForFinalExport && step === 9) {
                     if (springPhase === 0) {
@@ -2062,7 +2071,7 @@
                         dessinerCroixCentre(currentSpring.p1.x, currentSpring.p1.y, elementColor);
                         dessinerCroixCentre(tempX, tempY, elementColor);
                     } else if (springPhase === 2 && currentSpring.p1 && currentSpring.p2) {
-                        drawSpringRect(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
+                        drawSpring(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
                     }
                 }
             }
@@ -2292,7 +2301,7 @@
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
             }
             if (step === 9 && springPhase < 2) {
-                alert("Veuillez placer les 2 points du ressort avant de valider.");
+                alert("Veuillez placer les 2 points du ressort et valider le tracé avant de continuer.");
                 return;
             }
             if (step === 7) {
@@ -2435,7 +2444,7 @@
                     sustainWidth = canvas.width * 0.08;
                     zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 } else {
-                    step = 12; 
+                    step = 12;
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
@@ -2459,29 +2468,10 @@
             } else if (step === 9) {
                 if (springPhase === 2) {
                     springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    
-                    if (springs.length >= 4) {
-                        step = 10;
-                        if (!pbavX) {
-                            pbavX = sustainX; 
-                        }
-                        pbavOffsetTop = 30;
-                        pbavOffsetBottom = 30;
-                        updateUIState();
-                        statusText.innerText = "Étape PBAV : 3 cercles liés";
-                        zoomLevel = 1.0;
-                        manualPanX = 0;
-                        manualPanY = 0;
-                        redrawCanvas();
-                        return;
-                    } else {
-                        document.getElementById('spring-count-display').innerText = springs.length;
-                        const addBtn = document.getElementById('btn-add-another-spring');
-                        if (addBtn) addBtn.style.display = 'block';
-                        const modal = document.getElementById('spring-finish-modal');
-                        if (modal) modal.style.display = 'flex';
-                        return;
-                    }
+                    document.getElementById('spring-count-display').innerText = springs.length;
+                    const modal = document.getElementById('spring-finish-modal');
+                    if (modal) modal.style.display = 'flex';
+                    return;
                 }
             } else if (step === 10) {
                 step = 11;
@@ -2510,7 +2500,7 @@
                 } else if (step === 10) {
                     step = 9;
                 } else if (step === 11) {
-                    step = 10; 
+                    step = 10;
                 } else {
                     step--;
                 }
@@ -2558,9 +2548,11 @@
                 statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
                 if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Tracé des ressorts (min 2, max 4)";
+                statusText.innerText = "Étape 9 : Traçage des ressorts";
                 if (scaleSpring) scaleSpring.style.display = 'flex';
-                if (angleRow) angleRow.style.display = 'none';
+                if (springPhase === 2) {
+                    if (angleRow) angleRow.style.display = 'none';
+                }
             } else if (step === 10) {
                 statusText.innerText = "Étape PBAV : 3 cercles liés";
                 if (scalePbav) scalePbav.style.display = 'flex';
