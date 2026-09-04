@@ -1158,8 +1158,8 @@
         let hasTremlBlock = false;
         let springs = [];
         
-        // Logique exacte du placement des ressorts (intégrée depuis le code de référence)
-        let springPhase = 0;
+        // Logique de placement séquentiel étape par étape des ressorts (exigée par le client)
+        let springPhase = 0; // 0: clic point 1, 1: clic point 2 (validation interactive)
         let currentSpring = { p1: null, p2: null, width: 20 };
 
         // Variables étape PBAV (3 cercles d'env 4mm de diamètre)
@@ -1511,15 +1511,15 @@
                         xyAxisY.y = imgY;
                     }
                 } else if (step === 9) {
+                    // Validation étape par étape des points du ressort par le client
                     if (springPhase === 0) {
                         currentSpring.p1 = { x: imgX, y: imgY };
                         springPhase = 1;
-                        tempX = imgX + 50;
-                        tempY = imgY;
+                        statusText.innerText = "Traçage des ressorts : Cliquez pour poser le second point (fin)";
                     } else if (springPhase === 1) {
                         currentSpring.p2 = { x: imgX, y: imgY };
-                        springPhase = 2;
-                        currentSpring.width = canvas.width * 0.03;
+                        springPhase = 2; // En attente de validation explicite par bouton
+                        statusText.innerText = "Traçage des ressorts : Cliquez sur 'Valider l'étape'";
                     }
                 } else if (step === 10) {
                     pbavX = imgX;
@@ -2055,9 +2055,7 @@
                     drawSpring(s.p1, s.p2, s.width, elementColor);
                 });
                 if (!isForFinalExport && step === 9) {
-                    if (springPhase === 0) {
-                        dessinerCroixCentre(tempX, tempY, elementColor);
-                    } else if (springPhase === 1 && currentSpring.p1) {
+                    if (springPhase === 1 && currentSpring.p1) {
                         ctx.save();
                         ctx.strokeStyle = elementColor;
                         ctx.lineWidth = Math.max(1.5, canvas.width / 600);
@@ -2301,7 +2299,7 @@
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
             }
             if (step === 9 && springPhase < 2) {
-                alert("Veuillez placer les 2 points du ressort et valider le tracé avant de continuer.");
+                alert("Veuillez placer les 2 points du ressort et valider le tracé étape par étape avant de continuer.");
                 return;
             }
             if (step === 7) {
@@ -2355,6 +2353,7 @@
                 springPhase = 0;
                 tempX = canvas.width * 0.4;
                 tempY = canvas.height * 0.5;
+                statusText.innerText = "Traçage des ressorts : Cliquez pour poser le premier point";
                 updateUIState();
                 redrawCanvas();
             } else {
@@ -2464,6 +2463,7 @@
                 currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
                 tempX = canvas.width * 0.4;
                 tempY = canvas.height * 0.5;
+                statusText.innerText = "Traçage des ressorts : Cliquez pour poser le premier point";
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 9) {
                 if (springPhase === 2) {
@@ -2548,7 +2548,7 @@
                 statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
                 if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
+                statusText.innerText = "Étape 9 : Traçage des ressorts (Étape par étape)";
                 if (scaleSpring) scaleSpring.style.display = 'flex';
                 if (springPhase === 2) {
                     if (angleRow) angleRow.style.display = 'none';
