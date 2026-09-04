@@ -1252,7 +1252,6 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
-            springPhase = 0;
             pbavX = 0;
             pbarX = 0;
             step = 1;
@@ -1430,7 +1429,6 @@
                 tempSize = defaultSize;
                 hasTremlBlock = false;
                 springs = [];
-                springPhase = 0;
                 pbavX = 0;
                 pbarX = 0;
 
@@ -1471,7 +1469,6 @@
                     tempSize = defaultSize;
                     hasTremlBlock = false;
                     springs = [];
-                    springPhase = 0;
                     pbavX = 0;
                     pbarX = 0;
                     welcomePanel.style.display = 'none';
@@ -1507,20 +1504,6 @@
                     } else {
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
-                    }
-                } else if (step === 9) {
-                    if (springPhase === 0) {
-                        currentSpring.p1 = { x: imgX, y: imgY };
-                        springPhase = 1;
-                        tempX = imgX + 50;
-                        tempY = imgY;
-                    } else if (springPhase === 1) {
-                        currentSpring.p2 = { x: imgX, y: imgY };
-                        springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                        springPhase = 2;
-                        document.getElementById('spring-count-display').innerText = springs.length;
-                        const modal = document.getElementById('spring-finish-modal');
-                        if (modal) modal.style.display = 'flex';
                     }
                 } else if (step === 10) {
                     pbavX = imgX;
@@ -1668,7 +1651,6 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
-            springPhase = 0;
             pbavX = 0;
             pbarX = 0;
             step = 1;
@@ -2356,6 +2338,7 @@
                 redrawCanvas();
             } else {
                 step = 10;
+                // On initialise pbavX sur sustainX uniquement si elle n'a pas déjà été positionnée
                 if (!pbavX) {
                     pbavX = sustainX; 
                 }
@@ -2441,7 +2424,7 @@
                     sustainWidth = canvas.width * 0.08;
                     zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 } else {
-                    step = 12;
+                    step = 12; // Fin directe si pas de bloc treml
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
@@ -2470,14 +2453,37 @@
                     tempY = canvas.height * 0.5;
                 } else if (springPhase === 1) {
                     currentSpring.p2 = { x: tempX, y: tempY };
+                    springPhase = 2; // Activation de la phase de réglage de la largeur
+                } else if (springPhase === 2) {
                     springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    springPhase = 2;
                     document.getElementById('spring-count-display').innerText = springs.length;
-                    const modal = document.getElementById('spring-finish-modal');
-                    if (modal) modal.style.display = 'flex';
+                    
+                    if (springs.length < 2) {
+                        alert("Vous devez placer au minimum 2 ressorts.");
+                        currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                        springPhase = 0;
+                        tempX = canvas.width * 0.4;
+                        tempY = canvas.height * 0.5;
+                    } else if (springs.length >= 4) {
+                        alert("Nombre maximal de ressorts atteint (4). Passage à l'étape suivante.");
+                        step = 10;
+                        if (!pbavX) {
+                            pbavX = sustainX; 
+                        }
+                        pbavOffsetTop = 30;
+                        pbavOffsetBottom = 30;
+                        zoomLevel = 1.0;
+                        manualPanX = 0;
+                        manualPanY = 0;
+                    } else {
+                        const modal = document.getElementById('spring-finish-modal');
+                        if (modal) modal.style.display = 'flex';
+                    }
                 }
             } else if (step === 10) {
+                // Passage de l'étape PBAV vers la nouvelle étape PBAR
                 step = 11;
+                // On conserve pbarX si déjà initialisé/déplacé, sinon on l'aligne sur pbavX ou sustainX
                 if (!pbarX) {
                     pbarX = pbavX || sustainX;
                 }
@@ -2489,6 +2495,7 @@
                 redrawCanvas();
                 return;
             } else if (step === 11) {
+                // Validation de l'étape PBAR (dernier élément)
                 finishPbarTracing();
                 return;
             }
@@ -2503,7 +2510,7 @@
                 } else if (step === 10) {
                     step = 9;
                 } else if (step === 11) {
-                    step = 10;
+                    step = 10; // Retour de PBAR à PBAV
                 } else {
                     step--;
                 }
@@ -2551,10 +2558,21 @@
                 statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
                 if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
-                if (scaleSpring) scaleSpring.style.display = 'flex';
-                if (springPhase === 2) {
+                if (springPhase === 0) {
+                    statusText.innerText = "Étape 9 : Ressort " + (springs.length + 1) + " - Point 1";
+                    if (scaleSpring) scaleSpring.style.display = 'none';
                     if (angleRow) angleRow.style.display = 'none';
+                    if (dpadBox) dpadBox.style.display = 'flex';
+                } else if (springPhase === 1) {
+                    statusText.innerText = "Étape 9 : Ressort " + (springs.length + 1) + " - Point 2";
+                    if (scaleSpring) scaleSpring.style.display = 'none';
+                    if (angleRow) angleRow.style.display = 'none';
+                    if (dpadBox) dpadBox.style.display = 'flex';
+                } else if (springPhase === 2) {
+                    statusText.innerText = "Étape 9 : Ressort " + (springs.length + 1) + " - Ajuster Largeur";
+                    if (scaleSpring) scaleSpring.style.display = 'flex';
+                    if (angleRow) angleRow.style.display = 'none';
+                    if (dpadBox) dpadBox.style.display = 'none'; // Désactive le déplacement pour bloquer le ressort
                 }
             } else if (step === 10) {
                 statusText.innerText = "Étape PBAV : 3 cercles liés";
