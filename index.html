@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.121 - Assistant CAO Compact</title>
+    <title>Acuitix V.122 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -489,7 +489,7 @@
         </div>
     </div>
 
-    <h1>Acuitix V.121 - Assistant CAO</h1>
+    <h1>Acuitix V.122 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1165,13 +1165,11 @@
         let currentSpring = { p1: null, p2: null, width: 20 };
         let springPhase = 0;
 
-        // Variables étape PBAV (3 cercles d'env 4mm de diamètre)
         let pbavX = 0; 
         let pbavOffsetTop = 30;  
         let pbavOffsetBottom = 30; 
         let pbavCircleDiameter = 0; 
 
-        // Variables étape PBAR (3 cercles d'env 4mm de diamètre, écart fixe de 10.5mm)
         let pbarX = 0;
         let pbarCircleDiameter = 0;
 
@@ -1809,158 +1807,160 @@
             redrawCanvas();
         }
 
-        function drawSustainRectangle(x, y, lengthVal, widthVal, angleDeg, color) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
+        function drawSustainRectangle(x, y, lengthVal, widthVal, angleDeg, color, targetCtx = ctx, targetCanvas = canvas) {
+            targetCtx.save();
+            targetCtx.translate(x, y);
+            targetCtx.rotate((angleDeg * Math.PI) / 180);
 
             let w = widthVal;
             let h = lengthVal;
             let halfW = w / 2;
             let halfH = h / 2;
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+            targetCtx.strokeStyle = color;
+            targetCtx.lineWidth = Math.max(1.5, targetCanvas.width / 600);
 
-            ctx.strokeRect(-halfW, -halfH, w, h);
+            targetCtx.strokeRect(-halfW, -halfH, w, h);
 
-            ctx.beginPath();
-            ctx.moveTo(-halfW, -halfH);
-            ctx.lineTo(halfW, halfH);
-            ctx.moveTo(halfW, -halfH);
-            ctx.lineTo(-halfW, halfH);
-            ctx.stroke();
+            targetCtx.beginPath();
+            targetCtx.moveTo(-halfW, -halfH);
+            targetCtx.lineTo(halfW, halfH);
+            targetCtx.moveTo(halfW, -halfH);
+            targetCtx.lineTo(-halfW, halfH);
+            targetCtx.stroke();
 
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            ctx.arc(0, 0, Math.max(2, canvas.width / 300), 0, Math.PI * 2);
-            ctx.fill();
+            targetCtx.fillStyle = color;
+            targetCtx.beginPath();
+            targetCtx.arc(0, 0, Math.max(2, targetCanvas.width / 300), 0, Math.PI * 2);
+            targetCtx.fill();
 
-            ctx.restore();
+            targetCtx.restore();
         }
 
-        function drawSpring(p1, p2, width, color) {
-            ctx.save();
+        function drawSpring(p1, p2, width, color, targetCtx = ctx, targetCanvas = canvas) {
+            targetCtx.save();
             let cx = (p1.x + p2.x) / 2;
             let cy = (p1.y + p2.y) / 2;
             let length = Math.hypot(p2.x - p1.x, p2.y - p1.y);
             let angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            targetCtx.strokeStyle = color;
+            targetCtx.lineWidth = Math.max(1.5, targetCanvas.width / 600);
+            targetCtx.setLineDash([4, 4]);
+            targetCtx.beginPath();
+            targetCtx.moveTo(p1.x, p1.y);
+            targetCtx.lineTo(p2.x, p2.y);
+            targetCtx.stroke();
+            targetCtx.setLineDash([]);
 
-            ctx.translate(cx, cy);
-            ctx.rotate(angle);
+            targetCtx.translate(cx, cy);
+            targetCtx.rotate(angle);
             let halfW = width / 2;
             let halfL = length / 2;
             
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-            ctx.strokeRect(-halfL, -halfW, length, width);
+            targetCtx.strokeStyle = color;
+            targetCtx.lineWidth = Math.max(1.5, targetCanvas.width / 600);
+            targetCtx.strokeRect(-halfL, -halfW, length, width);
 
-            ctx.beginPath();
-            ctx.moveTo(-halfL, 0);
-            ctx.lineTo(halfL, 0);
-            ctx.stroke();
+            targetCtx.beginPath();
+            targetCtx.moveTo(-halfL, 0);
+            targetCtx.lineTo(halfL, 0);
+            targetCtx.stroke();
 
-            ctx.restore();
+            targetCtx.restore();
 
-            dessinerCroixCentre(p1.x, p1.y, color);
-            dessinerCroixCentre(p2.x, p2.y, color);
+            dessinerCroixCentreCustom(p1.x, p1.y, color, targetCtx, targetCanvas);
+            dessinerCroixCentreCustom(p2.x, p2.y, color, targetCtx, targetCanvas);
         }
 
         function redrawCanvas(isForFinalExport = false) {
             if (!currentImg) return;
-            
             if (!isForFinalExport) {
                 updateCanvasDimensions();
             }
+            renderSceneToContext(ctx, canvas, isForFinalExport, zoomLevel, manualPanX, manualPanY, tempX, tempY);
+        }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            if (!isForFinalExport && zoomLevel !== 1.0) {
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.scale(zoomLevel, zoomLevel);
-                ctx.translate(-tempX + manualPanX, -tempY + manualPanY);
+        function renderSceneToContext(targetCtx, targetCanvas, isForFinalExport, currentZoom, pX, pY, tX, tY) {
+            targetCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+            targetCtx.save();
+            if (!isForFinalExport && currentZoom !== 1.0) {
+                targetCtx.translate(targetCanvas.width / 2, targetCanvas.height / 2);
+                targetCtx.scale(currentZoom, currentZoom);
+                targetCtx.translate(-tX + pX, -tY + pY);
             }
-            ctx.save();
-            ctx.translate(canvas.width / 2 + imgOffsetX, canvas.height / 2 + imgOffsetY);
-            ctx.rotate((rotationAngle * Math.PI) / 180);
+            targetCtx.save();
+            targetCtx.translate(targetCanvas.width / 2 + imgOffsetX, targetCanvas.height / 2 + imgOffsetY);
+            targetCtx.rotate((rotationAngle * Math.PI) / 180);
             let drawW = currentImg.width;
             let drawH = currentImg.height;
-            ctx.drawImage(currentImg, -drawW / 2, -drawH / 2, drawW, drawH);
-            ctx.restore();
+            targetCtx.drawImage(currentImg, -drawW / 2, -drawH / 2, drawW, drawH);
+            targetCtx.restore();
 
-            let refW = canvas.width;
-            ctx.globalAlpha = isForFinalExport ? 1.0 : currentOpacity;
+            let refW = targetCanvas.width;
+            targetCtx.globalAlpha = isForFinalExport ? 1.0 : currentOpacity;
 
             if (!isForFinalExport && isSelectingColorState) {
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.fillStyle = elementColor;
-                ctx.globalAlpha = currentOpacity;
-                ctx.lineWidth = Math.max(1.5, canvas.width / 700);
-                let pw = canvas.width * 0.45;
-                let ph = canvas.height * 0.45;
-                ctx.strokeRect(canvas.width / 2 - pw / 2, canvas.height / 2 - ph / 2, pw, ph);
-                dessinerCroixCentre(canvas.width / 2, canvas.height / 2, elementColor);
-                ctx.restore();
+                targetCtx.save();
+                targetCtx.strokeStyle = elementColor;
+                targetCtx.fillStyle = elementColor;
+                targetCtx.globalAlpha = currentOpacity;
+                targetCtx.lineWidth = Math.max(1.5, targetCanvas.width / 700);
+                let pw = targetCanvas.width * 0.45;
+                let ph = targetCanvas.height * 0.45;
+                targetCtx.strokeRect(targetCanvas.width / 2 - pw / 2, targetCanvas.height / 2 - ph / 2, pw, ph);
+                dessinerCroixCentreCustom(targetCanvas.width / 2, targetCanvas.height / 2, elementColor, targetCtx, targetCanvas);
+                targetCtx.restore();
             }
 
             if (!isForFinalExport && step === 0 && !isSelectingColorState) {
-                ctx.save();
-                ctx.lineWidth = Math.max(2, canvas.width / 500);
+                targetCtx.save();
+                targetCtx.lineWidth = Math.max(2, targetCanvas.width / 500);
 
-                ctx.save();
-                ctx.strokeStyle = '#FF0000';
-                ctx.translate(xyAxisX.x, xyAxisX.y);
-                ctx.rotate((xyAxisX.angle * Math.PI) / 180);
-                ctx.beginPath();
-                ctx.moveTo(-canvas.width * 2, 0);
-                ctx.lineTo(canvas.width * 2, 0);
-                ctx.stroke();
-                ctx.restore();
-                dessinerCroixCentre(xyAxisX.x, xyAxisX.y, '#FF0000');
+                targetCtx.save();
+                targetCtx.strokeStyle = '#FF0000';
+                targetCtx.translate(xyAxisX.x, xyAxisX.y);
+                targetCtx.rotate((xyAxisX.angle * Math.PI) / 180);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-targetCanvas.width * 2, 0);
+                targetCtx.lineTo(targetCanvas.width * 2, 0);
+                targetCtx.stroke();
+                targetCtx.restore();
+                dessinerCroixCentreCustom(xyAxisX.x, xyAxisX.y, '#FF0000', targetCtx, targetCanvas);
 
-                ctx.save();
-                ctx.strokeStyle = '#00FF00';
-                ctx.translate(xyAxisY.x, xyAxisY.y);
-                ctx.rotate((xyAxisY.angle * Math.PI) / 180);
-                ctx.beginPath();
-                ctx.moveTo(0, -canvas.height * 2);
-                ctx.lineTo(0, canvas.height * 2);
-                ctx.stroke();
-                ctx.restore();
-                dessinerCroixCentre(xyAxisY.x, xyAxisY.y, '#00FF00');
+                targetCtx.save();
+                targetCtx.strokeStyle = '#00FF00';
+                targetCtx.translate(xyAxisY.x, xyAxisY.y);
+                targetCtx.rotate((xyAxisY.angle * Math.PI) / 180);
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, -targetCanvas.height * 2);
+                targetCtx.lineTo(0, targetCanvas.height * 2);
+                targetCtx.stroke();
+                targetCtx.restore();
+                dessinerCroixCentreCustom(xyAxisY.x, xyAxisY.y, '#00FF00', targetCtx, targetCanvas);
 
-                ctx.restore();
+                targetCtx.restore();
             }
 
             if (step >= 1 || isForFinalExport) {
-                let rx = (!isForFinalExport && step === 1) ? tempX : box1.x;
-                let ry = (!isForFinalExport && step === 1) ? tempY : box1.y;
-                let rsz = (!isForFinalExport && step === 1) ? tempSize : box1.size;
+                let rx = (!isForFinalExport && step === 1) ? tX : box1.x;
+                let ry = (!isForFinalExport && step === 1) ? tY : box1.y;
+                let rsz = (!isForFinalExport && step === 1) ? tSizeHelper() : box1.size;
                 let rang = (!isForFinalExport && step === 1) ? tempAngle : box1.angle;
-                drawStandardShape(rx, ry, rsz, rang, elementColor, standard1Type);
+                drawStandardShapeCustom(rx, ry, rsz, rang, elementColor, standard1Type, targetCtx, targetCanvas);
                 if (standard1Type !== '11' && (!isForFinalExport || step >= 1)) {
-                    dessinerCroixCentre(rx, ry, elementColor);
+                    dessinerCroixCentreCustom(rx, ry, elementColor, targetCtx, targetCanvas);
                 }
             }
 
             if (step >= 2 || isForFinalExport) {
-                let rx2 = (!isForFinalExport && step === 2) ? tempX : box2.x;
-                let ry2 = (!isForFinalExport && step === 2) ? tempY : box2.y;
-                let rsz2 = (!isForFinalExport && step === 2) ? tempSize : box2.size;
+                let rx2 = (!isForFinalExport && step === 2) ? tX : box2.x;
+                let ry2 = (!isForFinalExport && step === 2) ? tY : box2.y;
+                let rsz2 = (!isForFinalExport && step === 2) ? tSizeHelper() : box2.size;
                 let rang2 = (!isForFinalExport && step === 2) ? tempAngle : box2.angle;
-                drawStandardShape(rx2, ry2, rsz2, rang2, elementColor, standard2Type);
+                drawStandardShapeCustom(rx2, ry2, rsz2, rang2, elementColor, standard2Type, targetCtx, targetCanvas);
                 if (standard2Type !== '11' && (!isForFinalExport || step >= 2)) {
-                    dessinerCroixCentre(rx2, ry2, elementColor);
+                    dessinerCroixCentreCustom(rx2, ry2, elementColor, targetCtx, targetCanvas);
                 }
             }
 
@@ -1968,103 +1968,102 @@
                 let isActive = (!isForFinalExport && step === i + 3);
                 let isPassed = (!isForFinalExport && step > i + 3);
                 if (isPassed || isActive || isForFinalExport) {
-                    let cx = (!isForFinalExport && step === i + 3) ? tempX : corners[i].x;
-                    let cy = (!isForFinalExport && step === i + 3) ? tempY : corners[i].y;
-                    let csize = (!isForFinalExport && step === i + 3) ? tempSize : corners[i].size;
+                    let cx = (!isForFinalExport && step === i + 3) ? tX : corners[i].x;
+                    let cy = (!isForFinalExport && step === i + 3) ? tY : corners[i].y;
+                    let csize = (!isForFinalExport && step === i + 3) ? tSizeHelper() : corners[i].size;
                     let cangle = (!isForFinalExport && step === i + 3) ? tempAngle : corners[i].angle;
-                    drawCornerMarker(cx, cy, csize, cangle, elementColor, i);
-                    dessinerCroixCentre(cx, cy, elementColor);
+                    drawCornerMarkerCustom(cx, cy, csize, cangle, elementColor, i, targetCtx, targetCanvas);
+                    dessinerCroixCentreCustom(cx, cy, elementColor, targetCtx, targetCanvas);
                 }
             }
 
             if (step >= 7 || isForFinalExport) {
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 700);
-                ctx.beginPath();
-                ctx.moveTo(corners[0].x, corners[0].y);
-                ctx.lineTo(corners[2].x, corners[2].y);
-                ctx.moveTo(corners[1].x, corners[1].y);
-                ctx.lineTo(corners[3].x, corners[3].y);
-                ctx.stroke();
-                ctx.restore();
+                targetCtx.save();
+                targetCtx.strokeStyle = elementColor;
+                targetCtx.lineWidth = Math.max(1.5, refW / 700);
+                targetCtx.beginPath();
+                targetCtx.moveTo(corners[0].x, corners[0].y);
+                targetCtx.lineTo(corners[2].x, corners[2].y);
+                targetCtx.moveTo(corners[1].x, corners[1].y);
+                targetCtx.lineTo(corners[3].x, corners[3].y);
+                targetCtx.stroke();
+                targetCtx.restore();
 
                 if (!isForFinalExport && step === 7) {
-                    ctx.save();
-                    ctx.strokeStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 600);
-                    ctx.beginPath();
-                    ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
-                    ctx.stroke();
+                    targetCtx.save();
+                    targetCtx.strokeStyle = elementColor;
+                    targetCtx.lineWidth = Math.max(1.5, refW / 600);
+                    targetCtx.beginPath();
+                    targetCtx.arc(tX, tY, tempSize, 0, Math.PI * 2);
+                    targetCtx.stroke();
 
                     let len = tempSize * 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(tempX - len, tempY);
-                    ctx.lineTo(tempX + len, tempY);
-                    ctx.moveTo(tempX, tempY - len);
-                    ctx.lineTo(tempX, tempY + len);
-                    ctx.stroke();
-                    ctx.restore();
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(tX - len, tY);
+                    targetCtx.lineTo(tX + len, tY);
+                    targetCtx.moveTo(tX, tY - len);
+                    targetCtx.lineTo(tX, tY + len);
+                    targetCtx.stroke();
+                    targetCtx.restore();
                 }
 
                 holes.forEach((h, index) => {
-                    ctx.save();
-                    ctx.strokeStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 600);
-                    ctx.beginPath();
-                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                    ctx.stroke();
+                    targetCtx.save();
+                    targetCtx.strokeStyle = elementColor;
+                    targetCtx.lineWidth = Math.max(1.5, refW / 600);
+                    targetCtx.beginPath();
+                    targetCtx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                    targetCtx.stroke();
 
                     let len = h.radius * 0.4;
-                    ctx.beginPath();
-                    ctx.moveTo(h.x - len, h.y);
-                    ctx.lineTo(h.x + len, h.y);
-                    ctx.moveTo(h.x, h.y - len);
-                    ctx.lineTo(h.x, h.y + len);
-                    ctx.stroke();
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(h.x - len, h.y);
+                    targetCtx.lineTo(h.x + len, h.y);
+                    targetCtx.moveTo(h.x, h.y - len);
+                    targetCtx.lineTo(h.x, h.y + len);
+                    targetCtx.stroke();
 
-                    ctx.fillStyle = elementColor;
-                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
-                    ctx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
-                    ctx.restore();
+                    targetCtx.fillStyle = elementColor;
+                    targetCtx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
+                    targetCtx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
+                    targetCtx.restore();
                 });
             }
 
             if (step >= 8 || isForFinalExport) {
                 if (!isForFinalExport && step === 8) {
-                    drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
+                    drawSustainRectangle(tX, tY, sustainLength, sustainWidth, tempAngle, elementColor, targetCtx, targetCanvas);
                 } else if (hasTremlBlock) {
-                    drawSustainRectangle(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor);
+                    drawSustainRectangle(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor, targetCtx, targetCanvas);
                 }
             }
 
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
-                    drawSpring(s.p1, s.p2, s.width, elementColor);
+                    drawSpring(s.p1, s.p2, s.width, elementColor, targetCtx, targetCanvas);
                 });
                 if (!isForFinalExport && step === 9) {
                     if (springPhase === 1 && currentSpring.p1) {
-                        ctx.save();
-                        ctx.strokeStyle = elementColor;
-                        ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-                        ctx.setLineDash([4, 4]);
-                        ctx.beginPath();
-                        ctx.moveTo(currentSpring.p1.x, currentSpring.p1.y);
-                        ctx.lineTo(tempX, tempY);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
-                        ctx.restore();
-                        dessinerCroixCentre(currentSpring.p1.x, currentSpring.p1.y, elementColor);
-                        dessinerCroixCentre(tempX, tempY, elementColor);
+                        targetCtx.save();
+                        targetCtx.strokeStyle = elementColor;
+                        targetCtx.lineWidth = Math.max(1.5, targetCanvas.width / 600);
+                        targetCtx.setLineDash([4, 4]);
+                        targetCtx.beginPath();
+                        targetCtx.moveTo(currentSpring.p1.x, currentSpring.p1.y);
+                        targetCtx.lineTo(tX, tY);
+                        targetCtx.stroke();
+                        targetCtx.setLineDash([]);
+                        targetCtx.restore();
+                        dessinerCroixCentreCustom(currentSpring.p1.x, currentSpring.p1.y, elementColor, targetCtx, targetCanvas);
+                        dessinerCroixCentreCustom(tX, tY, elementColor, targetCtx, targetCanvas);
                     } else if (springPhase === 0) {
-                        dessinerCroixCentre(tempX, tempY, elementColor);
+                        dessinerCroixCentreCustom(tX, tY, elementColor, targetCtx, targetCanvas);
                     } else if (springPhase === 2 && currentSpring.p1 && currentSpring.p2) {
-                        drawSpring(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
+                        drawSpring(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor, targetCtx, targetCanvas);
                     }
                 }
             }
 
-            // Étape PBAV
             if (step >= 10 || isForFinalExport) {
                 let mmSize = getStandardMm(standard1Type);
                 let pxPerMm = box1.size / mmSize;
@@ -2078,207 +2077,212 @@
                 let cMid = { x: currentPbavX, y: centerY };
                 let cBot = { x: currentPbavX, y: centerY + pbavOffsetBottom };
 
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 600);
+                targetCtx.save();
+                targetCtx.strokeStyle = elementColor;
+                targetCtx.lineWidth = Math.max(1.5, refW / 600);
 
-                ctx.setLineDash([2, 2]);
-                ctx.beginPath();
-                ctx.moveTo(cTop.x, cTop.y);
-                ctx.lineTo(cBot.x, cBot.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
+                targetCtx.setLineDash([2, 2]);
+                targetCtx.beginPath();
+                targetCtx.moveTo(cTop.x, cTop.y);
+                targetCtx.lineTo(cBot.x, cBot.y);
+                targetCtx.stroke();
+                targetCtx.setLineDash([]);
 
                 [cTop, cMid, cBot].forEach(c => {
-                    ctx.beginPath();
-                    ctx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
-                    ctx.stroke();
-                    dessinerCroixCentre(c.x, c.y, elementColor);
+                    targetCtx.beginPath();
+                    targetCtx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
+                    targetCtx.stroke();
+                    dessinerCroixCentreCustom(c.x, c.y, elementColor, targetCtx, targetCanvas);
                 });
 
-                ctx.restore();
+                targetCtx.restore();
             }
 
-            // Étape PBAR (3 cercles de ~4mm de diam, écart fixe de 10.5 mm, alignés verticalement, cercle milieu aligné sur sustainX, déplacement X global)
             if (step >= 11 || isForFinalExport) {
                 let mmSize = getStandardMm(standard1Type);
                 let pxPerMm = box1.size / mmSize;
-                pbarCircleDiameter = 4 * pxPerMm; // ~4 mm convertis en px
+                pbarCircleDiameter = 4 * pxPerMm;
                 let rCircle = pbarCircleDiameter / 2;
-                let spacingPx = 10.5 * pxPerMm; // Écart standard de 10.5 mm verrouillé
+                let spacingPx = 10.5 * pxPerMm;
 
                 let currentPbarX = pbarX;
-                let centerY = sustainY; // Axe Y fixe centré sur le bloc sustain
+                let centerY = sustainY;
 
                 let pbarTop = { x: currentPbarX, y: centerY - spacingPx };
                 let pbarMid = { x: currentPbarX, y: centerY };
                 let pbarBot = { x: currentPbarX, y: centerY + spacingPx };
 
-                ctx.save();
-                ctx.strokeStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 600);
+                targetCtx.save();
+                targetCtx.strokeStyle = elementColor;
+                targetCtx.lineWidth = Math.max(1.5, refW / 600);
 
-                ctx.setLineDash([2, 2]);
-                ctx.beginPath();
-                ctx.moveTo(pbarTop.x, pbarTop.y);
-                ctx.lineTo(pbarBot.x, pbarBot.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
+                targetCtx.setLineDash([2, 2]);
+                targetCtx.beginPath();
+                targetCtx.moveTo(pbarTop.x, pbarTop.y);
+                targetCtx.lineTo(pbarBot.x, pbarBot.y);
+                targetCtx.stroke();
+                targetCtx.setLineDash([]);
 
                 [pbarTop, pbarMid, pbarBot].forEach(c => {
-                    ctx.beginPath();
-                    ctx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
-                    ctx.stroke();
-                    dessinerCroixCentre(c.x, c.y, elementColor);
+                    targetCtx.beginPath();
+                    targetCtx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
+                    targetCtx.stroke();
+                    dessinerCroixCentreCustom(c.x, c.y, elementColor, targetCtx, targetCanvas);
                 });
 
-                ctx.restore();
+                targetCtx.restore();
             }
 
-            ctx.globalAlpha = 1.0;
-            ctx.restore();
+            targetCtx.globalAlpha = 1.0;
+            targetCtx.restore();
+        }
+
+        function tSizeHelper() { return tempSize; }
+
+        function dessinerCroixCentreCustom(x, y, col, targetCtx, targetCanvas) {
+            targetCtx.save();
+            targetCtx.strokeStyle = col;
+            targetCtx.lineWidth = 1;
+            let len = 4;
+            targetCtx.beginPath();
+            targetCtx.moveTo(x - len, y);
+            targetCtx.lineTo(x + len, y);
+            targetCtx.moveTo(x, y - len);
+            targetCtx.lineTo(x, y + len);
+            targetCtx.stroke();
+            targetCtx.fillStyle = col;
+            targetCtx.beginPath();
+            targetCtx.arc(x, y, 1.5, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.restore();
         }
 
         function dessinerCroixCentre(x, y, col = elementColor) {
-            ctx.save();
-            ctx.strokeStyle = col;
-            ctx.lineWidth = 1;
-            let len = 4;
-            ctx.beginPath();
-            ctx.moveTo(x - len, y);
-            ctx.lineTo(x + len, y);
-            ctx.moveTo(x, y - len);
-            ctx.lineTo(x, y + len);
-            ctx.stroke();
-            ctx.fillStyle = col;
-            ctx.beginPath();
-            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            dessinerCroixCentreCustom(x, y, col, ctx, canvas);
         }
 
-        function drawStandardShape(x, y, size, angleDeg, color, type) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
+        function drawStandardShapeCustom(x, y, size, angleDeg, color, type, targetCtx, targetCanvas) {
+            targetCtx.save();
+            targetCtx.translate(x, y);
+            targetCtx.rotate((angleDeg * Math.PI) / 180);
 
             if (type === '11') {
                 let half = size / 2;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-                ctx.strokeRect(-half, -half, size, size);
-                ctx.beginPath();
-                ctx.moveTo(-half, -half);
-                ctx.lineTo(half, half);
-                ctx.moveTo(half, -half);
-                ctx.lineTo(-half, half);
-                ctx.stroke();
+                targetCtx.strokeStyle = '#000000';
+                targetCtx.lineWidth = Math.max(2.5, targetCanvas.width / 500);
+                targetCtx.strokeRect(-half, -half, size, size);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-half, -half);
+                targetCtx.lineTo(half, half);
+                targetCtx.moveTo(half, -half);
+                targetCtx.lineTo(-half, half);
+                targetCtx.stroke();
 
-                ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-                ctx.strokeRect(-half, -half, size, size);
-                ctx.beginPath();
-                ctx.moveTo(-half, -half);
-                ctx.lineTo(half, half);
-                ctx.moveTo(half, -half);
-                ctx.lineTo(-half, half);
-                ctx.stroke();
+                targetCtx.strokeStyle = color;
+                targetCtx.lineWidth = Math.max(1.0, targetCanvas.width / 800);
+                targetCtx.strokeRect(-half, -half, size, size);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-half, -half);
+                targetCtx.lineTo(half, half);
+                targetCtx.moveTo(half, -half);
+                targetCtx.lineTo(-half, half);
+                targetCtx.stroke();
             } else if (type === 'CARD') {
                 let cardW = size;
                 let cardH = size * (54 / 85);
                 let radius = cardH * 0.15;
                 
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
-                ctx.beginPath();
-                ctx.moveTo(-cardW / 2, 0);
-                ctx.lineTo(cardW / 2, 0);
-                ctx.moveTo(0, -cardH / 2);
-                ctx.lineTo(0, cardH / 2);
-                ctx.stroke();
+                targetCtx.strokeStyle = '#000000';
+                targetCtx.lineWidth = Math.max(2.5, targetCanvas.width / 500);
+                strokeRoundedRectCustom(-cardW / 2, -cardH / 2, cardW, cardH, radius, targetCtx);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-cardW / 2, 0);
+                targetCtx.lineTo(cardW / 2, 0);
+                targetCtx.moveTo(0, -cardH / 2);
+                targetCtx.lineTo(0, cardH / 2);
+                targetCtx.stroke();
 
-                ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
-                ctx.beginPath();
-                ctx.moveTo(-cardW / 2, 0);
-                ctx.lineTo(cardW / 2, 0);
-                ctx.moveTo(0, -cardH / 2);
-                ctx.lineTo(0, cardH / 2);
-                ctx.stroke();
+                targetCtx.strokeStyle = color;
+                targetCtx.lineWidth = Math.max(1.0, targetCanvas.width / 800);
+                strokeRoundedRectCustom(-cardW / 2, -cardH / 2, cardW, cardH, radius, targetCtx);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-cardW / 2, 0);
+                targetCtx.lineTo(cardW / 2, 0);
+                targetCtx.moveTo(0, -cardH / 2);
+                targetCtx.lineTo(0, cardH / 2);
+                targetCtx.stroke();
 
-                ctx.fillStyle = color;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
+                targetCtx.fillStyle = color;
+                targetCtx.strokeStyle = '#000000';
+                targetCtx.lineWidth = 1;
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, 2.5, 0, Math.PI * 2);
+                targetCtx.fill();
+                targetCtx.stroke();
             } else {
                 let radius = size / 2;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-                ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
-                ctx.stroke();
-                ctx.strokeStyle = color;
-                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-                ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                ctx.moveTo(-radius, 0);
-                ctx.lineTo(radius, 0);
-                ctx.stroke();
+                targetCtx.strokeStyle = '#000000';
+                targetCtx.lineWidth = Math.max(2.5, targetCanvas.width / 500);
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius, 0, Math.PI * 2);
+                targetCtx.moveTo(-radius, 0);
+                targetCtx.lineTo(radius, 0);
+                targetCtx.stroke();
+                targetCtx.strokeStyle = color;
+                targetCtx.lineWidth = Math.max(1.0, targetCanvas.width / 800);
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius, 0, Math.PI * 2);
+                targetCtx.moveTo(-radius, 0);
+                targetCtx.lineTo(radius, 0);
+                targetCtx.stroke();
             }
-            ctx.restore();
+            targetCtx.restore();
         }
 
-        function strokeRoundedRect(x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-            ctx.stroke();
+        function strokeRoundedRectCustom(x, y, width, height, radius, targetCtx) {
+            targetCtx.beginPath();
+            targetCtx.moveTo(x + radius, y);
+            targetCtx.lineTo(x + width - radius, y);
+            targetCtx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            targetCtx.lineTo(x + width, y + height - radius);
+            targetCtx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            targetCtx.lineTo(x + radius, y + height);
+            targetCtx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            targetCtx.lineTo(x, y + radius);
+            targetCtx.quadraticCurveTo(x, y, x + radius, y);
+            targetCtx.closePath();
+            targetCtx.stroke();
         }
 
-        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate((angleDeg * Math.PI) / 180);
+        function drawCornerMarkerCustom(x, y, size, angleDeg, color, cornerIdx, targetCtx, targetCanvas) {
+            targetCtx.save();
+            targetCtx.translate(x, y);
+            targetCtx.rotate((angleDeg * Math.PI) / 180);
             let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
             let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
-            ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
+            targetCtx.strokeStyle = '#000000';
+            targetCtx.lineWidth = Math.max(2.5, targetCanvas.width / 500);
+            targetCtx.beginPath();
+            targetCtx.moveTo(dirX * size, 0);
+            targetCtx.lineTo(0, 0);
+            targetCtx.lineTo(0, dirY * size);
+            targetCtx.stroke();
 
-            ctx.strokeStyle = color;
-            ctx.fillStyle = color;
-            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
-            ctx.beginPath();
-            ctx.moveTo(dirX * size, 0);
-            ctx.lineTo(0, 0);
-            ctx.lineTo(0, dirY * size);
-            ctx.stroke();
+            targetCtx.strokeStyle = color;
+            targetCtx.fillStyle = color;
+            targetCtx.lineWidth = Math.max(1.0, targetCanvas.width / 800);
+            targetCtx.beginPath();
+            targetCtx.moveTo(dirX * size, 0);
+            targetCtx.lineTo(0, 0);
+            targetCtx.lineTo(0, dirY * size);
+            targetCtx.stroke();
 
-            ctx.beginPath();
-            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
+            targetCtx.beginPath();
+            targetCtx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.stroke();
+            targetCtx.restore();
         }
 
         window.askValidateStep = function() {
@@ -2362,7 +2366,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.121) avec PBAR (Dernier élément) !";
+            statusText.innerText = "✅ Calage expert terminé (v.122) avec PBAR (Dernier élément) !";
             exportButtonsContainer.style.display = 'flex';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2428,11 +2432,11 @@
                     sustainWidth = canvas.width * 0.08;
                     zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 } else {
-                    step = 12; // Fin directe si pas de bloc treml
+                    step = 12;
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.121) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.122) !";
                     exportButtonsContainer.style.display = 'flex';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
@@ -2586,16 +2590,21 @@
             }
         }
 
-        // Fonctions d'exportations V.121
+        // Fonctions d'exportations V.122 corrigées
         function exportTracedImage() {
             if (!currentImg) return;
-            redrawCanvas(true);
-            const dataURL = canvas.toDataURL('image/png');
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = canvas.width;
+            exportCanvas.height = canvas.height;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            renderSceneToContext(exportCtx, exportCanvas, true, 1.0, 0, 0, tempX, tempY);
+
+            const dataURL = exportCanvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V121_Traced.png';
+            link.download = 'Acuitix_V122_Traced.png';
             link.href = dataURL;
             link.click();
-            redrawCanvas(false);
         }
 
         function exportOriginalImage() {
@@ -2613,14 +2622,14 @@
 
             const dataURL = tempCanvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V121_Original.png';
+            link.download = 'Acuitix_V122_Original.png';
             link.href = dataURL;
             link.click();
         }
 
         function exportJSONData() {
             const exportData = {
-                version: "Acuitix V.121",
+                version: "Acuitix V.122",
                 timestamp: new Date().toISOString(),
                 image: {
                     width: canvas.width,
@@ -2664,7 +2673,7 @@
             const jsonStr = JSON.stringify(exportData, null, 4);
             const blob = new Blob([jsonStr], { type: 'text/plain;charset=utf-8' });
             const link = document.createElement('a');
-            link.download = 'Acuitix_V121_Coordinates.txt';
+            link.download = 'Acuitix_V122_Coordinates.txt';
             link.href = URL.createObjectURL(blob);
             link.click();
             URL.revokeObjectURL(link.href);
