@@ -1252,6 +1252,8 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
+            pbavX = 0;
+            pbarX = 0;
             step = 1;
         }
 
@@ -1427,6 +1429,8 @@
                 tempSize = defaultSize;
                 hasTremlBlock = false;
                 springs = [];
+                pbavX = 0;
+                pbarX = 0;
 
                 goToPreCapture();
             };
@@ -1465,6 +1469,8 @@
                     tempSize = defaultSize;
                     hasTremlBlock = false;
                     springs = [];
+                    pbavX = 0;
+                    pbarX = 0;
                     welcomePanel.style.display = 'none';
                     goToPreCapture();
                 };
@@ -1645,6 +1651,8 @@
             holes = [];
             hasTremlBlock = false;
             springs = [];
+            pbavX = 0;
+            pbarX = 0;
             step = 1;
         }
 
@@ -1976,130 +1984,171 @@
                 ctx.stroke();
                 ctx.restore();
 
-                for (let h of holes) {
-                    ctx.save();
-                    ctx.strokeStyle = elementColor;
-                    ctx.fillStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 700);
-                    ctx.beginPath();
-                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
-                    ctx.stroke();
-                    dessinerCroixCentre(h.x, h.y, elementColor);
-                    ctx.restore();
-                }
-
                 if (!isForFinalExport && step === 7) {
                     ctx.save();
                     ctx.strokeStyle = elementColor;
-                    ctx.fillStyle = elementColor;
-                    ctx.lineWidth = Math.max(1.5, refW / 700);
+                    ctx.lineWidth = Math.max(1.5, refW / 600);
                     ctx.beginPath();
                     ctx.arc(tempX, tempY, tempSize, 0, Math.PI * 2);
                     ctx.stroke();
-                    dessinerCroixCentre(tempX, tempY, elementColor);
+
+                    let len = tempSize * 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(tempX - len, tempY);
+                    ctx.lineTo(tempX + len, tempY);
+                    ctx.moveTo(tempX, tempY - len);
+                    ctx.lineTo(tempX, tempY + len);
+                    ctx.stroke();
                     ctx.restore();
                 }
+
+                holes.forEach((h, index) => {
+                    ctx.save();
+                    ctx.strokeStyle = elementColor;
+                    ctx.lineWidth = Math.max(1.5, refW / 600);
+                    ctx.beginPath();
+                    ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    let len = h.radius * 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(h.x - len, h.y);
+                    ctx.lineTo(h.x + len, h.y);
+                    ctx.moveTo(h.x, h.y - len);
+                    ctx.lineTo(h.x, h.y + len);
+                    ctx.stroke();
+
+                    ctx.fillStyle = elementColor;
+                    ctx.font = 'bold ' + Math.max(10, refW / 35) + 'px Arial';
+                    ctx.fillText('P' + (index + 1), h.x + h.radius + 4, h.y - h.radius - 4);
+                    ctx.restore();
+                });
             }
 
             if (step >= 8 || isForFinalExport) {
-                let sx = (!isForFinalExport && step === 8) ? tempX : sustainX;
-                let sy = (!isForFinalExport && step === 8) ? tempY : sustainY;
-                let sl = (!isForFinalExport && step === 8) ? tempSize : sustainLength;
-                let sw = (!isForFinalExport && step === 8) ? tempAngle : sustainWidth;
-                let sang = (!isForFinalExport && step === 8) ? 0 : sustainAngle;
-                drawSustainRectangle(sx, sy, sl, sw, sang, elementColor);
+                if (!isForFinalExport && step === 8) {
+                    drawSustainRectangle(tempX, tempY, sustainLength, sustainWidth, tempAngle, elementColor);
+                } else if (hasTremlBlock) {
+                    drawSustainRectangle(sustainX, sustainY, sustainLength, sustainWidth, sustainAngle, elementColor);
+                }
             }
 
             if (step >= 9 || isForFinalExport) {
-                for (let spr of springs) {
-                    drawSpring(spr.p1, spr.p2, spr.width, elementColor);
-                }
-                if (!isForFinalExport && step === 9 && springPhase > 0) {
+                springs.forEach(s => {
+                    drawSpring(s.p1, s.p2, s.width, elementColor);
+                });
+                if (!isForFinalExport && step === 9) {
                     if (springPhase === 1 && currentSpring.p1) {
+                        ctx.save();
+                        ctx.strokeStyle = elementColor;
+                        ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+                        ctx.setLineDash([4, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(currentSpring.p1.x, currentSpring.p1.y);
+                        ctx.lineTo(tempX, tempY);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.restore();
                         dessinerCroixCentre(currentSpring.p1.x, currentSpring.p1.y, elementColor);
+                        dessinerCroixCentre(tempX, tempY, elementColor);
+                    } else if (springPhase === 0) {
+                        dessinerCroixCentre(tempX, tempY, elementColor);
                     } else if (springPhase === 2 && currentSpring.p1 && currentSpring.p2) {
                         drawSpring(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
                     }
                 }
             }
 
-            // Étape PBAV (3 cercles)
+            // Étape PBAV
             if (step >= 10 || isForFinalExport) {
-                let curPbavX = (!isForFinalExport && step === 10) ? pbavX : (window._savedPbavX !== undefined ? window._savedPbavX : sustainX);
-                let curTop = pbavOffsetTop;
-                let curBot = pbavOffsetBottom;
-                let diam = pbavCircleDiameter || (canvas.width * 0.015);
-                let yCenter = sustainY;
-                let yTop = yCenter - curTop;
-                let yBot = yCenter + curBot;
+                let mmSize = getStandardMm(standard1Type);
+                let pxPerMm = box1.size / mmSize;
+                pbavCircleDiameter = 4 * pxPerMm; 
+                let rCircle = pbavCircleDiameter / 2;
+
+                let currentPbavX = pbavX; 
+                let centerY = sustainY; 
+
+                let cTop = { x: currentPbavX, y: centerY - pbavOffsetTop };
+                let cMid = { x: currentPbavX, y: centerY };
+                let cBot = { x: currentPbavX, y: centerY + pbavOffsetBottom };
 
                 ctx.save();
                 ctx.strokeStyle = elementColor;
-                ctx.fillStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 700);
+                ctx.lineWidth = Math.max(1.5, refW / 600);
 
-                // Cercle du haut
+                ctx.setLineDash([2, 2]);
                 ctx.beginPath();
-                ctx.arc(curPbavX, yTop, diam, 0, Math.PI * 2);
+                ctx.moveTo(cTop.x, cTop.y);
+                ctx.lineTo(cBot.x, cBot.y);
                 ctx.stroke();
-                dessinerCroixCentre(curPbavX, yTop, elementColor);
+                ctx.setLineDash([]);
 
-                // Cercle du milieu
-                ctx.beginPath();
-                ctx.arc(curPbavX, yCenter, diam, 0, Math.PI * 2);
-                ctx.stroke();
-                dessinerCroixCentre(curPbavX, yCenter, elementColor);
-
-                // Cercle du bas
-                ctx.beginPath();
-                ctx.arc(curPbavX, yBot, diam, 0, Math.PI * 2);
-                ctx.stroke();
-                dessinerCroixCentre(curPbavX, yBot, elementColor);
+                [cTop, cMid, cBot].forEach(c => {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
+                    ctx.stroke();
+                    dessinerCroixCentre(c.x, c.y, elementColor);
+                });
 
                 ctx.restore();
             }
 
-            // Étape PBAR (3 cercles avec écart fixe de 10.5 mm convertis en pixels)
+            // Étape PBAR (3 cercles de ~4mm de diam, écart fixe de 10.5 mm, alignés verticalement, cercle milieu aligné sur sustainX, déplacement X global)
             if (step >= 11 || isForFinalExport) {
-                let curPbarX = (!isForFinalExport && step === 11) ? pbarX : (window._savedPbarX !== undefined ? window._savedPbarX : sustainX);
-                let diamPbar = pbarCircleDiameter || (canvas.width * 0.015);
-                let yCenter = sustainY;
+                let mmSize = getStandardMm(standard1Type);
+                let pxPerMm = box1.size / mmSize;
+                pbarCircleDiameter = 4 * pxPerMm; // ~4 mm convertis en px
+                let rCircle = pbarCircleDiameter / 2;
+                let spacingPx = 10.5 * pxPerMm; // Écart standard de 10.5 mm verrouillé
 
-                // Calcul du ratio mm -> px à partir de l'étalon 1
-                let mm1 = getStandardMm(standard1Type);
-                let px1 = box1.size; 
-                let ratioPxPerMm = (standard1Type === '11') ? (px1 / 10) : (px1 / mm1);
-                let spacingPx = 10.5 * ratioPxPerMm;
+                let currentPbarX = pbarX;
+                let centerY = sustainY; // Axe Y fixe centré sur le bloc sustain
 
-                let yTop = yCenter - spacingPx;
-                let yBot = yCenter + spacingPx;
+                let pbarTop = { x: currentPbarX, y: centerY - spacingPx };
+                let pbarMid = { x: currentPbarX, y: centerY };
+                let pbarBot = { x: currentPbarX, y: centerY + spacingPx };
 
                 ctx.save();
                 ctx.strokeStyle = elementColor;
-                ctx.fillStyle = elementColor;
-                ctx.lineWidth = Math.max(1.5, refW / 700);
+                ctx.lineWidth = Math.max(1.5, refW / 600);
 
-                // Cercle du haut
+                ctx.setLineDash([2, 2]);
                 ctx.beginPath();
-                ctx.arc(curPbarX, yTop, diamPbar, 0, Math.PI * 2);
+                ctx.moveTo(pbarTop.x, pbarTop.y);
+                ctx.lineTo(pbarBot.x, pbarBot.y);
                 ctx.stroke();
-                dessinerCroixCentre(curPbarX, yTop, elementColor);
+                ctx.setLineDash([]);
 
-                // Cercle du milieu
-                ctx.beginPath();
-                ctx.arc(curPbarX, yCenter, diamPbar, 0, Math.PI * 2);
-                ctx.stroke();
-                dessinerCroixCentre(curPbarX, yCenter, elementColor);
-
-                // Cercle du bas
-                ctx.beginPath();
-                ctx.arc(curPbarX, yBot, diamPbar, 0, Math.PI * 2);
-                ctx.stroke();
-                dessinerCroixCentre(curPbarX, yBot, elementColor);
+                [pbarTop, pbarMid, pbarBot].forEach(c => {
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, rCircle, 0, Math.PI * 2);
+                    ctx.stroke();
+                    dessinerCroixCentre(c.x, c.y, elementColor);
+                });
 
                 ctx.restore();
             }
 
+            ctx.globalAlpha = 1.0;
+            ctx.restore();
+        }
+
+        function dessinerCroixCentre(x, y, col = elementColor) {
+            ctx.save();
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 1;
+            let len = 4;
+            ctx.beginPath();
+            ctx.moveTo(x - len, y);
+            ctx.lineTo(x + len, y);
+            ctx.moveTo(x, y - len);
+            ctx.lineTo(x, y + len);
+            ctx.stroke();
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
             ctx.restore();
         }
 
@@ -2108,313 +2157,411 @@
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
-
             if (type === '11') {
-                ctx.strokeRect(-size / 2, -size / 2, size, size);
+                let half = size / 2;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+                ctx.strokeRect(-half, -half, size, size);
                 ctx.beginPath();
-                ctx.moveTo(-size / 2, -size / 2);
-                ctx.lineTo(size / 2, size / 2);
-                ctx.moveTo(size / 2, -size / 2);
-                ctx.lineTo(-size / 2, size / 2);
+                ctx.moveTo(-half, -half);
+                ctx.lineTo(half, half);
+                ctx.moveTo(half, -half);
+                ctx.lineTo(-half, half);
+                ctx.stroke();
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+                ctx.strokeRect(-half, -half, size, size);
+                ctx.beginPath();
+                ctx.moveTo(-half, -half);
+                ctx.lineTo(half, half);
+                ctx.moveTo(half, -half);
+                ctx.lineTo(-half, half);
                 ctx.stroke();
             } else if (type === 'CARD') {
-                let w = size;
-                let h = size * (54 / 85);
-                ctx.strokeRect(-w / 2, -h / 2, w, h);
+                let cardW = size;
+                let cardH = size * (54 / 85);
+                let radius = cardH * 0.15;
+                
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
+                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
                 ctx.beginPath();
-                ctx.moveTo(-w / 2, -h / 2);
-                ctx.lineTo(w / 2, h / 2);
-                ctx.moveTo(w / 2, -h / 2);
-                ctx.lineTo(-w / 2, h / 2);
+                ctx.moveTo(-cardW / 2, 0);
+                ctx.lineTo(cardW / 2, 0);
+                ctx.moveTo(0, -cardH / 2);
+                ctx.lineTo(0, cardH / 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+                strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, radius);
+                ctx.beginPath();
+                ctx.moveTo(-cardW / 2, 0);
+                ctx.lineTo(cardW / 2, 0);
+                ctx.moveTo(0, -cardH / 2);
+                ctx.lineTo(0, cardH / 2);
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.stroke();
             } else {
+                let radius = size / 2;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = Math.max(2.5, canvas.width / 500);
                 ctx.beginPath();
-                ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.moveTo(-radius, 0);
+                ctx.lineTo(radius, 0);
+                ctx.stroke();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = Math.max(1.0, canvas.width / 800);
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.moveTo(-radius, 0);
+                ctx.lineTo(radius, 0);
                 ctx.stroke();
             }
-
             ctx.restore();
         }
 
-        function drawCornerMarker(x, y, size, angleDeg, color, index) {
+        function strokeRoundedRect(x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawCornerMarker(x, y, size, angleDeg, color, cornerIdx) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate((angleDeg * Math.PI) / 180);
+            let dirX = (cornerIdx === 1 || cornerIdx === 2) ? -1 : 1;
+            let dirY = (cornerIdx === 2 || cornerIdx === 3) ? -1 : 1;
 
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1.5, canvas.width / 600);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = Math.max(2.5, canvas.width / 500);
             ctx.beginPath();
-            ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
             ctx.stroke();
 
+            ctx.strokeStyle = color;
             ctx.fillStyle = color;
-            ctx.font = `bold ${Math.max(10, canvas.width / 40)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText((index + 1).toString(), 0, 0);
-
-            ctx.restore();
-        }
-
-        function dessinerCroixCentre(x, y, color) {
-            ctx.save();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = Math.max(1, canvas.width / 800);
-            let len = Math.max(4, canvas.width / 150);
+            ctx.lineWidth = Math.max(1.0, canvas.width / 800);
             ctx.beginPath();
-            ctx.moveTo(x - len, y);
-            ctx.lineTo(x + len, y);
-            ctx.moveTo(x, y - len);
-            ctx.lineTo(x, y + len);
+            ctx.moveTo(dirX * size, 0);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(0, dirY * size);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
             ctx.stroke();
             ctx.restore();
         }
 
-        window.askPrevStep = function() {
-            triggerBackPrompt(() => {
-                prevStep();
-            });
+        window.askValidateStep = function() {
+            stopAction();
+            const stepNames = ["", "Étalon principal GAUCHE", "Étalon secondaire DROIT", "Coin Haut-Gauche", "Coin Haut-Droit", "Coin Bas-Droit", "Coin Bas-Gauche", "Perçages", "Positionnement bloc sustain", "Traçage des ressorts", "Étape PBAV", "Étape PBAR"];
+            let label = stepNames[step] || "cette étape";
+            if (step === 7 && holes.length === 0) {
+                if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
+            }
+            if (step === 7) {
+                showFinishMenu();
+            } else {
+                if (confirm("Confirmez-vous la validation pour : " + label + " ?")) {
+                    validateStep();
+                }
+            }
         }
 
-        function prevStep() {
-            if (step > 1) {
-                if (step === 8) {
-                    holes = [];
-                }
-                step--;
-                if (step === 1) {
-                    tempX = box1.x;
-                    tempY = box1.y;
-                    tempSize = box1.size;
-                    tempAngle = box1.angle;
-                } else if (step === 2) {
-                    tempX = box2.x;
-                    tempY = box2.y;
-                    tempSize = box2.size;
-                    tempAngle = box2.angle;
-                } else if (step >= 3 && step <= 6) {
-                    let idx = step - 3;
-                    tempX = corners[idx].x;
-                    tempY = corners[idx].y;
-                    tempSize = corners[idx].size;
-                    tempAngle = corners[idx].angle;
-                } else if (step === 7) {
+        window.showFinishMenu = function() {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        window.handleFinishChoice = function(choice) {
+            const modal = document.getElementById('finish-menu-modal');
+            if (modal) modal.style.display = 'none';
+            
+            if (choice === 'generate') {
+                hasTremlBlock = false;
+                validateStep();
+            } else if (choice === 'treml') {
+                step = 8;
+                hasTremlBlock = true;
+                if (corners && corners.length === 4) {
+                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                } else {
                     tempX = canvas.width * 0.5;
                     tempY = canvas.height * 0.5;
-                    tempSize = canvas.width * 0.035;
-                    tempAngle = 0;
-                } else if (step === 8) {
-                    tempX = sustainX;
-                    tempY = sustainY;
-                    tempSize = sustainLength;
-                    tempAngle = sustainWidth;
-                } else if (step === 9) {
-                    springPhase = springs.length > 0 ? 2 : 0;
-                } else if (step === 10) {
-                    pbavX = window._savedPbavX !== undefined ? window._savedPbavX : sustainX;
-                } else if (step === 11) {
-                    pbarX = window._savedPbarX !== undefined ? window._savedPbarX : sustainX;
                 }
+                tempAngle = 0;
+                sustainLength = canvas.width * 0.14;
+                sustainWidth = canvas.width * 0.08;
                 zoomLevel = 1.0;
                 manualPanX = 0;
                 manualPanY = 0;
                 updateUIState();
                 redrawCanvas();
-            } else if (step === 1) {
-                backToTutorialStep3();
+            } else if (choice === 'back') {
             }
-        }
-
-        window.askValidateStep = function() {
-            if (step === 1) {
-                box1.x = tempX;
-                box1.y = tempY;
-                box1.size = tempSize;
-                box1.angle = tempAngle;
-                step = 2;
-                tempX = canvas.width * 0.6;
-                tempY = canvas.height * 0.5;
-                tempSize = box1.size;
-                tempAngle = box1.angle;
-            } else if (step === 2) {
-                box2.x = tempX;
-                box2.y = tempY;
-                box2.size = tempSize;
-                box2.angle = tempAngle;
-                step = 3;
-                tempX = canvas.width * 0.3;
-                tempY = canvas.height * 0.3;
-                tempSize = canvas.width * 0.04;
-                tempAngle = 0;
-            } else if (step >= 3 && step <= 6) {
-                let idx = step - 3;
-                corners[idx].x = tempX;
-                corners[idx].y = tempY;
-                corners[idx].size = tempSize;
-                corners[idx].angle = tempAngle;
-                step++;
-                if (step <= 6) {
-                    tempX = canvas.width * (0.3 + (step - 3) * 0.1);
-                    tempY = canvas.height * 0.5;
-                } else {
-                    step = 7;
-                    tempX = canvas.width * 0.5;
-                    tempY = canvas.height * 0.5;
-                    tempSize = canvas.width * 0.02;
-                    tempAngle = 0;
-                }
-            } else if (step === 7) {
-                step = 8;
-                sustainLength = canvas.height * 0.25;
-                sustainWidth = canvas.width * 0.08;
-                tempX = canvas.width * 0.5;
-                tempY = canvas.height * 0.5;
-                tempSize = sustainLength;
-                tempAngle = sustainWidth;
-            } else if (step === 8) {
-                sustainX = tempX;
-                sustainY = tempY;
-                sustainLength = tempSize;
-                sustainWidth = tempAngle;
-                sustainAngle = 0;
-                step = 9;
-                springPhase = 0;
-                springs = [];
-                currentSpring = { p1: null, p2: null, width: Math.max(10, canvas.width * 0.02) };
-            } else if (step === 9) {
-                step = 10;
-                pbavX = sustainX;
-                pbavCircleDiameter = canvas.width * 0.015;
-            } else if (step === 10) {
-                window._savedPbavX = pbavX;
-                step = 11;
-                pbarX = sustainX;
-                pbarCircleDiameter = canvas.width * 0.015;
-            } else if (step === 11) {
-                window._savedPbarX = pbarX;
-                step = 12;
-                finishProcess();
-                return;
-            }
-            zoomLevel = 1.0;
-            manualPanX = 0;
-            manualPanY = 0;
-            updateUIState();
-            redrawCanvas();
-        }
-
-        function updateUIState() {
-            const scaleStd = document.getElementById('scale-controls-standard');
-            const scaleSus = document.getElementById('scale-controls-sustain');
-            const scaleSpr = document.getElementById('scale-controls-spring');
-            const scalePbav = document.getElementById('scale-controls-pbav');
-            const scalePbar = document.getElementById('scale-controls-pbar');
-            const angleRow = document.getElementById('angle-controls-row');
-
-            scaleStd.style.display = 'none';
-            scaleSus.style.display = 'none';
-            scaleSpr.style.display = 'none';
-            scalePbav.style.display = 'none';
-            scalePbar.style.display = 'none';
-            angleRow.style.display = 'flex';
-            holeActionPanel.style.display = 'none';
-
-            if (step === 1) {
-                statusText.innerText = `Étape 1 / 6 : Étalon principal GAUCHE (${standard1Type})`;
-            } else if (step === 2) {
-                statusText.innerText = `Étape 2 / 6 : Étalon secondaire DROIT (${standard2Type})`;
-            } else if (step >= 3 && step <= 6) {
-                let cornerNum = step - 2;
-                statusText.innerText = `Étape ${2 + cornerNum} / 6 : Emplacement Repère coin ${cornerNum} / 4`;
-            } else if (step === 7) {
-                statusText.innerText = `Étape 7 : Perçages de la plaque`;
-                angleRow.style.display = 'none';
-                holeActionPanel.style.display = 'block';
-            } else if (step === 8) {
-                statusText.innerText = `Étape 8 : Tracé du sustain / micro`;
-                scaleSus.style.display = 'flex';
-            } else if (step === 9) {
-                statusText.innerText = `Étape 9 : Tracé des ressorts du vibrato`;
-                scaleSpr.style.display = 'flex';
-                angleRow.style.display = 'none';
-            } else if (step === 10) {
-                statusText.innerText = `Étape 10 : Étape PBAV (Blocage vis AV)`;
-                scalePbav.style.display = 'flex';
-                angleRow.style.display = 'none';
-            } else if (step === 11) {
-                statusText.innerText = `Étape 11 : Étape PBAR (Blocage vis AR)`;
-                scalePbar.style.display = 'flex';
-                angleRow.style.display = 'none';
-            }
-        }
-
-        canvas.addEventListener('pointerdown', (e) => {
-            if (step === 9) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                let clientClickX = (e.clientX - rect.left) * scaleX;
-                let clientClickY = (e.clientY - rect.top) * scaleY;
-                let imgX, imgY;
-                if (zoomLevel !== 1.0) {
-                    imgX = (clientClickX - rect.width / 2) / zoomLevel + tempX - manualPanX;
-                    imgY = (clientClickY - rect.height / 2) / zoomLevel + tempY - manualPanY;
-                } else {
-                    imgX = clientClickX;
-                    imgY = clientClickY;
-                }
-
-                if (springPhase === 0) {
-                    currentSpring.p1 = { x: imgX, y: imgY };
-                    springPhase = 1;
-                } else if (springPhase === 1) {
-                    currentSpring.p2 = { x: imgX, y: imgY };
-                    springPhase = 2;
-                    openSpringFinishModal();
-                }
-                redrawCanvas();
-            }
-        });
-
-        function openSpringFinishModal() {
-            const modal = document.getElementById('spring-finish-modal');
-            const countDisplay = document.getElementById('spring-count-display');
-            if (countDisplay) countDisplay.innerText = springs.length + 1;
-            if (modal) modal.style.display = 'flex';
         }
 
         window.handleSpringChoice = function(choice) {
             const modal = document.getElementById('spring-finish-modal');
             if (modal) modal.style.display = 'none';
-
             if (choice === 'add') {
-                springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                currentSpring = { p1: null, p2: null, width: currentSpring.width };
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
                 springPhase = 0;
+                tempX = canvas.width * 0.4;
+                tempY = canvas.height * 0.5;
+                updateUIState();
                 redrawCanvas();
-            } else if (choice === 'finish') {
-                springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                window.askValidateStep();
+            } else {
+                step = 10;
+                // On initialise pbavX sur sustainX uniquement si elle n'a pas déjà été positionnée
+                if (!pbavX) {
+                    pbavX = sustainX; 
+                }
+                pbavOffsetTop = 30;
+                pbavOffsetBottom = 30;
+                updateUIState();
+                statusText.innerText = "Étape PBAV : 3 cercles liés";
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
             }
         }
 
-        function finishProcess() {
-            generalToolsContainer.style.display = 'none';
+        function finishPbarTracing() {
+            step = 12;
             adjustPanel.style.display = 'none';
-            statusText.innerText = "Traitement terminé avec succès !";
-            redrawCanvas(true);
+            generalToolsContainer.style.display = 'none';
+            sideColorDrawer.style.display = 'none';
+            statusText.innerText = "✅ Calage expert terminé (v.118) avec PBAR (Dernier élément) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
-            sideColorDrawer.style.display = 'none';
-
-            setTimeout(() => {
-                const dataURL = canvas.toDataURL('image/png');
-                btnDownload.href = dataURL;
-                btnDownload.download = 'Acuitix_Resultat_Definitif.png';
-            }, 200);
+            redrawCanvas(true);
         }
+
+        window.askPrevStep = function() {
+            stopAction();
+            triggerBackPrompt(() => {
+                if (step === 1) {
+                    generalToolsContainer.style.display = 'none';
+                    adjustPanel.style.display = 'none';
+                    tutorialPanel3.style.display = 'block';
+                    statusText.innerText = "Consigne : Alignement de l'échelle";
+                    redrawCanvas();
+                    return;
+                }
+                prevStep();
+            });
+        }
+
+        window.validateStep = function() {
+            stopAction();
+            if (step === 1) {
+                box1.x = tempX; box1.y = tempY; box1.angle = tempAngle; box1.size = tempSize;
+                step = 2;
+                tempX = box1.x + (canvas.width * 0.15);
+                tempY = box1.y;
+                tempAngle = box1.angle;
+                tempSize = box1.size;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 2) {
+                box2.x = tempX; box2.y = tempY; box2.angle = tempAngle; box2.size = tempSize;
+                step = 3;
+                tempX = canvas.width * 0.3;
+                tempY = canvas.height * 0.3;
+                tempAngle = 0;
+                tempSize = canvas.width * 0.04;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step >= 3 && step <= 5) {
+                corners[step - 3].x = tempX;
+                corners[step - 3].y = tempY;
+                corners[step - 3].angle = tempAngle;
+                corners[step - 3].size = tempSize;
+                step++;
+                if (step === 4) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.3; }
+                else if (step === 5) { tempX = canvas.width * 0.7; tempY = canvas.height * 0.7; }
+                else if (step === 6) { tempX = canvas.width * 0.3; tempY = canvas.height * 0.7; }
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 6) {
+                corners[3].x = tempX; corners[3].y = tempY; corners[3].angle = tempAngle; corners[3].size = tempSize;
+                step = 7;
+                tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                tempSize = canvas.width * 0.02;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 7) {
+                if (hasTremlBlock) {
+                    step = 8;
+                    tempX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+                    tempY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+                    tempAngle = 0;
+                    sustainLength = canvas.width * 0.14;
+                    sustainWidth = canvas.width * 0.08;
+                    zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+                } else {
+                    step = 12; // Fin directe si pas de bloc treml
+                    adjustPanel.style.display = 'none';
+                    generalToolsContainer.style.display = 'none';
+                    sideColorDrawer.style.display = 'none';
+                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    btnDownload.style.display = 'block';
+                    btnRetry.style.display = 'block';
+                    redrawCanvas(true);
+                    return;
+                }
+            } else if (step === 8) {
+                sustainX = tempX;
+                sustainY = tempY;
+                sustainAngle = tempAngle;
+                step = 9;
+                springs = [];
+                springPhase = 0;
+                currentSpring = { p1: null, p2: null, width: canvas.width * 0.03 };
+                tempX = canvas.width * 0.4;
+                tempY = canvas.height * 0.5;
+                zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
+            } else if (step === 9) {
+                if (springPhase === 0) {
+                    currentSpring.p1 = { x: tempX, y: tempY };
+                    springPhase = 1;
+                    tempX = canvas.width * 0.6;
+                    tempY = canvas.height * 0.5;
+                } else if (springPhase === 1) {
+                    currentSpring.p2 = { x: tempX, y: tempY };
+                    springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
+                    springPhase = 2;
+                    document.getElementById('spring-count-display').innerText = springs.length;
+                    const modal = document.getElementById('spring-finish-modal');
+                    if (modal) modal.style.display = 'flex';
+                }
+            } else if (step === 10) {
+                // Passage de l'étape PBAV vers la nouvelle étape PBAR
+                step = 11;
+                // On conserve pbarX si déjà initialisé/déplacé, sinon on l'aligne sur pbavX ou sustainX
+                if (!pbarX) {
+                    pbarX = pbavX || sustainX;
+                }
+                updateUIState();
+                statusText.innerText = "Étape PBAR : 3 cercles alignés (Dernier élément)";
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
+                return;
+            } else if (step === 11) {
+                // Validation de l'étape PBAR (dernier élément)
+                finishPbarTracing();
+                return;
+            }
+            updateUIState();
+            redrawCanvas();
+        }
+
+        function prevStep() {
+            if (step > 1) {
+                if (step === 8 && !hasTremlBlock) {
+                    step = 7;
+                } else if (step === 10) {
+                    step = 9;
+                } else if (step === 11) {
+                    step = 10; // Retour de PBAR à PBAV
+                } else {
+                    step--;
+                }
+                updateUIState();
+                zoomLevel = 1.0;
+                manualPanX = 0;
+                manualPanY = 0;
+                redrawCanvas();
+            }
+        }
+
+        function updateUIState() {
+            const scaleStandard = document.getElementById('scale-controls-standard');
+            const scaleSustain = document.getElementById('scale-controls-sustain');
+            const scaleSpring = document.getElementById('scale-controls-spring');
+            const scalePbav = document.getElementById('scale-controls-pbav');
+            const scalePbar = document.getElementById('scale-controls-pbar');
+            const angleRow = document.getElementById('angle-controls-row');
+            const dpadBox = document.getElementById('dpad-container-box');
+
+            if (scaleStandard) scaleStandard.style.display = 'none';
+            if (scaleSustain) scaleSustain.style.display = 'none';
+            if (scaleSpring) scaleSpring.style.display = 'none';
+            if (scalePbav) scalePbav.style.display = 'none';
+            if (scalePbar) scalePbar.style.display = 'none';
+            if (angleRow) angleRow.style.display = 'flex';
+            if (holeActionPanel) holeActionPanel.style.display = 'none';
+            if (dpadBox) dpadBox.style.display = 'flex';
+
+            if (step === 1) {
+                statusText.innerText = "Étape 1 / 6 : Étalon principal GAUCHE (" + standard1Type + ")";
+                if (scaleStandard) scaleStandard.style.display = 'flex';
+            } else if (step === 2) {
+                statusText.innerText = "Étape 2 / 6 : Étalon secondaire DROIT (" + standard2Type + ")";
+                if (scaleStandard) scaleStandard.style.display = 'flex';
+            } else if (step >= 3 && step <= 6) {
+                const names = ["Haut-Gauche", "Haut-Droit", "Bas-Droit", "Bas-Gauche"];
+                statusText.innerText = "Étape " + (step) + " / 6 : Coin " + names[step - 3];
+                if (scaleStandard) scaleStandard.style.display = 'flex';
+            } else if (step === 7) {
+                statusText.innerText = "Étape 5 / 6 : Perçages (Optionnel)";
+                if (holeActionPanel) holeActionPanel.style.display = 'block';
+                if (scaleStandard) scaleStandard.style.display = 'flex';
+            } else if (step === 8) {
+                statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
+                if (scaleSustain) scaleSustain.style.display = 'flex';
+            } else if (step === 9) {
+                statusText.innerText = "Étape 9 : Traçage des ressorts";
+                if (scaleSpring) scaleSpring.style.display = 'flex';
+                if (springPhase === 2) {
+                    if (angleRow) angleRow.style.display = 'none';
+                }
+            } else if (step === 10) {
+                statusText.innerText = "Étape PBAV : 3 cercles liés";
+                if (scalePbav) scalePbav.style.display = 'flex';
+                if (angleRow) angleRow.style.display = 'none';
+            } else if (step === 11) {
+                statusText.innerText = "Étape PBAR : 3 cercles alignés (Dernier élément)";
+                if (scalePbar) scalePbar.style.display = 'flex';
+                if (angleRow) angleRow.style.display = 'none';
+            }
+        }
+
+        btnDownload.addEventListener('click', function() {
+            redrawCanvas(true);
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'Acuitix_V118_Final_PBAR.png';
+            link.href = dataURL;
+            link.click();
+            redrawCanvas(false);
+        });
     </script>
 </body>
 </html>
