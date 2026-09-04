@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acuitix V.118 - Assistant CAO Compact</title>
+    <title>Acuitix V.119 - Assistant CAO Compact</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -482,14 +482,14 @@
     <div id="spring-finish-modal">
         <div class="recenter-modal-content">
             <p style="color: #ffc107; font-weight: bold; font-size: 0.9rem; margin-bottom: 12px;">Ressorts tracés (<span id="spring-count-display">2</span>). Voulez-vous en ajouter un autre ou terminer ?</p>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn" style="background: #28a745; margin-top: 0;" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
+            <div style="display: flex; flex-direction: column; gap: 8px;" id="spring-modal-buttons">
+                <button class="btn" style="background: #28a745; margin-top: 0;" id="btn-add-another-spring" onclick="handleSpringChoice('add')">Ajouter un autre ressort</button>
                 <button class="btn btn-info" style="margin-top: 0;" onclick="handleSpringChoice('finish')">Terminer le calage</button>
             </div>
         </div>
     </div>
 
-    <h1>Acuitix V.118 - Assistant CAO</h1>
+    <h1>Acuitix V.119 - Assistant CAO</h1>
     <div id="status-text">Étalonnage</div>
 
     <div id="live-back-btn" onclick="stopLiveCameraAndReset()" style="display:none; position:fixed; top:15px; left:15px; width:45px; height:45px; border-radius:50%; background:rgba(0,0,0,0.6); border:2px solid #ffc107; color:#fff; align-items:center; justify-content:center; font-size:1.2rem; z-index:100001; cursor:pointer;">↩</div>
@@ -1505,6 +1505,14 @@
                         xyAxisY.x = imgX;
                         xyAxisY.y = imgY;
                     }
+                } else if (step === 9) {
+                    if (springPhase === 0) {
+                        currentSpring.p1 = { x: imgX, y: imgY };
+                        springPhase = 1;
+                    } else if (springPhase === 1) {
+                        currentSpring.p2 = { x: imgX, y: imgY };
+                        springPhase = 2;
+                    }
                 } else if (step === 10) {
                     pbavX = imgX;
                 } else if (step === 11) {
@@ -1834,7 +1842,7 @@
             ctx.restore();
         }
 
-        function drawSpring(p1, p2, width, color) {
+        function drawSpringRect(p1, p2, width, color) {
             ctx.save();
             let cx = (p1.x + p2.x) / 2;
             let cy = (p1.y + p2.y) / 2;
@@ -2035,10 +2043,12 @@
 
             if (step >= 9 || isForFinalExport) {
                 springs.forEach(s => {
-                    drawSpring(s.p1, s.p2, s.width, elementColor);
+                    drawSpringRect(s.p1, s.p2, s.width, elementColor);
                 });
                 if (!isForFinalExport && step === 9) {
-                    if (springPhase === 1 && currentSpring.p1) {
+                    if (springPhase === 0) {
+                        dessinerCroixCentre(tempX, tempY, elementColor);
+                    } else if (springPhase === 1 && currentSpring.p1) {
                         ctx.save();
                         ctx.strokeStyle = elementColor;
                         ctx.lineWidth = Math.max(1.5, canvas.width / 600);
@@ -2051,10 +2061,8 @@
                         ctx.restore();
                         dessinerCroixCentre(currentSpring.p1.x, currentSpring.p1.y, elementColor);
                         dessinerCroixCentre(tempX, tempY, elementColor);
-                    } else if (springPhase === 0) {
-                        dessinerCroixCentre(tempX, tempY, elementColor);
                     } else if (springPhase === 2 && currentSpring.p1 && currentSpring.p2) {
-                        drawSpring(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
+                        drawSpringRect(currentSpring.p1, currentSpring.p2, currentSpring.width, elementColor);
                     }
                 }
             }
@@ -2094,16 +2102,16 @@
                 ctx.restore();
             }
 
-            // Étape PBAR (3 cercles de ~4mm de diam, écart fixe de 10.5 mm, alignés verticalement, cercle milieu aligné sur sustainX, déplacement X global)
+            // Étape PBAR
             if (step >= 11 || isForFinalExport) {
                 let mmSize = getStandardMm(standard1Type);
                 let pxPerMm = box1.size / mmSize;
-                pbarCircleDiameter = 4 * pxPerMm; // ~4 mm convertis en px
+                pbarCircleDiameter = 4 * pxPerMm; 
                 let rCircle = pbarCircleDiameter / 2;
-                let spacingPx = 10.5 * pxPerMm; // Écart standard de 10.5 mm verrouillé
+                let spacingPx = 10.5 * pxPerMm; 
 
                 let currentPbarX = pbarX;
-                let centerY = sustainY; // Axe Y fixe centré sur le bloc sustain
+                let centerY = sustainY; 
 
                 let pbarTop = { x: currentPbarX, y: centerY - spacingPx };
                 let pbarMid = { x: currentPbarX, y: centerY };
@@ -2283,6 +2291,10 @@
             if (step === 7 && holes.length === 0) {
                 if (!confirm("Aucun perçage n'a été ajouté. Continuer sans perçage ?")) return;
             }
+            if (step === 9 && springPhase < 2) {
+                alert("Veuillez placer les 2 points du ressort avant de valider.");
+                return;
+            }
             if (step === 7) {
                 showFinishMenu();
             } else {
@@ -2338,7 +2350,6 @@
                 redrawCanvas();
             } else {
                 step = 10;
-                // On initialise pbavX sur sustainX uniquement si elle n'a pas déjà été positionnée
                 if (!pbavX) {
                     pbavX = sustainX; 
                 }
@@ -2358,7 +2369,7 @@
             adjustPanel.style.display = 'none';
             generalToolsContainer.style.display = 'none';
             sideColorDrawer.style.display = 'none';
-            statusText.innerText = "✅ Calage expert terminé (v.118) avec PBAR (Dernier élément) !";
+            statusText.innerText = "✅ Calage expert terminé (v.119) avec PBAR (Dernier élément) !";
             btnDownload.style.display = 'block';
             btnRetry.style.display = 'block';
             redrawCanvas(true);
@@ -2424,11 +2435,11 @@
                     sustainWidth = canvas.width * 0.08;
                     zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
                 } else {
-                    step = 12; // Fin directe si pas de bloc treml
+                    step = 12; 
                     adjustPanel.style.display = 'none';
                     generalToolsContainer.style.display = 'none';
                     sideColorDrawer.style.display = 'none';
-                    statusText.innerText = "✅ Calage expert terminé (v.118) !";
+                    statusText.innerText = "✅ Calage expert terminé (v.119) !";
                     btnDownload.style.display = 'block';
                     btnRetry.style.display = 'block';
                     redrawCanvas(true);
@@ -2446,23 +2457,34 @@
                 tempY = canvas.height * 0.5;
                 zoomLevel = 1.0; manualPanX = 0; manualPanY = 0;
             } else if (step === 9) {
-                if (springPhase === 0) {
-                    currentSpring.p1 = { x: tempX, y: tempY };
-                    springPhase = 1;
-                    tempX = canvas.width * 0.6;
-                    tempY = canvas.height * 0.5;
-                } else if (springPhase === 1) {
-                    currentSpring.p2 = { x: tempX, y: tempY };
+                if (springPhase === 2) {
                     springs.push({ p1: currentSpring.p1, p2: currentSpring.p2, width: currentSpring.width });
-                    springPhase = 2;
-                    document.getElementById('spring-count-display').innerText = springs.length;
-                    const modal = document.getElementById('spring-finish-modal');
-                    if (modal) modal.style.display = 'flex';
+                    
+                    if (springs.length >= 4) {
+                        step = 10;
+                        if (!pbavX) {
+                            pbavX = sustainX; 
+                        }
+                        pbavOffsetTop = 30;
+                        pbavOffsetBottom = 30;
+                        updateUIState();
+                        statusText.innerText = "Étape PBAV : 3 cercles liés";
+                        zoomLevel = 1.0;
+                        manualPanX = 0;
+                        manualPanY = 0;
+                        redrawCanvas();
+                        return;
+                    } else {
+                        document.getElementById('spring-count-display').innerText = springs.length;
+                        const addBtn = document.getElementById('btn-add-another-spring');
+                        if (addBtn) addBtn.style.display = 'block';
+                        const modal = document.getElementById('spring-finish-modal');
+                        if (modal) modal.style.display = 'flex';
+                        return;
+                    }
                 }
             } else if (step === 10) {
-                // Passage de l'étape PBAV vers la nouvelle étape PBAR
                 step = 11;
-                // On conserve pbarX si déjà initialisé/déplacé, sinon on l'aligne sur pbavX ou sustainX
                 if (!pbarX) {
                     pbarX = pbavX || sustainX;
                 }
@@ -2474,7 +2496,6 @@
                 redrawCanvas();
                 return;
             } else if (step === 11) {
-                // Validation de l'étape PBAR (dernier élément)
                 finishPbarTracing();
                 return;
             }
@@ -2489,7 +2510,7 @@
                 } else if (step === 10) {
                     step = 9;
                 } else if (step === 11) {
-                    step = 10; // Retour de PBAR à PBAV
+                    step = 10; 
                 } else {
                     step--;
                 }
@@ -2537,11 +2558,9 @@
                 statusText.innerText = "Étape 6 / 6 : Positionnement bloc sustain";
                 if (scaleSustain) scaleSustain.style.display = 'flex';
             } else if (step === 9) {
-                statusText.innerText = "Étape 9 : Traçage des ressorts";
+                statusText.innerText = "Étape 9 : Tracé des ressorts (min 2, max 4)";
                 if (scaleSpring) scaleSpring.style.display = 'flex';
-                if (springPhase === 2) {
-                    if (angleRow) angleRow.style.display = 'none';
-                }
+                if (angleRow) angleRow.style.display = 'none';
             } else if (step === 10) {
                 statusText.innerText = "Étape PBAV : 3 cercles liés";
                 if (scalePbav) scalePbav.style.display = 'flex';
@@ -2557,7 +2576,7 @@
             redrawCanvas(true);
             const dataURL = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = 'Acuitix_V118_Final_PBAR.png';
+            link.download = 'Acuitix_V119_Final_PBAR.png';
             link.href = dataURL;
             link.click();
             redrawCanvas(false);
